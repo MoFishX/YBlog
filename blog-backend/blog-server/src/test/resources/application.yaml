@@ -1,9 +1,19 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  sql:
-    init:
-      mode: embedded
+    url: jdbc:mysql://localhost:3306/blog?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 666
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisReactiveAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ReactiveElasticsearchClientAutoConfiguration
+
+jwt:
+  secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
+  expiration: 86400000

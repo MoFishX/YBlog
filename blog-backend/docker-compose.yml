@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blog
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  elasticsearch:
+    image: elasticsearch:8.11.0
+    environment:
+      - "discovery.type=single-node"
+      - "xpack.security.enabled=false"
+    ports:
+      - "9200:9200"
+
+  rabbitmq:
+    image: rabbitmq:3.12-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  mysql_data:

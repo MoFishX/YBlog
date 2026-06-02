@@ -1,0 +1,13 @@
+package com.yvmoux.blog.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
+@Data
+@TableName("article_tag")
+public class ArticleTag {
+
+    private Long articleId;
+
+    private Long tagId;
+}

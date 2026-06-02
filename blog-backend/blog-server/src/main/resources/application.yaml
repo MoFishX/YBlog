@@ -1,3 +1,51 @@
 spring:
-  application:
-    name: blog-server
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/blog?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: 666
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  elasticsearch:
+    uris: http://localhost:9200
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deletedAt
+      logic-delete-value: "now()"
+      logic-not-delete-value: "null"
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+jwt:
+  secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
+  expiration: 86400000
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+server:
+  port: 8080
