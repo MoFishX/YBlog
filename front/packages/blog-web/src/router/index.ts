@@ -1,7 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior() {
+    return { top: 0, behavior: 'smooth' }
+  },
   routes: [
     {
       path: '/',
@@ -42,6 +46,15 @@ const router = createRouter({
       component: () => import('@/views/NotFound.vue')
     }
   ]
+})
+
+router.beforeEach((to) => {
+  if (to.meta.guest) {
+    const userStore = useUserStore()
+    if (userStore.isLoggedIn) {
+      return { name: 'Home' }
+    }
+  }
 })
 
 export default router
