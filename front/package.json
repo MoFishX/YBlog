@@ -1,0 +1,14 @@
+{
+  "name": "blog-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace packages/blog-web run dev",
+    "dev:admin": "npm --workspace packages/blog-admin run dev",
+    "build:web": "npm --workspace packages/blog-web run build",
+    "build:admin": "npm --workspace packages/blog-admin run build"
+  }
+}
