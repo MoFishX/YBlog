@@ -1,12 +1,15 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
+import { setupMock } from '@shared/mock/mockData'
 
 const instance: AxiosInstance = axios.create({
   baseURL: '/api',
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' }
 })
+
+setupMock(instance)
 
 instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const userStore = useUserStore()
