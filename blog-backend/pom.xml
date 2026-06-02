@@ -11,9 +11,14 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.yvmoux</groupId>
-    <artifactId>blog-server</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <groupId>com.yvmoux.blog</groupId>
+    <artifactId>blog-backend</artifactId>
+    <packaging>pom</packaging>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <modules>
+        <module>blog-server</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
