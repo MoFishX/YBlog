@@ -8,7 +8,6 @@ import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.response.PageResult;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
-import com.yvmoux.blog.service.SearchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -23,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 public class ArticleController {
 
     private final ArticleService articleService;
-    private final SearchService searchService;
     private final SecurityUtils securityUtils;
 
     @Operation(summary = "文章列表")
@@ -86,16 +84,6 @@ public class ArticleController {
     public ApiResponse<PageResult<ArticleVO>> hot(@RequestParam(defaultValue = "10") Integer limit) {
         if (limit > 50) limit = 50;
         return ApiResponse.success(articleService.getHotArticles(limit));
-    }
-
-    @Operation(summary = "搜索文章")
-    @GetMapping("/search")
-    public ApiResponse<PageResult<ArticleVO>> search(
-            @RequestParam String keyword,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        if (pageSize > 50) pageSize = 50;
-        return ApiResponse.success(searchService.search(keyword, page, pageSize));
     }
 
     @Operation(summary = "我的文章列表")

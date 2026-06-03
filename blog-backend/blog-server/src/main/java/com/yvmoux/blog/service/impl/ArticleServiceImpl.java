@@ -27,7 +27,6 @@ import com.yvmoux.blog.mapper.UserLikeMapper;
 import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
-import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,7 +53,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserLikeMapper userLikeMapper;
     private final SecurityUtils securityUtils;
     private final RedisUtils redisUtils;
-    private final AsyncTaskService asyncTaskService;
     private final ArticleConverter articleConverter;
 
     @Override
@@ -168,8 +166,6 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        asyncTaskService.syncArticleToES(article.getId());
-
         User author = userMapper.selectById(userId);
         List<Tag> tags = tagMapper.selectByArticleId(article.getId());
         List<TagVO> tagVOs = tags.stream()
@@ -229,8 +225,6 @@ public class ArticleServiceImpl implements ArticleService {
                 articleTagMapper.insert(articleTag);
             }
         }
-
-        asyncTaskService.syncArticleToES(article.getId());
 
         User author = userMapper.selectById(article.getAuthorId());
         List<Tag> tags = tagMapper.selectByArticleId(articleId);
@@ -349,8 +343,6 @@ public class ArticleServiceImpl implements ArticleService {
 
         article.setUpdatedAt(LocalDateTime.now());
         articleMapper.updateById(article);
-
-        asyncTaskService.syncArticleToES(article.getId());
 
         User author = userMapper.selectById(article.getAuthorId());
         List<Tag> tags = tagMapper.selectByArticleId(articleId);

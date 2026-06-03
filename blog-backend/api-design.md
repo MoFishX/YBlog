@@ -642,65 +642,7 @@ GET /articles/hot
 
 **说明：** 直接读取 Redis ZSet `hot:articles`，按 `score` 倒序返回 Top N，无分页。
 
----
-
-#### 4.8 搜索文章（Elasticsearch）
-
-> 🌐 blog-web
-
-```
-GET /articles/search
-```
-
-| 参数 | 类型 | 必填 | 说明 |
-| ---- | ---- | ---- | ---- |
-| `keyword` | string | 必填 | 搜索关键词，1-100 字符 |
-| `page` | number | 否 | 默认 1 |
-| `pageSize` | number | 否 | 默认 10，最大 50 |
-
-**成功响应：**
-
-```json
-{
-  "code": 200,
-  "message": "ok",
-  "data": {
-    "records": [
-      {
-        "id": 42,
-        "title": "string",
-        "titleHighlight": "Spring <em>Boot</em> 入门教程",
-        "summary": "string",
-        "contentHighlight": "...快速搭建一个 <em>Boot</em> 项目的方法...",
-        "author": {
-          "id": 1,
-          "username": "string"
-        },
-        "tags": [
-          { "id": 1, "name": "Spring Boot" }
-        ],
-        "viewCount": 1280,
-        "likeCount": 56,
-        "createdAt": "2025-01-15T10:30:00+08:00"
-      }
-    ],
-    "total": 5,
-    "page": 1,
-    "pageSize": 10,
-    "took": 15
-  }
-}
-```
-
-**说明：**
-- 匹配字段：`title`（权重 ×3）+ `content`（权重 ×1）
-- `titleHighlight` / `contentHighlight`：命中片段，`<em>` 标记高亮，未命中时返回原文截断
-- `took`：ES 查询耗时（毫秒）
-- blog-web 的 `articleService.search()` 在 Service 层对高亮片段做 sanitize 处理
-
----
-
-#### 4.9 我的文章列表
+#### 4.8 我的文章列表
 
 > 🌐 blog-web
 
@@ -1473,7 +1415,6 @@ Authorization: Bearer <token>
 | `GET /articles` | `/articles?page=1&pageSize=10` |
 | `GET /articles/*` | `/articles/42` |
 | `GET /articles/hot` | `/articles/hot?limit=10` |
-| `GET /articles/search` | `/articles/search?keyword=spring` |
 | `GET /articles/*/comments` | `/articles/42/comments?page=1` |
 | `GET /user/*` | `/user/1` |
 | `GET /tags` | `/tags` |
@@ -1544,7 +1485,6 @@ public enum ErrorCode {
 | `GET /articles/{id}` | `getDetail(id)` | 每次实时拉取，不做缓存 |
 | `POST /articles/{id}/like` | `like(id)` | 乐观更新（先改 UI）、失败自动回滚 |
 | `POST /articles` | `create(data)` | 发布后清除列表缓存 |
-| `GET /articles/search` | `search(keyword, page)` | 不缓存、对高亮 HTML 做 sanitize |
 
 以 `blog-admin/src/services/dashboardService.ts` 为例：
 

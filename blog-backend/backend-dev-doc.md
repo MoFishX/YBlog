@@ -1,6 +1,6 @@
 # 高性能博客平台 — 后端开发文档
 
-> 基于 Spring Boot 3 + MyBatis-Plus + MySQL + Redis + Elasticsearch + Spring @Async 的博客后端工程
+> 基于 Spring Boot 3 + MyBatis-Plus + MySQL + Redis + Spring @Async 的博客后端工程
 
 ---
 
@@ -12,8 +12,7 @@
 | ORM          | MyBatis-Plus               | 减少模板代码，分页插件            |
 | 数据库       | MySQL 8                    | 主数据存储                        |
 | 缓存         | Redis 7                    | 热点缓存 / 排行榜 / 阅读量计数    |
-| 搜索引擎     | Elasticsearch 8            | 文章全文检索 + 高亮               |
-| 异步任务     | Spring @Async              | 异步解耦：邮件、索引同步          |
+| 异步任务     | Spring @Async              | 异步解耦：邮件                  |
 | 安全认证     | Spring Security + JWT      | 无状态认证 + 角色鉴权             |
 | API 文档     | Knife4j (Swagger 增强)     | 接口文档自动生成 + 在线调试       |
 | 参数校验     | Jakarta Validation         | `@Valid` + 分组校验               |
@@ -40,7 +39,6 @@ blog-backend/
     │   │   │   ├── SecurityConfig.java       # Spring Security 配置
     │   │   │   ├── JwtConfig.java            # JWT 密钥 + 过期时间
     │   │   │   ├── RedisConfig.java          # Redis 序列化配置
-│   │   │   ├── ElasticsearchConfig.java  # ES 客户端配置
 │   │   │   ├── AsyncConfig.java          # 异步任务线程池配置
 │   │   │   ├── MyBatisPlusConfig.java    # 分页插件
     │   │   │   ├── WebMvcConfig.java         # CORS / 拦截器注册
@@ -64,8 +62,6 @@ blog-backend/
 │   │   │   ├── AuthService.java
 │   │   │   ├── impl/AuthServiceImpl.java
 │   │   │   ├── AsyncTaskService.java      # 异步任务服务
-│   │   │   ├── SearchService.java         # ES 搜索服务
-│   │   │   └── impl/SearchServiceImpl.java
     │   │   ├── mapper/
     │   │   │   ├── ArticleMapper.java
     │   │   │   ├── CommentMapper.java
@@ -125,7 +121,6 @@ blog-backend/
 - Maven 3.8+
 - MySQL 8
 - Redis 7
-- Elasticsearch 8
 
 ### 3.2 Docker Compose — 中间件一键启动
 
@@ -147,14 +142,6 @@ services:
     image: redis:7-alpine
     ports:
       - "6379:6379"
-
-  elasticsearch:
-    image: elasticsearch:8.11.0
-    environment:
-      - "discovery.type=single-node"
-      - "xpack.security.enabled=false"
-    ports:
-      - "9200:9200"
 
 volumes:
   mysql_data:
@@ -197,13 +184,6 @@ docker compose up -d
     <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-data-redis</artifactId>
-    </dependency>
-
-    <!-- Elasticsearch -->
-    <dependency>
-        <groupId>co.elastic.clients</groupId>
-        <artifactId>elasticsearch-java</artifactId>
-        <version>8.11.0</version>
     </dependency>
 
     <!-- Spring Security -->
@@ -284,9 +264,6 @@ spring:
     redis:
       host: localhost
       port: 6379
-
-  elasticsearch:
-    uris: http://localhost:9200
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -601,73 +578,7 @@ public Article getArticleWithCache(Long id) {
 }
 ```
 
-### 4.6 Elasticsearch 全文搜索
-
-#### 索引结构（ES Mapping）
-
-```json
-{
-  "mappings": {
-    "properties": {
-      "id":      { "type": "long" },
-      "title":   { "type": "text", "analyzer": "ik_max_word" },
-      "content": { "type": "text", "analyzer": "ik_max_word" },
-      "summary": { "type": "text", "analyzer": "ik_smart" },
-      "authorName": { "type": "keyword" },
-      "tags":     { "type": "keyword" },
-      "createdAt": { "type": "date" }
-    }
-  }
-}
-```
-
-#### SearchService
-
-```java
-@Service
-@RequiredArgsConstructor
-@Slf4j
-public class SearchServiceImpl implements SearchService {
-
-    private final ElasticsearchClient esClient;
-
-    @Override
-    public PageResult<ArticleVO> search(String keyword, int page, int pageSize) {
-        SearchRequest request = SearchRequest.of(s -> s
-            .index("articles")
-            .from((page - 1) * pageSize)
-            .size(pageSize)
-            .query(q -> q
-                .multiMatch(mm -> mm
-                    .fields("title^3", "content")  // title 权重 3 倍
-                    .query(keyword)
-                )
-            )
-            .highlight(h -> h
-                .fields("title", hf -> hf.fragmentSize(100).numberOfFragments(1))
-                .fields("content", hf -> hf.fragmentSize(200).numberOfFragments(1))
-            )
-        );
-
-        SearchResponse<ArticleDocument> response = esClient.search(request, ArticleDocument.class);
-        // ... 组装 PageResult，含高亮片段
-    }
-}
-```
-
-#### 发布文章 → 异步同步 ES
-
-```
-POST /articles
-    ↓
-① 写入 MySQL
-    ↓
-② 调用 AsyncTaskService.syncArticleToES()（异步执行）
-    ↓
-③ @Async 线程池执行 → 调用 ES Index API
-```
-
-### 4.7 Spring @Async 异步解耦
+### 4.6 Spring @Async 异步解耦
 
 #### 异步线程池配置
 
@@ -694,39 +605,7 @@ public class AsyncConfig {
 ```java
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AsyncTaskService {
-
-    private final ArticleMapper articleMapper;
-    private final ElasticsearchClient esClient;
-
-    @Async
-    public void syncArticleToES(Long articleId) {
-        try {
-            Article article = articleMapper.selectById(articleId);
-            if (article == null) {
-                try {
-                    esClient.delete(d -> d.index("articles").id(String.valueOf(articleId)));
-                } catch (Exception ignored) {}
-                return;
-            }
-
-            Map<String, Object> doc = Map.of(
-                "id", article.getId(),
-                "title", article.getTitle(),
-                "content", article.getContent() != null ? article.getContent() : "",
-                "summary", article.getSummary() != null ? article.getSummary() : "",
-                "authorId", article.getAuthorId(),
-                "status", article.getStatus() != null ? article.getStatus() : "PUBLISHED",
-                "createdAt", article.getCreatedAt() != null ? article.getCreatedAt().toString() : ""
-            );
-
-            esClient.index(i -> i.index("articles").id(String.valueOf(articleId)).document(doc));
-            log.info("文章 {} 同步到 ES 完成", articleId);
-        } catch (Exception e) {
-            log.error("文章 {} 同步到 ES 失败", articleId, e);
-        }
-    }
 
     @Async
     public void sendWelcomeEmail(String email) {
@@ -739,16 +618,13 @@ public class AsyncTaskService {
 #### 业务层调用
 
 ```java
-// ArticleServiceImpl.java - 发布/编辑文章后
-asyncTaskService.syncArticleToES(article.getId());
-
 // AuthServiceImpl.java - 注册成功后
 asyncTaskService.sendWelcomeEmail(user.getEmail());
 ```
 
-> **设计要点**：使用 Spring 内置 `@Async` 替代重量级消息队列。对于个人博客的低并发场景，`@Async` 线程池足够实现解耦 — 主流程快速返回，ES 索引和邮件发送在后台异步执行，无需额外部署 MQ 中间件。
+> **设计要点**：使用 Spring 内置 `@Async` 实现异步解耦，注册接口快速返回，邮件发送在后台线程执行，无需额外部署中间件。
 
-### 4.8 接口限流（Redis + Lua）
+### 4.7 接口限流（Redis + Lua）
 
 ```java
 @Component
@@ -791,7 +667,7 @@ public ApiResponse<PageResult<ArticleVO>> search(...) {
 }
 ```
 
-### 4.9 全局异常处理
+### 4.8 全局异常处理
 
 ```java
 @RestControllerAdvice
@@ -939,9 +815,9 @@ public class Article {
          ┌──────────────────┼───────────────┘
          │                  │
          ▼                  ▼
-   ┌──────────┐      ┌──────────┐
-   │  MySQL   │      │  Redis   │
-   └──────────┘      └──────────┘
+   ┌──────────┐
+   │  Redis   │
+   └──────────┘
          │
          ▼
    ┌──────────┐
@@ -1015,7 +891,7 @@ docs: 更新 API 文档
 ## 八、FAQ（常见问题）
 
 **Q: 为什么写操作不直接同步更新 ES？**
-A: 同步更新会拖慢接口响应（ES 写入通常耗时 20~100ms），且 ES 索引失败会导致主流程回滚或异常。通过 `@Async` 异步处理后，主流程只负责写入 MySQL 并返回成功，ES 更新失败不影响用户请求，实现最终一致性。
+A: 对于个人博客的低并发场景，无需引入 Elasticsearch 增加部署成本。全文搜索可通过 MySQL FULLTEXT 索引实现。
 
 **Q: Token 过期了前端怎么处理？**
 A: 后端返回 HTTP 401，前端 Axios 响应拦截器自动跳转登录页。也可增加 `/auth/refresh` 刷新 Token 接口（需配合 Refresh Token 机制）。
@@ -1033,7 +909,6 @@ A: 单机 MySQL 自增够用；若后续分库分表或期望 ID 不暴露业务
 - [Spring Boot 3 官方文档](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
 - [MyBatis-Plus 文档](https://baomidou.com/)
 - [Spring Security 架构](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
-- [Elasticsearch Java Client](https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html)
 - [Spring Async 文档](https://docs.spring.io/spring-framework/reference/integration/scheduling.html)
 - [Knife4j 文档](https://doc.xiaominfo.com/)
 - [Hutool 文档](https://hutool.cn/)

@@ -10,9 +10,6 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 
-  elasticsearch:
-    uris: ${ES_URIS:http://localhost:9200}
-
 logging:
   level:
     com.yvmoux.blog: info

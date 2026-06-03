@@ -24,8 +24,6 @@ public class ArticleVO {
     private Long likeCount;
     private Integer commentCount;
     private Boolean isLiked;
-    private String titleHighlight;
-    private String contentHighlight;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
