@@ -7,7 +7,6 @@ import com.yvmoux.blog.converter.ArticleConverter;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
 import com.yvmoux.blog.dto.response.ArticleVO;
-import com.yvmoux.blog.dto.response.AuthorVO;
 import com.yvmoux.blog.dto.response.PageResult;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.Article;

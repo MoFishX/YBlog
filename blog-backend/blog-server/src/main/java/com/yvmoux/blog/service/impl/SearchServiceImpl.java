@@ -8,7 +8,6 @@ import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.response.AuthorVO;
 import com.yvmoux.blog.dto.response.PageResult;
 import com.yvmoux.blog.dto.response.TagVO;
-import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.entity.Tag;
 import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.mapper.ArticleMapper;
