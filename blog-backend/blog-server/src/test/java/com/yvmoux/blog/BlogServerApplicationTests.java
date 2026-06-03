@@ -3,7 +3,6 @@ package com.yvmoux.blog;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -26,12 +25,6 @@ class BlogServerApplicationTests {
         @Primary
         public RedisConnectionFactory redisConnectionFactory() {
             return Mockito.mock(RedisConnectionFactory.class);
-        }
-
-        @Bean
-        @Primary
-        public RabbitTemplate rabbitTemplate() {
-            return Mockito.mock(RabbitTemplate.class);
         }
 
         @Bean

@@ -11,11 +11,11 @@ import com.yvmoux.blog.enums.RoleEnum;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.security.JwtTokenProvider;
+import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.service.AuthService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
-    private final RabbitTemplate rabbitTemplate;
+    private final AsyncTaskService asyncTaskService;
     private final RedisUtils redisUtils;
 
     @Override
@@ -52,7 +52,7 @@ public class AuthServiceImpl implements AuthService {
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.insert(user);
 
-        rabbitTemplate.convertAndSend("email.exchange", "email.send", user.getEmail());
+        asyncTaskService.sendWelcomeEmail(user.getEmail());
     }
 
     @Override

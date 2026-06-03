@@ -3,7 +3,6 @@ package com.yvmoux.blog.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yvmoux.blog.config.RabbitMQConfig;
 import com.yvmoux.blog.converter.ArticleConverter;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
@@ -27,10 +26,10 @@ import com.yvmoux.blog.mapper.UserLikeMapper;
 import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
+import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserLikeMapper userLikeMapper;
     private final SecurityUtils securityUtils;
     private final RedisUtils redisUtils;
-    private final RabbitTemplate rabbitTemplate;
+    private final AsyncTaskService asyncTaskService;
     private final ArticleConverter articleConverter;
 
     @Override
@@ -158,7 +157,7 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.ARTICLE_EXCHANGE, RabbitMQConfig.ARTICLE_SYNC_KEY, article.getId());
+        asyncTaskService.syncArticleToES(article.getId());
 
         User author = userMapper.selectById(userId);
         List<Tag> tags = tagMapper.selectByArticleId(article.getId());
@@ -210,7 +209,7 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.ARTICLE_EXCHANGE, RabbitMQConfig.ARTICLE_SYNC_KEY, article.getId());
+        asyncTaskService.syncArticleToES(article.getId());
 
         User author = userMapper.selectById(article.getAuthorId());
         List<Tag> tags = tagMapper.selectByArticleId(articleId);
@@ -328,7 +327,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setUpdatedAt(LocalDateTime.now());
         articleMapper.updateById(article);
 
-        rabbitTemplate.convertAndSend(RabbitMQConfig.ARTICLE_EXCHANGE, RabbitMQConfig.ARTICLE_SYNC_KEY, article.getId());
+        asyncTaskService.syncArticleToES(article.getId());
 
         User author = userMapper.selectById(article.getAuthorId());
         List<Tag> tags = tagMapper.selectByArticleId(articleId);

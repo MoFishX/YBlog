@@ -1,6 +1,6 @@
 # 高性能博客平台 — 后端开发文档
 
-> 基于 Spring Boot 3 + MyBatis-Plus + MySQL + Redis + Elasticsearch + RabbitMQ 的博客后端工程
+> 基于 Spring Boot 3 + MyBatis-Plus + MySQL + Redis + Elasticsearch + Spring @Async 的博客后端工程
 
 ---
 
@@ -13,7 +13,7 @@
 | 数据库       | MySQL 8                    | 主数据存储                        |
 | 缓存         | Redis 7                    | 热点缓存 / 排行榜 / 阅读量计数    |
 | 搜索引擎     | Elasticsearch 8            | 文章全文检索 + 高亮               |
-| 消息队列     | RabbitMQ                   | 异步解耦：邮件、索引同步、统计    |
+| 异步任务     | Spring @Async              | 异步解耦：邮件、索引同步          |
 | 安全认证     | Spring Security + JWT      | 无状态认证 + 角色鉴权             |
 | API 文档     | Knife4j (Swagger 增强)     | 接口文档自动生成 + 在线调试       |
 | 参数校验     | Jakarta Validation         | `@Valid` + 分组校验               |
@@ -40,9 +40,9 @@ blog-backend/
     │   │   │   ├── SecurityConfig.java       # Spring Security 配置
     │   │   │   ├── JwtConfig.java            # JWT 密钥 + 过期时间
     │   │   │   ├── RedisConfig.java          # Redis 序列化配置
-    │   │   │   ├── ElasticsearchConfig.java  # ES 客户端配置
-    │   │   │   ├── RabbitMQConfig.java       # 队列 / 交换机声明
-    │   │   │   ├── MyBatisPlusConfig.java    # 分页插件
+│   │   │   ├── ElasticsearchConfig.java  # ES 客户端配置
+│   │   │   ├── AsyncConfig.java          # 异步任务线程池配置
+│   │   │   ├── MyBatisPlusConfig.java    # 分页插件
     │   │   │   ├── WebMvcConfig.java         # CORS / 拦截器注册
     │   │   │   └── Knife4jConfig.java        # API 文档配置
     │   │   ├── security/
@@ -56,15 +56,16 @@ blog-backend/
     │   │   │   ├── CommentController.java    # 评论
     │   │   │   ├── TagController.java        # 标签
     │   │   │   └── UserController.java       # 用户信息
-    │   │   ├── service/
-    │   │   │   ├── ArticleService.java
-    │   │   │   ├── impl/ArticleServiceImpl.java
-    │   │   │   ├── CommentService.java
-    │   │   │   ├── impl/CommentServiceImpl.java
-    │   │   │   ├── AuthService.java
-    │   │   │   ├── impl/AuthServiceImpl.java
-    │   │   │   ├── SearchService.java        # ES 搜索服务
-    │   │   │   └── impl/SearchServiceImpl.java
+│   │   ├── service/
+│   │   │   ├── ArticleService.java
+│   │   │   ├── impl/ArticleServiceImpl.java
+│   │   │   ├── CommentService.java
+│   │   │   ├── impl/CommentServiceImpl.java
+│   │   │   ├── AuthService.java
+│   │   │   ├── impl/AuthServiceImpl.java
+│   │   │   ├── AsyncTaskService.java      # 异步任务服务
+│   │   │   ├── SearchService.java         # ES 搜索服务
+│   │   │   └── impl/SearchServiceImpl.java
     │   │   ├── mapper/
     │   │   │   ├── ArticleMapper.java
     │   │   │   ├── CommentMapper.java
@@ -96,12 +97,6 @@ blog-backend/
     │   │   │   ├── GlobalExceptionHandler.java # 全局异常处理
     │   │   │   ├── BusinessException.java     # 业务异常
     │   │   │   └── ErrorCode.java             # 错误码枚举
-    │   │   ├── mq/
-    │   │   │   ├── producer/
-    │   │   │   │   └── ArticleSyncProducer.java  # 发送消息
-    │   │   │   └── consumer/
-    │   │   │       ├── ArticleSyncConsumer.java  # ES 索引同步
-    │   │   │       └── EmailConsumer.java        # 注册邮件
     │   │   ├── schedule/
     │   │   │   └── ViewCountSyncTask.java     # 阅读量定时落库
     │   │   └── utils/
@@ -131,7 +126,6 @@ blog-backend/
 - MySQL 8
 - Redis 7
 - Elasticsearch 8
-- RabbitMQ 3.12+
 
 ### 3.2 Docker Compose — 中间件一键启动
 
@@ -161,12 +155,6 @@ services:
       - "xpack.security.enabled=false"
     ports:
       - "9200:9200"
-
-  rabbitmq:
-    image: rabbitmq:3.12-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
 
 volumes:
   mysql_data:
@@ -216,12 +204,6 @@ docker compose up -d
         <groupId>co.elastic.clients</groupId>
         <artifactId>elasticsearch-java</artifactId>
         <version>8.11.0</version>
-    </dependency>
-
-    <!-- RabbitMQ -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-amqp</artifactId>
     </dependency>
 
     <!-- Spring Security -->
@@ -305,12 +287,6 @@ spring:
 
   elasticsearch:
     uris: http://localhost:9200
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
 
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
@@ -686,92 +662,91 @@ POST /articles
     ↓
 ① 写入 MySQL
     ↓
-② 发送 RabbitMQ 消息：article.sync
+② 调用 AsyncTaskService.syncArticleToES()（异步执行）
     ↓
-③ ArticleSyncConsumer 消费 → 调用 ES Index API
+③ @Async 线程池执行 → 调用 ES Index API
 ```
 
-### 4.7 RabbitMQ 异步解耦
+### 4.7 Spring @Async 异步解耦
 
-#### 交换机 & 队列声明
+#### 异步线程池配置
 
 ```java
 @Configuration
-public class RabbitMQConfig {
+@EnableAsync
+public class AsyncConfig {
 
-    // 文章索引同步
-    @Bean
-    public Queue articleSyncQueue() {
-        return QueueBuilder.durable("article.sync.queue").build();
-    }
-
-    @Bean
-    public DirectExchange articleExchange() {
-        return new DirectExchange("article.exchange");
-    }
-
-    @Bean
-    public Binding articleSyncBinding() {
-        return BindingBuilder.bind(articleSyncQueue()).to(articleExchange()).with("article.sync");
-    }
-
-    // 注册邮件
-    @Bean
-    public Queue emailQueue() {
-        return QueueBuilder.durable("email.queue").build();
-    }
-
-    @Bean
-    public DirectExchange emailExchange() {
-        return new DirectExchange("email.exchange");
-    }
-
-    @Bean
-    public Binding emailBinding() {
-        return BindingBuilder.bind(emailQueue()).to(emailExchange()).with("email.send");
+    @Bean("taskExecutor")
+    public Executor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(100);
+        executor.setThreadNamePrefix("async-");
+        executor.initialize();
+        return executor;
     }
 }
 ```
 
-#### Producer
+#### 异步任务服务
 
 ```java
-@Component
-@RequiredArgsConstructor
-public class ArticleSyncProducer {
-
-    private final RabbitTemplate rabbitTemplate;
-
-    public void syncToES(Long articleId) {
-        rabbitTemplate.convertAndSend("article.exchange", "article.sync", articleId);
-    }
-}
-```
-
-#### Consumer
-
-```java
-@Component
 @Slf4j
+@Service
 @RequiredArgsConstructor
-public class ArticleSyncConsumer {
+public class AsyncTaskService {
 
     private final ArticleMapper articleMapper;
     private final ElasticsearchClient esClient;
 
-    @RabbitListener(queues = "article.sync.queue")
-    public void handleSync(Long articleId) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) return;
+    @Async
+    public void syncArticleToES(Long articleId) {
+        try {
+            Article article = articleMapper.selectById(articleId);
+            if (article == null) {
+                try {
+                    esClient.delete(d -> d.index("articles").id(String.valueOf(articleId)));
+                } catch (Exception ignored) {}
+                return;
+            }
 
-        ArticleDocument doc = convertToDocument(article);
-        esClient.index(i -> i.index("articles").id(String.valueOf(articleId)).document(doc));
-        log.info("文章 {} 同步到 ES 完成", articleId);
+            Map<String, Object> doc = Map.of(
+                "id", article.getId(),
+                "title", article.getTitle(),
+                "content", article.getContent() != null ? article.getContent() : "",
+                "summary", article.getSummary() != null ? article.getSummary() : "",
+                "authorId", article.getAuthorId(),
+                "status", article.getStatus() != null ? article.getStatus() : "PUBLISHED",
+                "createdAt", article.getCreatedAt() != null ? article.getCreatedAt().toString() : ""
+            );
+
+            esClient.index(i -> i.index("articles").id(String.valueOf(articleId)).document(doc));
+            log.info("文章 {} 同步到 ES 完成", articleId);
+        } catch (Exception e) {
+            log.error("文章 {} 同步到 ES 失败", articleId, e);
+        }
+    }
+
+    @Async
+    public void sendWelcomeEmail(String email) {
+        log.info("收到邮件任务: {}", email);
+        // TODO: 接入真实邮件服务
     }
 }
 ```
 
-> **面试要点**：异步削峰 — 高并发发布时消息在队列中排队，ES 按消费能力处理，不影响主流程响应速度。
+#### 业务层调用
+
+```java
+// ArticleServiceImpl.java - 发布/编辑文章后
+asyncTaskService.syncArticleToES(article.getId());
+
+// AuthServiceImpl.java - 注册成功后
+asyncTaskService.sendWelcomeEmail(user.getEmail());
+```
+
+> **设计要点**：使用 Spring 内置 `@Async` 替代重量级消息队列。对于个人博客的低并发场景，`@Async` 线程池足够实现解耦 — 主流程快速返回，ES 索引和邮件发送在后台异步执行，无需额外部署 MQ 中间件。
 
 ### 4.8 接口限流（Redis + Lua）
 
@@ -938,51 +913,7 @@ public class Article {
 
 ---
 
-## 六、API 接口清单
-
-### 6.1 认证模块
-
-| 方法   | 路径              | 说明         | 鉴权   |
-| ------ | ----------------- | ------------ | ------ |
-| POST   | `/auth/register`  | 注册         | 无     |
-| POST   | `/auth/login`     | 登录         | 无     |
-
-### 6.2 文章模块
-
-| 方法   | 路径                     | 说明              | 鉴权     |
-| ------ | ------------------------ | ----------------- | -------- |
-| GET    | `/articles`              | 文章列表（分页）  | 无       |
-| GET    | `/articles/{id}`         | 文章详情          | 无       |
-| POST   | `/articles`              | 发布文章          | 登录     |
-| PUT    | `/articles/{id}`         | 编辑文章          | 作者本人 |
-| DELETE | `/articles/{id}`         | 删除文章          | 作者/管理员 |
-| POST   | `/articles/{id}/like`    | 点赞              | 登录     |
-| GET    | `/articles/hot`          | 热门排行榜 Top N  | 无       |
-| GET    | `/articles/search`       | 全文搜索（ES）    | 无       |
-
-### 6.3 评论模块
-
-| 方法   | 路径                          | 说明           | 鉴权 |
-| ------ | ----------------------------- | -------------- | ---- |
-| GET    | `/articles/{id}/comments`     | 文章评论列表   | 无   |
-| POST   | `/articles/{id}/comments`     | 发表评论       | 登录 |
-| DELETE | `/comments/{id}`              | 删除评论       | 评论者/管理员 |
-
-### 6.4 标签模块
-
-| 方法 | 路径       | 说明       | 鉴权 |
-| ---- | ---------- | ---------- | ---- |
-| GET  | `/tags`    | 标签列表   | 无   |
-
-### 6.5 用户模块
-
-| 方法 | 路径            | 说明         | 鉴权 |
-| ---- | --------------- | ------------ | ---- |
-| GET  | `/users/{id}`   | 用户主页信息 | 无   |
-
----
-
-## 七、部署架构
+## 六、部署架构
 
 ```
                     ┌──────────────────┐
@@ -1003,11 +934,11 @@ public class Article {
    ┌──────────┐      ┌──────────┐
    │  MySQL   │      │  Redis   │
    └──────────┘      └──────────┘
-         │                  │
-         ▼                  ▼
-   ┌──────────┐      ┌──────────┐
-   │   ES     │      │ RabbitMQ │
-   └──────────┘      └──────────┘
+         │
+         ▼
+   ┌──────────┐
+   │   ES     │
+   └──────────┘
 ```
 
 #### Docker 部署命令
@@ -1023,7 +954,7 @@ docker compose up -d
 
 ---
 
-## 八、开发规范
+## 七、开发规范
 
 ### 8.1 命名约定
 
@@ -1067,16 +998,16 @@ docs: 更新 API 文档
 - [ ] 写操作是否使用了 `@Transactional`（必要时）
 - [ ] 敏感字段（password）是否在 VO 中排除
 - [ ] 分页查询是否设置了合理的 `pageSize` 上限
-- [ ] MQ 消费者是否做了幂等处理
+- [ ] 异步任务是否做了异常处理和日志记录
 - [ ] Redis Key 是否有统一的命名空间前缀
 - [ ] 日志级别是否合理（`debug` / `info` / `warn` / `error`）
 
 ---
 
-## 九、FAQ（常见问题）
+## 八、FAQ（常见问题）
 
 **Q: 为什么写操作不直接同步更新 ES？**
-A: 同步更新会拖慢接口响应，且 ES 索引失败会导致主流程回滚或异常。通过 MQ 异步解耦后，主流程只负责「发消息→返回成功」，ES 更新失败可以重试，符合最终一致性。
+A: 同步更新会拖慢接口响应（ES 写入通常耗时 20~100ms），且 ES 索引失败会导致主流程回滚或异常。通过 `@Async` 异步处理后，主流程只负责写入 MySQL 并返回成功，ES 更新失败不影响用户请求，实现最终一致性。
 
 **Q: Token 过期了前端怎么处理？**
 A: 后端返回 HTTP 401，前端 Axios 响应拦截器自动跳转登录页。也可增加 `/auth/refresh` 刷新 Token 接口（需配合 Refresh Token 机制）。
@@ -1089,12 +1020,12 @@ A: 单机 MySQL 自增够用；若后续分库分表或期望 ID 不暴露业务
 
 ---
 
-## 十、参考资源
+## 九、参考资源
 
 - [Spring Boot 3 官方文档](https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/)
 - [MyBatis-Plus 文档](https://baomidou.com/)
 - [Spring Security 架构](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
 - [Elasticsearch Java Client](https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/index.html)
-- [RabbitMQ 文档](https://www.rabbitmq.com/docs)
+- [Spring Async 文档](https://docs.spring.io/spring-framework/reference/integration/scheduling.html)
 - [Knife4j 文档](https://doc.xiaominfo.com/)
 - [Hutool 文档](https://hutool.cn/)

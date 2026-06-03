@@ -1,25 +1,25 @@
-package com.yvmoux.blog.mq.consumer;
+package com.yvmoux.blog.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.mapper.ArticleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import java.util.Map;
 
-@Component
 @Slf4j
+@Service
 @RequiredArgsConstructor
-public class ArticleSyncConsumer {
+public class AsyncTaskService {
 
     private final ArticleMapper articleMapper;
     private final ElasticsearchClient esClient;
 
-    @RabbitListener(queues = "article.sync.queue")
-    public void handleSync(Long articleId) {
+    @Async
+    public void syncArticleToES(Long articleId) {
         try {
             Article article = articleMapper.selectById(articleId);
             if (article == null) {
@@ -44,5 +44,10 @@ public class ArticleSyncConsumer {
         } catch (Exception e) {
             log.error("文章 {} 同步到 ES 失败", articleId, e);
         }
+    }
+
+    @Async
+    public void sendWelcomeEmail(String email) {
+        log.info("收到邮件任务: {}", email);
     }
 }
