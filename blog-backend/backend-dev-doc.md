@@ -843,20 +843,28 @@ CREATE TABLE `user` (
 
 -- 文章表
 CREATE TABLE `article` (
-    `id`         BIGINT       NOT NULL AUTO_INCREMENT,
-    `title`      VARCHAR(200) NOT NULL,
-    `content`    LONGTEXT     NOT NULL,
-    `summary`    VARCHAR(500),
-    `author_id`  BIGINT       NOT NULL,
-    `status`     VARCHAR(20)  NOT NULL DEFAULT 'PUBLISHED',  -- DRAFT / PUBLISHED
-    `view_count` BIGINT       NOT NULL DEFAULT 0,
-    `like_count` BIGINT       NOT NULL DEFAULT 0,
-    `created_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`          BIGINT       NOT NULL AUTO_INCREMENT,
+    `title`       VARCHAR(200) NOT NULL,
+    `summary`     VARCHAR(500),
+    `cover_image` VARCHAR(255),
+    `author_id`   BIGINT       NOT NULL,
+    `status`      VARCHAR(20)  NOT NULL DEFAULT 'PUBLISHED',  -- DRAFT / PUBLISHED
+    `view_count`  BIGINT       NOT NULL DEFAULT 0,
+    `like_count`  BIGINT       NOT NULL DEFAULT 0,
+    `created_at`  DATETIME     NOT NULL,
+    `updated_at`  DATETIME     NOT NULL,
+    `deleted_at`  DATETIME     DEFAULT NULL,
     PRIMARY KEY (`id`),
     INDEX `idx_author` (`author_id`),
     INDEX `idx_created` (`created_at`),
-    FULLTEXT INDEX `ft_title_content` (`title`, `content`)   -- MySQL 原生全文索引（备选）
+    INDEX `idx_deleted` (`deleted_at`)
+) ENGINE=InnoDB;
+
+-- 文章内容表（分离大字段，避免列表查询拖慢性能）
+CREATE TABLE `article_content` (
+    `article_id` BIGINT   NOT NULL,
+    `content`    LONGTEXT NOT NULL,
+    PRIMARY KEY (`article_id`)
 ) ENGINE=InnoDB;
 
 -- 评论表

@@ -15,8 +15,6 @@ public class Article {
 
     private String title;
 
-    private String content;
-
     private String summary;
 
     private String coverImage;

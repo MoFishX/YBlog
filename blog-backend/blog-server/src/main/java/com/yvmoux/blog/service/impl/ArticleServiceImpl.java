@@ -10,6 +10,7 @@ import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.response.PageResult;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.Article;
+import com.yvmoux.blog.entity.ArticleContent;
 import com.yvmoux.blog.entity.ArticleTag;
 import com.yvmoux.blog.entity.Tag;
 import com.yvmoux.blog.entity.User;
@@ -17,6 +18,7 @@ import com.yvmoux.blog.entity.UserLike;
 import com.yvmoux.blog.enums.ArticleStatusEnum;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
+import com.yvmoux.blog.mapper.ArticleContentMapper;
 import com.yvmoux.blog.mapper.ArticleMapper;
 import com.yvmoux.blog.mapper.ArticleTagMapper;
 import com.yvmoux.blog.mapper.CommentMapper;
@@ -44,6 +46,7 @@ import java.util.stream.Collectors;
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleMapper articleMapper;
+    private final ArticleContentMapper articleContentMapper;
     private final TagMapper tagMapper;
     private final UserMapper userMapper;
     private final CommentMapper commentMapper;
@@ -82,7 +85,7 @@ public class ArticleServiceImpl implements ArticleService {
                     .collect(Collectors.toList());
             User author = userMapper.selectById(article.getAuthorId());
             int commentCount = commentMapper.countByArticleId(article.getId());
-            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
             records.add(vo);
         }
 
@@ -114,7 +117,12 @@ public class ArticleServiceImpl implements ArticleService {
                 .collect(Collectors.toList());
         User author = userMapper.selectById(article.getAuthorId());
         int commentCount = commentMapper.countByArticleId(articleId);
-        ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+        String content = null;
+        ArticleContent articleContent = articleContentMapper.selectById(articleId);
+        if (articleContent != null) {
+            content = articleContent.getContent();
+        }
+        ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, content);
 
         if (currentUserId != null) {
             boolean liked = userLikeMapper.countByUserAndArticle(currentUserId, articleId) > 0;
@@ -129,7 +137,6 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleVO createArticle(Long userId, ArticleCreateRequest request) {
         Article article = new Article();
         article.setTitle(request.getTitle());
-        article.setContent(request.getContent());
         article.setCoverImage(request.getCoverImage());
         article.setAuthorId(userId);
         article.setStatus(request.getStatus() != null ? request.getStatus() : ArticleStatusEnum.DRAFT.name());
@@ -146,6 +153,11 @@ public class ArticleServiceImpl implements ArticleService {
         article.setUpdatedAt(LocalDateTime.now());
 
         articleMapper.insert(article);
+
+        ArticleContent articleContent = new ArticleContent();
+        articleContent.setArticleId(article.getId());
+        articleContent.setContent(request.getContent());
+        articleContentMapper.insert(articleContent);
 
         if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
             for (Long tagId : request.getTagIds()) {
@@ -164,7 +176,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
                 .collect(Collectors.toList());
 
-        return articleConverter.toArticleVO(article, author, tagVOs, 0);
+        return articleConverter.toArticleVO(article, author, tagVOs, 0, request.getContent());
     }
 
     @Override
@@ -183,9 +195,6 @@ public class ArticleServiceImpl implements ArticleService {
         if (request.getTitle() != null) {
             article.setTitle(request.getTitle());
         }
-        if (request.getContent() != null) {
-            article.setContent(request.getContent());
-        }
         if (request.getSummary() != null) {
             article.setSummary(request.getSummary());
         }
@@ -197,6 +206,19 @@ public class ArticleServiceImpl implements ArticleService {
         }
         article.setUpdatedAt(LocalDateTime.now());
         articleMapper.updateById(article);
+
+        if (request.getContent() != null) {
+            ArticleContent articleContent = articleContentMapper.selectById(articleId);
+            if (articleContent != null) {
+                articleContent.setContent(request.getContent());
+                articleContentMapper.updateById(articleContent);
+            } else {
+                articleContent = new ArticleContent();
+                articleContent.setArticleId(articleId);
+                articleContent.setContent(request.getContent());
+                articleContentMapper.insert(articleContent);
+            }
+        }
 
         if (request.getTagIds() != null) {
             articleTagMapper.deleteByArticleId(articleId);
@@ -217,7 +239,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .collect(Collectors.toList());
         int commentCount = commentMapper.countByArticleId(articleId);
 
-        return articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+        return articleConverter.toArticleVO(article, author, tagVOs, commentCount, request.getContent());
     }
 
     @Override
@@ -232,6 +254,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         articleMapper.deleteById(articleId);
+        articleContentMapper.deleteById(articleId);
     }
 
     @Override
@@ -267,7 +290,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
                 .collect(Collectors.toList());
         int commentCount = commentMapper.countByArticleId(articleId);
-        ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+        ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
         vo.setIsLiked(!liked);
 
         return vo;
@@ -293,7 +316,7 @@ public class ArticleServiceImpl implements ArticleService {
                     .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
                     .collect(Collectors.toList());
             int commentCount = commentMapper.countByArticleId(articleId);
-            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
             records.add(vo);
         }
 
@@ -304,6 +327,7 @@ public class ArticleServiceImpl implements ArticleService {
     public void batchDelete(List<Long> ids) {
         for (Long id : ids) {
             articleMapper.deleteById(id);
+            articleContentMapper.deleteById(id);
         }
     }
 
@@ -335,7 +359,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .collect(Collectors.toList());
         int commentCount = commentMapper.countByArticleId(articleId);
 
-        return articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+        return articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
     }
 
     @Override
@@ -361,7 +385,7 @@ public class ArticleServiceImpl implements ArticleService {
                     .collect(Collectors.toList());
             User author = userMapper.selectById(article.getAuthorId());
             int commentCount = commentMapper.countByArticleId(article.getId());
-            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount);
+            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
             records.add(vo);
         }
 

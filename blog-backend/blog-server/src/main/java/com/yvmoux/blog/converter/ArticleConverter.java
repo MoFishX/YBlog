@@ -12,11 +12,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ArticleConverter {
 
-    default ArticleVO toArticleVO(Article article, User author, List<TagVO> tags, Integer commentCount) {
+    default ArticleVO toArticleVO(Article article, User author, List<TagVO> tags, Integer commentCount, String content) {
         ArticleVO vo = new ArticleVO();
         vo.setId(article.getId());
         vo.setTitle(article.getTitle());
-        vo.setContent(article.getContent());
+        vo.setContent(content);
         vo.setSummary(article.getSummary());
         vo.setCoverImage(article.getCoverImage());
         vo.setStatus(article.getStatus());

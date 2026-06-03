@@ -2,6 +2,8 @@ package com.yvmoux.blog.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import com.yvmoux.blog.entity.Article;
+import com.yvmoux.blog.entity.ArticleContent;
+import com.yvmoux.blog.mapper.ArticleContentMapper;
 import com.yvmoux.blog.mapper.ArticleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import java.util.Map;
 public class AsyncTaskService {
 
     private final ArticleMapper articleMapper;
+    private final ArticleContentMapper articleContentMapper;
     private final ElasticsearchClient esClient;
 
     @Async
@@ -29,10 +32,16 @@ public class AsyncTaskService {
                 return;
             }
 
+            String content = "";
+            ArticleContent articleContent = articleContentMapper.selectById(articleId);
+            if (articleContent != null) {
+                content = articleContent.getContent();
+            }
+
             Map<String, Object> doc = Map.of(
                 "id", article.getId(),
                 "title", article.getTitle(),
-                "content", article.getContent() != null ? article.getContent() : "",
+                "content", content,
                 "summary", article.getSummary() != null ? article.getSummary() : "",
                 "authorId", article.getAuthorId(),
                 "status", article.getStatus() != null ? article.getStatus() : "PUBLISHED",
