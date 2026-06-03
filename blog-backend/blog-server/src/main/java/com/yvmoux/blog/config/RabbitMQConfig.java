@@ -7,10 +7,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    // 文章同步到ES的消息总线
     public static final String ARTICLE_EXCHANGE = "article.exchange";
     public static final String ARTICLE_SYNC_QUEUE = "article.sync.queue";
     public static final String ARTICLE_SYNC_KEY = "article.sync";
 
+    // 注册邮件通知的消息总线
     public static final String EMAIL_EXCHANGE = "email.exchange";
     public static final String EMAIL_QUEUE = "email.queue";
     public static final String EMAIL_KEY = "email.send";

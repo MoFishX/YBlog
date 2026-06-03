@@ -1,8 +1,11 @@
 <template>
   <div class="article-editor-page">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-semibold">{{ isEdit ? '编辑文章' : '新建文章' }}</h2>
-      <el-button @click="$router.back()">返回</el-button>
+      <h2 class="text-lg font-semibold text-gray-900">{{ isEdit ? '编辑文章' : '新建文章' }}</h2>
+      <el-button text @click="$router.back()">
+        <el-icon><ArrowLeft /></el-icon>
+        返回列表
+      </el-button>
     </div>
 
     <el-card>
@@ -10,31 +13,48 @@
         <el-alert :title="error" type="error" show-icon :closable="false" />
       </div>
 
-      <el-form label-width="80px">
+      <el-form label-width="60px" class="max-w-4xl">
         <el-form-item label="标题">
-          <el-input v-model="form.title" placeholder="文章标题" maxlength="200" show-word-limit />
+          <el-input v-model="form.title" placeholder="输入文章标题" maxlength="200" show-word-limit size="large" />
         </el-form-item>
-        <el-form-item label="摘要">
-          <el-input v-model="form.summary" type="textarea" :rows="3" placeholder="选填，不填则自动截取" maxlength="300" show-word-limit />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-select v-model="form.status" placeholder="发布状态">
-            <el-option label="发布" value="PUBLISHED" />
-            <el-option label="草稿" value="DRAFT" />
-          </el-select>
-        </el-form-item>
+
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="状态">
+              <el-select v-model="form.status" class="w-full">
+                <el-option label="发布" value="PUBLISHED" />
+                <el-option label="草稿" value="DRAFT" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="摘要">
+              <el-input v-model="form.summary" placeholder="选填" maxlength="300" show-word-limit />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
         <el-form-item label="内容">
-          <textarea
-            v-model="form.content"
-            class="editor-textarea"
-            placeholder="Markdown 格式内容..."
-          ></textarea>
+          <div class="editor-wrapper">
+            <div class="editor-toolbar">
+              <span class="text-xs text-gray-400">Markdown</span>
+              <span class="text-xs text-gray-300">{{ form.content.length }} 字</span>
+            </div>
+            <textarea
+              v-model="form.content"
+              class="editor-textarea"
+              placeholder="# 标题&#10;&#10;开始写作..."
+            ></textarea>
+          </div>
         </el-form-item>
+
         <el-form-item>
-          <el-button @click="$router.back()">取消</el-button>
-          <el-button type="primary" :loading="submitting" @click="handleSave">
-            {{ isEdit ? '更新' : '发布' }}
-          </el-button>
+          <div class="flex gap-3">
+            <el-button type="primary" :loading="submitting" @click="handleSave" size="large">
+              {{ isEdit ? '更新' : '发布' }}
+            </el-button>
+            <el-button @click="$router.back()" size="large">取消</el-button>
+          </div>
         </el-form-item>
       </el-form>
     </el-card>
@@ -44,6 +64,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { ArrowLeft } from '@element-plus/icons-vue'
 import { articleService } from '@/services/articleService'
 
 const route = useRoute()
@@ -112,19 +133,39 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.editor-textarea {
+.editor-wrapper {
   width: 100%;
-  min-height: 400px;
-  padding: 12px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  font-family: 'Courier New', Courier, monospace;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.editor-wrapper:focus-within {
+  border-color: #6366f1;
+}
+.editor-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #fafafa;
+  border-bottom: 1px solid #f0f0f0;
+}
+.editor-textarea {
+  display: block;
+  width: 100%;
+  min-height: 420px;
+  padding: 16px;
+  border: none;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.8;
   resize: vertical;
   outline: none;
+  color: #1f2937;
+  background: #fcfcfc;
 }
-.editor-textarea:focus {
-  border-color: #409EFF;
+.editor-textarea::placeholder {
+  color: #c4c4c4;
 }
 </style>

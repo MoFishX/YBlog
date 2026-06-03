@@ -126,7 +126,7 @@ function randomUser(overrides = {}) {
     username: pick(USERNAMES),
     email: `${pick(['dev', 'coder', 'admin', 'user'])}${nextId()}@example.com`,
     avatar: pick(AVATARS),
-    role: pick(['USER', 'ADMIN']),
+    role: 'ADMIN',
     articleCount: randomInt(0, 120),
     status: pick(['ACTIVE', 'ACTIVE', 'ACTIVE', 'BANNED']),
     createdAt: randomDateStr(),

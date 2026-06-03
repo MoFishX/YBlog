@@ -140,10 +140,5 @@ async function handleReview(id: number) {
   }
 }
 
-function handlePageChange(p: number) {
-  page.value = p
-  fetchList()
-}
-
 onMounted(() => fetchList())
 </script>
