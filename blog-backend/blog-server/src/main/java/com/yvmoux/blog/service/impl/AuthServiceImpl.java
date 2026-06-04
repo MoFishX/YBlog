@@ -6,7 +6,7 @@ import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
-import com.yvmoux.blog.dto.response.LoginResponse;
+import com.yvmoux.blog.dto.LoginResult;
 import com.yvmoux.blog.dto.response.UserVO;
 import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.enums.ErrorCode;
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) {
+    public LoginResult login(LoginRequest request) {
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", request.getUsername());
         User user = userMapper.selectOne(queryWrapper);
@@ -81,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(user.getCreatedAt())
                 .build();
 
-        return LoginResponse.builder()
+        return LoginResult.builder()
                 .token(tokenInfo.getTokenValue())
                 .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
                 .user(userVO)
@@ -89,7 +89,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResponse refreshToken(Long userId) {
+    public LoginResult refreshToken(Long userId) {
         User user = userMapper.selectById(userId);
         if (user == null) {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
@@ -97,7 +97,7 @@ public class AuthServiceImpl implements AuthService {
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-        return LoginResponse.builder()
+        return LoginResult.builder()
                 .token(tokenInfo.getTokenValue())
                 .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
                 .build();

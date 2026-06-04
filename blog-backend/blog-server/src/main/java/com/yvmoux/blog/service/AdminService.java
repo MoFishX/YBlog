@@ -1,6 +1,6 @@
 package com.yvmoux.blog.service;
 
-import com.yvmoux.blog.dto.response.PageResult;
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.response.StatsVO;
 import com.yvmoux.blog.dto.response.TrendVO;
 import com.yvmoux.blog.dto.response.UserVO;

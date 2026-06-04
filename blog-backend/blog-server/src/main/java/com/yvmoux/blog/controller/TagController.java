@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
-import com.yvmoux.blog.dto.response.ApiResponse;
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.service.TagService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,31 +31,31 @@ public class TagController {
 
     @Operation(summary = "标签列表")
     @GetMapping
-    public ApiResponse<List<TagVO>> list() {
-        return ApiResponse.success(tagService.getAllTags());
+    public Result<List<TagVO>> list() {
+        return Result.success(tagService.getAllTags());
     }
 
     @Operation(summary = "创建标签")
     @PostMapping
     @SaCheckRole("ADMIN")
-    public ApiResponse<TagVO> create(@Valid @RequestBody TagRequest request) {
+    public Result<TagVO> create(@Valid @RequestBody TagRequest request) {
         TagVO tag = tagService.createTag(request.getName());
-        return ApiResponse.success("创建成功", tag);
+        return Result.success("创建成功", tag);
     }
 
     @Operation(summary = "更新标签")
     @PutMapping("/{tagId}")
     @SaCheckRole("ADMIN")
-    public ApiResponse<TagVO> update(@PathVariable Long tagId, @Valid @RequestBody TagRequest request) {
+    public Result<TagVO> update(@PathVariable Long tagId, @Valid @RequestBody TagRequest request) {
         TagVO tag = tagService.updateTag(tagId, request.getName());
-        return ApiResponse.success("更新成功", tag);
+        return Result.success("更新成功", tag);
     }
 
     @Operation(summary = "删除标签")
     @DeleteMapping("/{tagId}")
     @SaCheckRole("ADMIN")
-    public ApiResponse<Void> delete(@PathVariable Long tagId) {
+    public Result<Void> delete(@PathVariable Long tagId) {
         tagService.deleteTag(tagId);
-        return ApiResponse.success("删除成功", null);
+        return Result.success("删除成功", null);
     }
 }

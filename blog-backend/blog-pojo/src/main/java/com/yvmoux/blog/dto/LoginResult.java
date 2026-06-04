@@ -1,5 +1,6 @@
-package com.yvmoux.blog.dto.response;
+package com.yvmoux.blog.dto;
 
+import com.yvmoux.blog.dto.response.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
+public class LoginResult {
     private String token;
     private long expiresIn;
     private UserVO user;

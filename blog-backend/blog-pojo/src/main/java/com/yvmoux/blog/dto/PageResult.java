@@ -1,4 +1,4 @@
-package com.yvmoux.blog.dto.response;
+package com.yvmoux.blog.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

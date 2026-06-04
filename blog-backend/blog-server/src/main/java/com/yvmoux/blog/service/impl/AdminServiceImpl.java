@@ -2,7 +2,7 @@ package com.yvmoux.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.yvmoux.blog.dto.response.PageResult;
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.response.StatsVO;
 import com.yvmoux.blog.dto.response.TrendVO;
 import com.yvmoux.blog.dto.response.UserVO;

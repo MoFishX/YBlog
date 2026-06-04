@@ -2,7 +2,7 @@ package com.yvmoux.blog.handler;
 
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotRoleException;
-import com.yvmoux.blog.dto.response.ApiResponse;
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,32 +14,32 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ApiResponse<Object> handleBusinessException(BusinessException e) {
-        return ApiResponse.error(e.getCode(), e.getMessage());
+    public Result<Object> handleBusinessException(BusinessException e) {
+        return Result.error(e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public Result<Object> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("参数校验失败");
-        return ApiResponse.error(400, message);
+        return Result.error(400, message);
     }
 
     @ExceptionHandler(NotLoginException.class)
-    public ApiResponse<Object> handleNotLoginException(NotLoginException e) {
-        return ApiResponse.error(401, "未登录");
+    public Result<Object> handleNotLoginException(NotLoginException e) {
+        return Result.error(401, "未登录");
     }
 
     @ExceptionHandler(NotRoleException.class)
-    public ApiResponse<Object> handleNotRoleException(NotRoleException e) {
-        return ApiResponse.error(403, "无权限");
+    public Result<Object> handleNotRoleException(NotRoleException e) {
+        return Result.error(403, "无权限");
     }
 
     @ExceptionHandler(Exception.class)
-    public ApiResponse<Object> handleException(Exception e) {
+    public Result<Object> handleException(Exception e) {
         log.error("服务器内部错误", e);
-        return ApiResponse.error(500, "服务器内部错误");
+        return Result.error(500, "服务器内部错误");
     }
 }

@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import com.yvmoux.blog.dto.response.ApiResponse;
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,8 +36,8 @@ public class UploadController {
     @Operation(summary = "上传文件")
     @PostMapping
     @SaCheckLogin
-    public ApiResponse<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
-                                                    @RequestParam("type") String type) throws IOException {
+    public Result<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("type") String type) throws IOException {
         if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
@@ -62,7 +62,7 @@ public class UploadController {
         file.transferTo(targetPath.toFile());
 
         String url = "/uploads/" + type + "/" + dateStr + "/" + newFilename;
-        return ApiResponse.success("上传成功", Map.of(
+        return Result.success("上传成功", Map.of(
                 "url", url,
                 "filename", newFilename,
                 "size", file.getSize()

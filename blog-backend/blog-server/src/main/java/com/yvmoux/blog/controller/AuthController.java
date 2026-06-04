@@ -3,8 +3,8 @@ package com.yvmoux.blog.controller;
 import cn.dev33.satoken.stp.StpUtil;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
-import com.yvmoux.blog.dto.response.ApiResponse;
-import com.yvmoux.blog.dto.response.LoginResponse;
+import com.yvmoux.blog.dto.Result;
+import com.yvmoux.blog.dto.LoginResult;
 import com.yvmoux.blog.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,28 +22,28 @@ public class AuthController {
 
     @Operation(summary = "登录")
     @PostMapping("/login")
-    public ApiResponse<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ApiResponse.success(authService.login(request));
+    public Result<LoginResult> login(@Valid @RequestBody LoginRequest request) {
+        return Result.success(authService.login(request));
     }
 
     @Operation(summary = "注册")
     @PostMapping("/register")
-    public ApiResponse<Void> register(@Valid @RequestBody RegisterRequest request) {
+    public Result<Void> register(@Valid @RequestBody RegisterRequest request) {
         authService.register(request);
-        return ApiResponse.success("注册成功", null);
+        return Result.success("注册成功", null);
     }
 
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
-    public ApiResponse<LoginResponse> refresh() {
+    public Result<LoginResult> refresh() {
         Long userId = StpUtil.getLoginIdAsLong();
-        return ApiResponse.success(authService.refreshToken(userId));
+        return Result.success(authService.refreshToken(userId));
     }
 
     @Operation(summary = "登出")
     @PostMapping("/logout")
-    public ApiResponse<Void> logout() {
+    public Result<Void> logout() {
         authService.logout(null);
-        return ApiResponse.success("已登出", null);
+        return Result.success("已登出", null);
     }
 }
