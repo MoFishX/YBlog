@@ -1,5 +1,8 @@
 package com.yvmoux.blog.service.impl;
 
+import cn.dev33.satoken.stp.SaTokenInfo;
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
@@ -10,18 +13,13 @@ import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.enums.RoleEnum;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.UserMapper;
-import com.yvmoux.blog.security.JwtTokenProvider;
 import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.service.AuthService;
-import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -29,10 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
     private final AsyncTaskService asyncTaskService;
-    private final RedisUtils redisUtils;
 
     @Override
     public void register(RegisterRequest request) {
@@ -44,7 +39,7 @@ public class AuthServiceImpl implements AuthService {
 
         User user = new User();
         user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(BCrypt.hashpw(request.getPassword()));
         user.setEmail(request.getEmail());
         user.setRole(RoleEnum.USER.name());
         user.setStatus("ACTIVE");
@@ -61,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
         queryWrapper.eq("username", request.getUsername());
         User user = userMapper.selectOne(queryWrapper);
 
-        if (user == null || !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (user == null || !BCrypt.checkpw(request.getPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD);
         }
 
@@ -69,7 +64,11 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.USER_BANNED);
         }
 
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getRole());
+        StpUtil.login(user.getId());
+        // 将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
+        StpUtil.getSession().set("role", user.getRole());
+
+        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
         UserVO userVO = UserVO.builder()
                 .id(user.getId())
@@ -83,8 +82,8 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return LoginResponse.builder()
-                .token(token)
-                .expiresIn(86400000L)
+                .token(tokenInfo.getTokenValue())
+                .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
                 .user(userVO)
                 .build();
     }
@@ -96,20 +95,16 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        String token = jwtTokenProvider.generateToken(user.getId(), user.getRole());
+        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
         return LoginResponse.builder()
-                .token(token)
-                .expiresIn(86400000L)
+                .token(tokenInfo.getTokenValue())
+                .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
                 .build();
     }
 
     @Override
     public void logout(String token) {
-        Date expiration = jwtTokenProvider.getExpiration(token);
-        long remainingTime = expiration.getTime() - System.currentTimeMillis();
-        if (remainingTime > 0) {
-            redisUtils.set("blacklist:token:" + token, "1", remainingTime, TimeUnit.MILLISECONDS);
-        }
+        StpUtil.logout();
     }
 }

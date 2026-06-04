@@ -1,9 +1,10 @@
-package com.yvmoux.blog.exception;
+package com.yvmoux.blog.handler;
 
+import cn.dev33.satoken.exception.NotLoginException;
+import cn.dev33.satoken.exception.NotRoleException;
 import com.yvmoux.blog.dto.response.ApiResponse;
+import com.yvmoux.blog.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -26,14 +27,14 @@ public class GlobalExceptionHandler {
         return ApiResponse.error(400, message);
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
-    public ApiResponse<Object> handleAccessDeniedException(AccessDeniedException e) {
-        return ApiResponse.error(403, "无权限");
+    @ExceptionHandler(NotLoginException.class)
+    public ApiResponse<Object> handleNotLoginException(NotLoginException e) {
+        return ApiResponse.error(401, "未登录");
     }
 
-    @ExceptionHandler(AuthenticationException.class)
-    public ApiResponse<Object> handleAuthenticationException(AuthenticationException e) {
-        return ApiResponse.error(401, "未认证");
+    @ExceptionHandler(NotRoleException.class)
+    public ApiResponse<Object> handleNotRoleException(NotRoleException e) {
+        return ApiResponse.error(403, "无权限");
     }
 
     @ExceptionHandler(Exception.class)

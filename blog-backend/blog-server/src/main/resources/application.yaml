@@ -34,6 +34,14 @@ jwt:
   secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
   expiration: 86400000
 
+sa-token:
+  token-name: Authorization
+  timeout: 86400
+  active-timeout: -1
+  is-concurrent: true
+  is-log: true
+  jwt-secret-key: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

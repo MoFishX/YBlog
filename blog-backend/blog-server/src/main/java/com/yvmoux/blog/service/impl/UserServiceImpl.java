@@ -1,5 +1,6 @@
 package com.yvmoux.blog.service.impl;
 
+import cn.hutool.crypto.digest.BCrypt;
 import com.yvmoux.blog.dto.request.ChangePasswordRequest;
 import com.yvmoux.blog.dto.request.UpdateProfileRequest;
 import com.yvmoux.blog.dto.response.UserVO;
@@ -10,7 +11,6 @@ import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserVO getCurrentUser(Long userId) {
@@ -94,11 +93,11 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+        if (!BCrypt.checkpw(request.getOldPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD);
         }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPassword(BCrypt.hashpw(request.getNewPassword()));
         user.setUpdatedAt(LocalDateTime.now());
         userMapper.updateById(user);
     }

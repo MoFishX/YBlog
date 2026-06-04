@@ -1,5 +1,6 @@
 package com.yvmoux.blog.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.yvmoux.blog.dto.response.ApiResponse;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +35,7 @@ public class UploadController {
 
     @Operation(summary = "上传文件")
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @SaCheckLogin
     public ApiResponse<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
                                                     @RequestParam("type") String type) throws IOException {
         if (file.isEmpty()) {

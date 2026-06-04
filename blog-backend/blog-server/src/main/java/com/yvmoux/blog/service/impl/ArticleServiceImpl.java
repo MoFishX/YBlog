@@ -25,9 +25,9 @@ import com.yvmoux.blog.mapper.CommentMapper;
 import com.yvmoux.blog.mapper.TagMapper;
 import com.yvmoux.blog.mapper.UserLikeMapper;
 import com.yvmoux.blog.mapper.UserMapper;
-import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
 import com.yvmoux.blog.utils.RedisUtils;
+import cn.dev33.satoken.stp.StpUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -51,7 +51,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final CommentMapper commentMapper;
     private final ArticleTagMapper articleTagMapper;
     private final UserLikeMapper userLikeMapper;
-    private final SecurityUtils securityUtils;
     private final RedisUtils redisUtils;
     private final ArticleConverter articleConverter;
 
@@ -98,7 +97,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         boolean isAuthor = currentUserId != null && currentUserId.equals(article.getAuthorId());
-        boolean isAdmin = currentUserId != null && securityUtils.isAdmin();
+        boolean isAdmin = currentUserId != null && StpUtil.hasRole("ADMIN");
 
         if (currentUserId != null && !isAuthor && !isAdmin) {
             if (ArticleStatusEnum.DRAFT.name().equals(article.getStatus())) {
@@ -183,7 +182,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        boolean isAdmin = securityUtils.isAdmin();
+        boolean isAdmin = StpUtil.hasRole("ADMIN");
         if (!article.getAuthorId().equals(userId) && !isAdmin) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }

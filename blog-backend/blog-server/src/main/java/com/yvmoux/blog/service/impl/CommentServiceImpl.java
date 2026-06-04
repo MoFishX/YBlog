@@ -14,7 +14,6 @@ import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.ArticleMapper;
 import com.yvmoux.blog.mapper.CommentMapper;
 import com.yvmoux.blog.mapper.UserMapper;
-import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +32,6 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
-    private final SecurityUtils securityUtils;
 
     @Override
     public PageResult<CommentVO> getCommentsByArticle(Long articleId, Integer page, Integer pageSize) {

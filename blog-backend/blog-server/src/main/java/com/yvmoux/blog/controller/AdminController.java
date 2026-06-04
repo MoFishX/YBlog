@@ -1,5 +1,6 @@
 package com.yvmoux.blog.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.yvmoux.blog.dto.request.BatchDeleteRequest;
 import com.yvmoux.blog.dto.request.ReviewRequest;
 import com.yvmoux.blog.dto.request.UpdateUserRoleRequest;
@@ -18,7 +19,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
+@SaCheckRole("ADMIN")
 public class AdminController {
 
     private final AdminService adminService;

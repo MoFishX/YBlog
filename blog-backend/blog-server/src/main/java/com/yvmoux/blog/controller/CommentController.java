@@ -1,16 +1,16 @@
 package com.yvmoux.blog.controller;
 
+import cn.dev33.satoken.annotation.SaCheckLogin;
+import cn.dev33.satoken.stp.StpUtil;
 import com.yvmoux.blog.dto.request.CommentCreateRequest;
 import com.yvmoux.blog.dto.response.ApiResponse;
 import com.yvmoux.blog.dto.response.CommentVO;
 import com.yvmoux.blog.dto.response.PageResult;
-import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "评论")
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
-    private final SecurityUtils securityUtils;
 
     @Operation(summary = "文章评论列表")
     @GetMapping("/articles/{articleId}/comments")
@@ -33,32 +32,32 @@ public class CommentController {
 
     @Operation(summary = "发表评论")
     @PostMapping("/articles/{articleId}/comments")
-    @PreAuthorize("isAuthenticated()")
+    @SaCheckLogin
     public ApiResponse<CommentVO> create(@PathVariable Long articleId,
                                           @Valid @RequestBody CommentCreateRequest request) {
-        Long userId = securityUtils.getCurrentUserId();
+        Long userId = StpUtil.getLoginIdAsLong();
         CommentVO comment = commentService.createComment(userId, articleId, request);
         return ApiResponse.success("评论成功", comment);
     }
 
     @Operation(summary = "删除评论")
     @DeleteMapping("/comments/{commentId}")
-    @PreAuthorize("isAuthenticated()")
+    @SaCheckLogin
     public ApiResponse<Void> delete(@PathVariable Long commentId) {
-        Long userId = securityUtils.getCurrentUserId();
-        boolean isAdmin = securityUtils.isAdmin();
+        Long userId = StpUtil.getLoginIdAsLong();
+        boolean isAdmin = StpUtil.hasRole("ADMIN");
         commentService.deleteComment(commentId, userId, isAdmin);
         return ApiResponse.success("删除成功", null);
     }
 
     @Operation(summary = "我收到的评论回复")
     @GetMapping("/comments/replies")
-    @PreAuthorize("isAuthenticated()")
+    @SaCheckLogin
     public ApiResponse<PageResult<CommentVO>> replies(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "0") Integer unreadOnly) {
-        Long userId = securityUtils.getCurrentUserId();
+        Long userId = StpUtil.getLoginIdAsLong();
         return ApiResponse.success(commentService.getReplies(userId, page, pageSize, unreadOnly == 1));
     }
 }

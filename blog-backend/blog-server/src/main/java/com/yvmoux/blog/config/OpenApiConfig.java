@@ -7,15 +7,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class Knife4jConfig {
+public class OpenApiConfig {
 
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("高性能博客平台 API")
+                        .title("博客平台 API")
                         .version("1.0.0")
-                        .description("基于 Spring Boot 3 + MyBatis-Plus 的博客后端接口文档")
+                        .description("基于 Spring Boot 4 + MyBatis-Plus 的博客后端接口文档")
                         .contact(new Contact().name("Blog Team")));
     }
 }

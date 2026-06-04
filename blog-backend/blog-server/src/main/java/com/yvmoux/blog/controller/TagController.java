@@ -1,5 +1,6 @@
 package com.yvmoux.blog.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.yvmoux.blog.dto.response.ApiResponse;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.service.TagService;
@@ -10,7 +11,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public class TagController {
 
     @Operation(summary = "创建标签")
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @SaCheckRole("ADMIN")
     public ApiResponse<TagVO> create(@Valid @RequestBody TagRequest request) {
         TagVO tag = tagService.createTag(request.getName());
         return ApiResponse.success("创建成功", tag);
@@ -45,7 +45,7 @@ public class TagController {
 
     @Operation(summary = "更新标签")
     @PutMapping("/{tagId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @SaCheckRole("ADMIN")
     public ApiResponse<TagVO> update(@PathVariable Long tagId, @Valid @RequestBody TagRequest request) {
         TagVO tag = tagService.updateTag(tagId, request.getName());
         return ApiResponse.success("更新成功", tag);
@@ -53,7 +53,7 @@ public class TagController {
 
     @Operation(summary = "删除标签")
     @DeleteMapping("/{tagId}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @SaCheckRole("ADMIN")
     public ApiResponse<Void> delete(@PathVariable Long tagId) {
         tagService.deleteTag(tagId);
         return ApiResponse.success("删除成功", null);

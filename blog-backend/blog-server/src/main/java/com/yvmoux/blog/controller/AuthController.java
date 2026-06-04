@@ -1,10 +1,10 @@
 package com.yvmoux.blog.controller;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.response.ApiResponse;
 import com.yvmoux.blog.dto.response.LoginResponse;
-import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final SecurityUtils securityUtils;
 
     @Operation(summary = "登录")
     @PostMapping("/login")
@@ -37,15 +36,14 @@ public class AuthController {
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
     public ApiResponse<LoginResponse> refresh() {
-        Long userId = securityUtils.getCurrentUserId();
+        Long userId = StpUtil.getLoginIdAsLong();
         return ApiResponse.success(authService.refreshToken(userId));
     }
 
     @Operation(summary = "登出")
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        authService.logout(token);
+    public ApiResponse<Void> logout() {
+        authService.logout(null);
         return ApiResponse.success("已登出", null);
     }
 }
