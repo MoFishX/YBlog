@@ -3,7 +3,7 @@
 // 使用方式：在 request.ts 中引入即可，通过 USE_MOCK 切换
 // ============================================================
 
-export const USE_MOCK = true // 上线前改为 false
+export const USE_MOCK = false // 上线前改为 false
 
 // ==================== 随机数据生成工具 ====================
 

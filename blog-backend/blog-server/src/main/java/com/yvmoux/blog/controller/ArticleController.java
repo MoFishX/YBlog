@@ -11,7 +11,9 @@ import com.yvmoux.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/articles")
 @RequiredArgsConstructor
+@Slf4j
 public class ArticleController {
 
     private final ArticleService articleService;
@@ -31,6 +34,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) Long tagId,
             @RequestParam(defaultValue = "latest") String orderBy) {
+        log.debug("获取文章列表, page: {}, pageSize: {}, tagId: {}, orderBy: {}", page, pageSize, tagId, orderBy);
         if (pageSize > 100) pageSize = 100;
         return ApiResponse.success(articleService.getArticleList(page, pageSize, tagId, orderBy, null, null));
     }
@@ -81,7 +85,7 @@ public class ArticleController {
 
     @Operation(summary = "热门文章排行榜")
     @GetMapping("/hot")
-    public ApiResponse<PageResult<ArticleVO>> hot(@RequestParam(defaultValue = "10") Integer limit) {
+    public ApiResponse<List<ArticleVO>> hot(@RequestParam(defaultValue = "10") Integer limit) {
         if (limit > 50) limit = 50;
         return ApiResponse.success(articleService.getHotArticles(limit));
     }

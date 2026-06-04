@@ -291,10 +291,10 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageResult<ArticleVO> getHotArticles(int limit) {
+    public List<ArticleVO> getHotArticles(int limit) {
         Set<Object> members = redisUtils.opsForZSet().reverseRange("hot:articles", 0, limit - 1);
         if (members == null || members.isEmpty()) {
-            return new PageResult<>(new ArrayList<>(), 0, 1, limit);
+            return new ArrayList<>();
         }
 
         List<ArticleVO> records = new ArrayList<>();
@@ -314,7 +314,7 @@ public class ArticleServiceImpl implements ArticleService {
             records.add(vo);
         }
 
-        return new PageResult<>(records, records.size(), 1, limit);
+        return records;
     }
 
     @Override
