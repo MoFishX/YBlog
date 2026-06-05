@@ -48,7 +48,6 @@ public class AuthServiceImpl implements AuthService {
                 .avatar(null)
                 .role(RoleEnum.USER.name())
                 .status(UserStatus.ACTIVE.name())
-                .articleCount(null)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

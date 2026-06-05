@@ -26,8 +26,12 @@ public class RedisUtils {
     @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> clazz) {
         Object value = redisTemplate.opsForValue().get(key);
-        if (value == null) return null;
-        return (T) value;
+        return switch (value) {
+            case null -> null;
+            case Number number when clazz == Long.class -> (T) (Long) number.longValue();
+            case Number number when clazz == Integer.class -> (T) (Integer) number.intValue();
+            default -> (T) value;
+        };
     }
 
     public void delete(String key) {
@@ -54,7 +58,7 @@ public class RedisUtils {
         return redisTemplate.opsForValue().increment(key, delta);
     }
 
-    public Long getSet(String key, String value) {
+    public Long getSet(String key, Object value) {
         Object result = redisTemplate.opsForValue().getAndSet(key, value);
         if (result == null) return 0L;
         return Long.parseLong(result.toString());

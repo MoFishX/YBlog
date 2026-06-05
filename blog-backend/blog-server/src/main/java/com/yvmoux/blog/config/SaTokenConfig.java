@@ -30,6 +30,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
                     // 只读内容公开
                     SaRouter.match("/articles", "/articles/*", "/articles/hot").stop();
                     SaRouter.match("/articles/*/comments").stop();
+                    SaRouter.match("/articles/*/view").stop();
                     SaRouter.match("/user/*").stop();
                     SaRouter.match("/tags").stop();
 

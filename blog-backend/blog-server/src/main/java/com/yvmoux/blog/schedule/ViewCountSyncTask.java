@@ -40,7 +40,7 @@ public class ViewCountSyncTask {
                 // 从缓存键中提取文章 ID 并获取阅读增量
                 String idStr = key.substring(key.lastIndexOf(":") + 1);
                 Long articleId = Long.parseLong(idStr);
-                Long incrCount = redisUtils.getSet(key, "0");
+                Long incrCount = redisUtils.getSet(key, 0L);
 
                 if (incrCount != null && incrCount > 0) {
                     articleMapper.incrementViewCount(articleId, incrCount);

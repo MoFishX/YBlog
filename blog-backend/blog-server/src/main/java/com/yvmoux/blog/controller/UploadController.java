@@ -7,6 +7,7 @@ import com.yvmoux.blog.exception.BusinessException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+@Slf4j
 @Tag(name = "文件上传")
 @RestController
 @RequestMapping("/upload")
@@ -38,6 +40,8 @@ public class UploadController {
     @SaCheckLogin
     public Result<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
                                               @RequestParam("type") String type) throws IOException {
+        log.info("上传文件, type: {}, originalFilename: {}, size: {}", type, file.getOriginalFilename(), file.getSize());
+
         if (file.isEmpty()) {
             throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
@@ -62,6 +66,7 @@ public class UploadController {
         file.transferTo(targetPath.toFile());
 
         String url = "/uploads/" + type + "/" + dateStr + "/" + newFilename;
+        log.info("上传文件成功, url: {}", url);
         return Result.success("上传成功", Map.of(
                 "url", url,
                 "filename", newFilename,

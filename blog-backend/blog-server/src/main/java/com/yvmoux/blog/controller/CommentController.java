@@ -11,8 +11,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @Tag(name = "评论")
 @RestController
 @RequiredArgsConstructor
@@ -26,8 +28,11 @@ public class CommentController {
             @PathVariable Long articleId,
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "20") Integer pageSize) {
+        log.info("获取文章评论列表, articleId: {}, page: {}, pageSize: {}", articleId, page, pageSize);
         if (pageSize > 100) pageSize = 100;
-        return Result.success(commentService.getCommentsByArticle(articleId, page, pageSize));
+        Result<PageResult<CommentVO>> result = Result.success(commentService.getCommentsByArticle(articleId, page, pageSize));
+        log.info("获取文章评论列表成功, total: {}", result.getData().getTotal());
+        return result;
     }
 
     @Operation(summary = "发表评论")
@@ -36,7 +41,9 @@ public class CommentController {
     public Result<CommentVO> create(@PathVariable Long articleId,
                                     @Valid @RequestBody CommentCreateRequest request) {
         Long userId = StpUtil.getLoginIdAsLong();
+        log.info("发表评论, userId: {}, articleId: {}", userId, articleId);
         CommentVO comment = commentService.createComment(userId, articleId, request);
+        log.info("发表评论成功, commentId: {}", comment.getId());
         return Result.success("评论成功", comment);
     }
 
@@ -46,7 +53,9 @@ public class CommentController {
     public Result<Void> delete(@PathVariable Long commentId) {
         Long userId = StpUtil.getLoginIdAsLong();
         boolean isAdmin = StpUtil.hasRole("ADMIN");
+        log.info("删除评论, userId: {}, commentId: {}, isAdmin: {}", userId, commentId, isAdmin);
         commentService.deleteComment(commentId, userId, isAdmin);
+        log.info("删除评论成功, commentId: {}", commentId);
         return Result.success("删除成功", null);
     }
 
@@ -58,6 +67,9 @@ public class CommentController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "0") Integer unreadOnly) {
         Long userId = StpUtil.getLoginIdAsLong();
-        return Result.success(commentService.getReplies(userId, page, pageSize, unreadOnly == 1));
+        log.info("获取评论回复, userId: {}, page: {}, pageSize: {}, unreadOnly: {}", userId, page, pageSize, unreadOnly);
+        Result<PageResult<CommentVO>> result = Result.success(commentService.getReplies(userId, page, pageSize, unreadOnly == 1));
+        log.info("获取评论回复成功, total: {}", result.getData().getTotal());
+        return result;
     }
 }
