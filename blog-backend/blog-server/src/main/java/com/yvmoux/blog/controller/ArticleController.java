@@ -60,7 +60,7 @@ public class ArticleController {
     @GetMapping("/{articleId}")
     public Result<ArticleVO> getDetail(@PathVariable Long articleId) {
         Long currentUserId = StpUtil.isLogin() ? StpUtil.getLoginIdAsLong() : null;
-        return Result.success(articleService.getArticleDetail(articleId, currentUserId));
+        return Result.success(articleService.getArticleDetail(articleId));
     }
 
     @Operation(summary = "发布文章")

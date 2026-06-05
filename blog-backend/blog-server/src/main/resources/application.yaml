@@ -32,7 +32,7 @@ mybatis-plus:
 
 sa-token:
   token-name: satoken
-  timeout: 300
+  timeout: 9999999 # TODO 暂时为
   is-read-header: false
   is-read-cookie: true
   is-write-header: false

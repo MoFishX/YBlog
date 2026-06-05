@@ -11,8 +11,6 @@ public class ArticleCreateRequest {
     @Size(min = 1, max = 200)
     private String title;
 
-    @NotBlank
-    @Size(min = 10)
     private String content;
 
     private String summary;

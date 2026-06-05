@@ -16,9 +16,20 @@
       </div>
     </div>
 
-    <div v-else-if="error" class="bg-red-50 border border-red-100 rounded-lg p-6 text-center">
-      <p class="text-red-600 mb-3">{{ error }}</p>
-      <button @click="fetchDetail" class="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors">重试</button>
+    <div v-else-if="error" class="min-h-[50vh] flex items-center justify-center">
+      <div class="text-center">
+        <div class="mb-5 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-50">
+          <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-3-3v6m-7 5.3A9 9 0 1112 3a9 9 0 01-7 14.3z"/>
+          </svg>
+        </div>
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">{{ errorTitle }}</h2>
+        <p class="text-sm text-gray-500 mb-6 max-w-md">{{ errorMessage }}</p>
+        <div class="flex items-center justify-center gap-3">
+          <button @click="fetchDetail" class="px-4 py-2 bg-gray-900 text-white text-sm rounded-md hover:bg-gray-800 transition-colors">重试</button>
+          <RouterLink to="/" class="px-4 py-2 border border-gray-200 text-sm rounded-md text-gray-600 hover:bg-gray-50 transition-colors">返回首页</RouterLink>
+        </div>
+      </div>
     </div>
 
     <template v-else-if="article">
@@ -130,7 +141,23 @@ const userStore = useUserStore()
 const article = ref<Article | null>(null)
 const loading = ref(true)
 const error = ref('')
+const errorStatus = ref(0)
 const likeCount = ref(0)
+
+const errorTitle = computed(() => {
+  if (errorStatus.value === 404) return '文章不存在'
+  if (errorStatus.value === 403) return '暂无权限访问'
+  if (errorStatus.value >= 500) return '服务器异常'
+  return '加载失败'
+})
+
+const errorMessage = computed(() => {
+  if (error.value) return error.value
+  if (errorStatus.value === 404) return '该文章可能已被删除，或链接地址有误'
+  if (errorStatus.value === 403) return '你没有权限查看此文章'
+  if (errorStatus.value >= 500) return '服务器暂时无法响应，请稍后再试'
+  return '请检查网络连接后重试'
+})
 
 const comments = ref<Comment[]>([])
 const commentLoading = ref(false)
@@ -150,12 +177,15 @@ const renderedContent = computed(() => {
 
 async function fetchDetail() {
   const id = Number(route.params.id)
-  if (!id) { error.value = '文章不存在'; loading.value = false; return }
-  loading.value = true; error.value = ''
+  if (!id) { error.value = '无效的文章ID'; errorStatus.value = 404; loading.value = false; return }
+  loading.value = true; error.value = ''; errorStatus.value = 0
   try {
     const res = await articleService.getDetail(id)
     article.value = res; likeCount.value = res.likeCount
-  } catch (e: any) { error.value = e?.response?.data?.message || '加载失败' }
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || ''
+    errorStatus.value = e?.response?.data?.code || e?.response?.status || 0
+  }
   finally { loading.value = false }
 }
 

@@ -20,6 +20,7 @@ import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.entity.UserLike;
 import com.yvmoux.blog.enums.ArticleStatusEnum;
 import com.yvmoux.blog.enums.ErrorCode;
+import com.yvmoux.blog.enums.RoleEnum;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.ArticleContentMapper;
 import com.yvmoux.blog.mapper.ArticleMapper;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -105,37 +107,42 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleVO getArticleDetail(Long articleId, Long currentUserId) {
+    public ArticleVO getArticleDetail(Long articleId) {
+        // 获取对象
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        boolean isAuthor = currentUserId != null && currentUserId.equals(article.getAuthorId());
-        boolean isAdmin = currentUserId != null && StpUtil.hasRole("ADMIN");
+        Long currentUserId = StpUtil.isLogin() ? StpUtil.getLoginIdAsLong() : null;
 
-        if (currentUserId != null && !isAuthor && !isAdmin) {
+        // 禁止非管理员访问草稿文章
+        boolean isAuthor = currentUserId != null && currentUserId.equals(article.getAuthorId());
+        boolean isAdmin = currentUserId != null && StpUtil.hasRole(RoleEnum.ADMIN.name());
+
+        if (!isAuthor && !isAdmin) {
             if (ArticleStatusEnum.DRAFT.name().equals(article.getStatus())) {
                 throw new BusinessException(ErrorCode.NOT_FOUND);
             }
         }
 
+        // 增加浏览数并将文章在ZSet中的score加1
         redisUtils.increment("article:view:" + articleId);
         redisUtils.opsForZSet().incrementScore("hot:articles", articleId.toString(), 1);
 
+        // 查询文章标签
         List<Tag> tags = tagMapper.selectByArticleId(articleId);
-        List<TagVO> tagVOs = tags.stream()
-                .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
-                .collect(Collectors.toList());
-        User author = userMapper.selectById(article.getAuthorId());
-        int commentCount = commentMapper.countByArticleId(articleId);
-        String content = null;
-        ArticleContent articleContent = articleContentMapper.selectById(articleId);
-        if (articleContent != null) {
-            content = articleContent.getContent();
-        }
-        ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, content);
+        List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
 
+        ArticleVO vo = articleConverter.toArticleVO(
+                article,
+                userMapper.selectById(article.getAuthorId()),
+                tagVOs,
+                commentMapper.countByArticleId(articleId),
+                articleContentMapper.selectById(articleId).getContent()
+        );
+
+        // 判断用户是否点赞
         if (currentUserId != null) {
             boolean liked = userLikeMapper.countByUserAndArticle(currentUserId, articleId) > 0;
             vo.setIsLiked(liked);
@@ -147,44 +154,71 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional
     public ArticleVO createArticle(Long userId, ArticleCreateRequest request) {
-        Article article = new Article();
-        article.setTitle(request.getTitle());
-        article.setCoverImage(request.getCoverImage());
-        article.setAuthorId(userId);
-        article.setStatus(request.getStatus() != null ? request.getStatus() : ArticleStatusEnum.DRAFT.name());
-
-        if (request.getSummary() != null && !request.getSummary().isBlank()) {
-            article.setSummary(request.getSummary());
+        // 设置文章状态
+        String status;
+        if (request.getStatus() == null || !ArticleStatusEnum.contains(request.getStatus().toUpperCase())) {
+            status = ArticleStatusEnum.DRAFT.name();
         } else {
-            article.setSummary(extractPlainText(request.getContent()));
+            status = request.getStatus().toUpperCase();
+        }
+        // 获取文章内容
+        String content;
+        if (request.getContent() == null || request.getContent().isBlank()) {
+            content = "似乎什么也没写呢~";
+        } else {
+            content = request.getContent();
+        }
+        // 设置文章摘要
+        String summary;
+        if (request.getSummary() == null || request.getSummary().isBlank()) {
+            summary = extractPlainText(request.getContent());
+            if (content.equals("似乎什么也没写呢~")) {
+                summary = "似乎什么也没写呢~";
+            }
+        } else {
+            summary = request.getSummary();
         }
 
-        article.setViewCount(0L);
-        article.setLikeCount(0L);
-        article.setCreatedAt(LocalDateTime.now());
-        article.setUpdatedAt(LocalDateTime.now());
 
+        // 插入文章
+        Article article = Article.builder()
+                .id(null)
+                .title(request.getTitle())
+                .summary(summary) // TODO 实现AI摘要
+                .coverImage(request.getCoverImage())
+                .authorId(userId)
+                .status(status)
+                .viewCount(0L)
+                .likeCount(0L)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .deletedAt(null)
+                .build();
         articleMapper.insert(article);
 
-        ArticleContent articleContent = new ArticleContent();
-        articleContent.setArticleId(article.getId());
-        articleContent.setContent(request.getContent());
+        // 插入文章内容
+        ArticleContent articleContent = ArticleContent.builder()
+                .articleId(article.getId())
+                .content(content)
+                .build();
         articleContentMapper.insert(articleContent);
 
+        // 插入文章标签
         if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
-            for (Long tagId : request.getTagIds()) {
-                ArticleTag articleTag = new ArticleTag();
-                articleTag.setArticleId(article.getId());
-                articleTag.setTagId(tagId);
-                articleTagMapper.insert(articleTag);
-            }
+            List<ArticleTag> tags = request.getTagIds().stream()
+                    .map(tagId -> {
+                        return ArticleTag.builder()
+                                .articleId(article.getId())
+                                .tagId(tagId)
+                                .build();
+                    })
+                    .toList();
+            articleTagMapper.insert(tags);
         }
 
         User author = userMapper.selectById(userId);
         List<Tag> tags = tagMapper.selectByArticleId(article.getId());
-        List<TagVO> tagVOs = tags.stream()
-                .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
-                .collect(Collectors.toList());
+        List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
 
         return articleConverter.toArticleVO(article, author, tagVOs, 0, request.getContent());
     }
@@ -398,6 +432,9 @@ public class ArticleServiceImpl implements ArticleService {
         return new PageResult<>(records, articlePage.getTotal());
     }
 
+    /**
+     * 提取纯文本
+     */
     private String extractPlainText(String markdown) {
         if (markdown == null) {
             return "";
