@@ -13,27 +13,33 @@ import java.util.List;
 public interface ArticleConverter {
 
     default ArticleVO toArticleVO(Article article, User author, List<TagVO> tags, Integer commentCount, String content) {
-        ArticleVO vo = new ArticleVO();
-        vo.setId(article.getId());
-        vo.setTitle(article.getTitle());
-        vo.setContent(content);
-        vo.setSummary(article.getSummary());
-        vo.setCoverImage(article.getCoverImage());
-        vo.setStatus(article.getStatus());
-        vo.setViewCount(article.getViewCount());
-        vo.setLikeCount(article.getLikeCount());
-        vo.setIsLiked(false);
-        vo.setCreatedAt(article.getCreatedAt());
-        vo.setUpdatedAt(article.getUpdatedAt());
-        vo.setTags(tags);
-        vo.setCommentCount(commentCount);
+
+        ArticleVO vo = ArticleVO.builder()
+                .id(article.getId())
+                .title(article.getTitle())
+                .content(content)
+                .summary(article.getSummary())
+                .coverImage(article.getCoverImage())
+                .status(article.getStatus())
+                .author(null)
+                .tags(tags)
+                .viewCount(article.getViewCount())
+                .likeCount(article.getLikeCount())
+                .commentCount(commentCount)
+                .isLiked(false) // TODO: 获取当前用户是否点赞
+                .createdAt(article.getCreatedAt())
+                .updatedAt(article.getUpdatedAt())
+                .build();
+
         if (author != null) {
-            AuthorVO authorVO = new AuthorVO();
-            authorVO.setId(author.getId());
-            authorVO.setUsername(author.getUsername());
-            authorVO.setAvatar(author.getAvatar());
-            vo.setAuthor(authorVO);
+            AuthorVO a = AuthorVO.builder().id(author.getId())
+                    .username(author.getUsername())
+                    .avatar(author.getAvatar())
+                    .email(author.getEmail())
+                    .build();
+            vo.setAuthor(a);
         }
+
         return vo;
     }
 }

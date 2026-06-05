@@ -1,9 +1,12 @@
 package com.yvmoux.blog.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yvmoux.blog.converter.ArticleConverter;
+import com.yvmoux.blog.converter.TagConverter;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
 import com.yvmoux.blog.dto.response.ArticleVO;
@@ -53,40 +56,52 @@ public class ArticleServiceImpl implements ArticleService {
     private final UserLikeMapper userLikeMapper;
     private final RedisUtils redisUtils;
     private final ArticleConverter articleConverter;
+    private final TagConverter tagConverter;
 
     @Override
-    public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, Long tagId, String orderBy, String status, Long userId) {
+    public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId) {
+
+        // 条件查询
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
-        wrapper.eq("status", ArticleStatusEnum.PUBLISHED.name());
-
-        if (tagId != null) {
-            wrapper.exists("SELECT 1 FROM article_tag WHERE article_tag.article_id = article.id AND article_tag.tag_id = {0}", tagId);
+        // 筛选状态
+        if (status != null) {
+            wrapper.eq("status", status);
         }
-
-        if ("hot".equals(orderBy)) {
+        // 筛选作者
+        if (userId != null) {
+            wrapper.eq("author_id", userId);
+        }
+        // 筛选标签
+        if (tagName != null) {
+            wrapper.exists("select 1 from article_tag at " +
+                    "join tag t on at.tag_id = t.id " +
+                    "where at.article_id = article.id and t.name = {0}", tagName);
+        }
+        // 排序
+        if (orderBy.equals("hot")) {
             wrapper.orderByDesc("view_count");
-        } else if ("oldest".equals(orderBy)) {
-            wrapper.orderByAsc("created_at");
         } else {
             wrapper.orderByDesc("created_at");
         }
 
+        // 分页
         Page<Article> articlePage = new Page<>(page, pageSize);
         articlePage = articleMapper.selectPage(articlePage, wrapper);
 
         List<ArticleVO> records = new ArrayList<>();
-        for (Article article : articlePage.getRecords()) {
-            List<Tag> tags = tagMapper.selectByArticleId(article.getId());
-            List<TagVO> tagVOs = tags.stream()
-                    .map(t -> TagVO.builder().id(t.getId()).name(t.getName()).build())
-                    .collect(Collectors.toList());
-            User author = userMapper.selectById(article.getAuthorId());
-            int commentCount = commentMapper.countByArticleId(article.getId());
-            ArticleVO vo = articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
-            records.add(vo);
-        }
 
-        return new PageResult<>(records, articlePage.getTotal(), page, pageSize);
+        articlePage.getRecords().forEach(article -> {
+            ArticleVO articleVO = articleConverter.toArticleVO(
+                    article,
+                    userMapper.selectById(article.getAuthorId()),
+                    tagConverter.toTagVOList(tagMapper.selectByArticleId(article.getId())),
+                    commentMapper.countByArticleId(article.getId()),
+                    null
+            );
+            records.add(articleVO);
+        });
+
+        return new PageResult<>(records, articlePage.getTotal());
     }
 
     @Override
@@ -380,7 +395,7 @@ public class ArticleServiceImpl implements ArticleService {
             records.add(vo);
         }
 
-        return new PageResult<>(records, articlePage.getTotal(), page, pageSize);
+        return new PageResult<>(records, articlePage.getTotal());
     }
 
     private String extractPlainText(String markdown) {

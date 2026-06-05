@@ -68,7 +68,7 @@ public class CommentServiceImpl implements CommentService {
                     .build();
         }).collect(Collectors.toList());
 
-        return new PageResult<>(vos, result.getTotal(), page, pageSize);
+        return new PageResult<>(vos, result.getTotal());
     }
 
     @Override
@@ -133,7 +133,7 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> userComments = commentMapper.selectList(userCommentsWrapper);
 
         if (userComments.isEmpty()) {
-            return new PageResult<>(new ArrayList<>(), 0, page, pageSize);
+            return new PageResult<>(new ArrayList<>(), 0);
         }
 
         List<Long> userCommentIds = userComments.stream()
@@ -169,7 +169,7 @@ public class CommentServiceImpl implements CommentService {
                     .build();
         }).collect(Collectors.toList());
 
-        return new PageResult<>(vos, result.getTotal(), page, pageSize);
+        return new PageResult<>(vos, result.getTotal());
     }
 
     @Override
@@ -205,7 +205,7 @@ public class CommentServiceImpl implements CommentService {
                     .build();
         }).collect(Collectors.toList());
 
-        return new PageResult<>(vos, result.getTotal(), page, pageSize);
+        return new PageResult<>(vos, result.getTotal());
     }
 
     @Override

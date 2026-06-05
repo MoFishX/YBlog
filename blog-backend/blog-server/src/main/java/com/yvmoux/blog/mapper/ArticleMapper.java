@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
@@ -27,4 +29,6 @@ public interface ArticleMapper extends BaseMapper<Article> {
 
     @Select("SELECT COUNT(*) FROM article WHERE deleted_at IS NULL AND DATE(created_at) = CURDATE()")
     long countToday();
+
+//    List<Article> getListByCondition(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId);
 }

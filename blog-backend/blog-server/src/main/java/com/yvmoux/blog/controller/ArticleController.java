@@ -7,6 +7,7 @@ import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.PageResult;
+import com.yvmoux.blog.enums.ArticleStatusEnum;
 import com.yvmoux.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,11 +31,29 @@ public class ArticleController {
     public Result<PageResult<ArticleVO>> getList(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) Long tagId,
+            @RequestParam(required = false) String tagName,
             @RequestParam(defaultValue = "latest") String orderBy) {
-        log.debug("获取文章列表, page: {}, pageSize: {}, tagId: {}, orderBy: {}", page, pageSize, tagId, orderBy);
+        log.info("获取文章列表, page: {}, pageSize: {}, tagName: {}, orderBy: {}", page, pageSize, tagName, orderBy);
         if (pageSize > 100) pageSize = 100;
-        return Result.success(articleService.getArticleList(page, pageSize, tagId, orderBy, null, null));
+        return Result.success(articleService.getArticleList(page, pageSize, null, orderBy, ArticleStatusEnum.PUBLISHED.name(), null));
+    }
+
+    @Operation(summary = "热门文章排行榜")
+    @GetMapping("/hot")
+    public Result<List<ArticleVO>> hot(@RequestParam(defaultValue = "10") Integer limit) {
+        if (limit > 50) limit = 50;
+        return Result.success(articleService.getHotArticles(limit));
+    }
+
+    @Operation(summary = "我的文章列表")
+    @GetMapping("/mine")
+    @SaCheckLogin
+    public Result<PageResult<ArticleVO>> mine(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) String status) {
+        Long userId = StpUtil.getLoginIdAsLong();
+        return Result.success(articleService.getArticleList(page, pageSize, null, "latest", status, userId));
     }
 
     @Operation(summary = "文章详情")
@@ -79,23 +98,5 @@ public class ArticleController {
     public Result<ArticleVO> like(@PathVariable Long articleId) {
         Long userId = StpUtil.getLoginIdAsLong();
         return Result.success(articleService.toggleLike(articleId, userId));
-    }
-
-    @Operation(summary = "热门文章排行榜")
-    @GetMapping("/hot")
-    public Result<List<ArticleVO>> hot(@RequestParam(defaultValue = "10") Integer limit) {
-        if (limit > 50) limit = 50;
-        return Result.success(articleService.getHotArticles(limit));
-    }
-
-    @Operation(summary = "我的文章列表")
-    @GetMapping("/mine")
-    @SaCheckLogin
-    public Result<PageResult<ArticleVO>> mine(
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) String status) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        return Result.success(articleService.getArticleList(page, pageSize, null, "latest", status, userId));
     }
 }

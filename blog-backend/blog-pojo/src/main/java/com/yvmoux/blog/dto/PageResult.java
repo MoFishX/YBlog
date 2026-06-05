@@ -11,6 +11,4 @@ import java.util.List;
 public class PageResult<T> {
     private List<T> records;
     private long total;
-    private int page;
-    private int pageSize;
 }

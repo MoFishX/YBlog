@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.LoginResult;
+import com.yvmoux.blog.dto.response.LoginVO;
 import com.yvmoux.blog.dto.response.UserVO;
 import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.enums.ErrorCode;
@@ -45,8 +46,8 @@ public class AuthServiceImpl implements AuthService {
                 .password(BCrypt.hashpw(request.getPassword())) // 使用 BCrypt 对密码进行加密
                 .email(request.getEmail())
                 .avatar(null)
-                .role(RoleEnum.USER.toString())
-                .status(UserStatus.ACTIVE.toString())
+                .role(RoleEnum.USER.name())
+                .status(UserStatus.ACTIVE.name())
                 .articleCount(null)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -70,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD);
         }
 
-        if (UserStatus.BANNED.toString().equals(user.getStatus())) {
+        if (UserStatus.BANNED.name().equals(user.getStatus())) {
             throw new BusinessException(ErrorCode.USER_BANNED);
         }
 
@@ -80,21 +81,18 @@ public class AuthServiceImpl implements AuthService {
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
 
-        UserVO userVO = UserVO.builder()
+        LoginVO loginVO = LoginVO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .avatar(user.getAvatar())
                 .role(user.getRole())
-                .status(user.getStatus())
-                .articleCount(user.getArticleCount())
-                .createdAt(user.getCreatedAt())
                 .build();
 
         return LoginResult.builder()
                 .token(tokenInfo.getTokenValue())
-                .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
-                .user(userVO)
+                .expiresIn(tokenInfo.getTokenTimeout())
+                .user(loginVO)
                 .build();
     }
 
@@ -109,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
 
         return LoginResult.builder()
                 .token(tokenInfo.getTokenValue())
-                .expiresIn(tokenInfo.getTokenTimeout() * 1000L)
+                .expiresIn(tokenInfo.getTokenTimeout())
                 .build();
     }
 

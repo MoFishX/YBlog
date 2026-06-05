@@ -1,5 +1,6 @@
 package com.yvmoux.blog.dto;
 
+import com.yvmoux.blog.dto.response.LoginVO;
 import com.yvmoux.blog.dto.response.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,5 +14,5 @@ import lombok.NoArgsConstructor;
 public class LoginResult {
     private String token;
     private long expiresIn;
-    private UserVO user;
+    private LoginVO user;
 }

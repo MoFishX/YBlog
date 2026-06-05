@@ -52,8 +52,8 @@ const error = ref('')
 async function handleLogin() {
   loading.value = true; error.value = ''
   try {
-    const user = await authService.login(form.value)
-    userStore.setUser(user)
+    const res = await authService.login(form.value)
+    userStore.setAuth(res.token, res.expiresIn, res.user)
     router.push('/')
   } catch (e: any) { error.value = e?.response?.data?.message || '登录失败' }
   finally { loading.value = false }

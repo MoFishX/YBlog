@@ -58,7 +58,7 @@ public class AdminServiceImpl implements AdminService {
                 .createdAt(user.getCreatedAt())
                 .build()).collect(Collectors.toList());
 
-        return new PageResult<>(vos, result.getTotal(), page, pageSize);
+        return new PageResult<>(vos, result.getTotal());
     }
 
     @Override

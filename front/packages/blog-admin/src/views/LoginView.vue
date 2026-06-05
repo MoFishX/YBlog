@@ -52,7 +52,7 @@ async function handleLogin() {
   error.value = ''
   try {
     const res = await authService.login(form)
-    userStore.setAuth(res.token, res.user)
+    userStore.setAuth(res.token, res.expiresIn, res.user)
     const redirect = (route.query.redirect as string) || '/'
     router.push(redirect)
   } catch (e: any) {

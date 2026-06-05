@@ -13,9 +13,18 @@ export interface LoginResult {
   user: User
 }
 
+export interface RefreshResult {
+  token: string
+  expiresIn: number
+}
+
 export const authApi = {
   login(data: LoginParams): Promise<ApiResponse<LoginResult>> {
     return request.post('/auth/login', data)
+  },
+
+  refresh(): Promise<ApiResponse<RefreshResult>> {
+    return request.post('/auth/refresh')
   },
 
   logout(): Promise<ApiResponse<null>> {
