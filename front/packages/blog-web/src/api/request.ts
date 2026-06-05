@@ -34,43 +34,47 @@ function processQueue(error: any, token: string | null = null) {
   failedQueue = []
 }
 
+async function handle401Refresh(originalRequest: any) {
+  if (isRefreshing) {
+    return new Promise((resolve, reject) => {
+      failedQueue.push({ resolve, reject })
+    }).then((token) => {
+      originalRequest.headers.Authorization = `Bearer ${token}`
+      return instance(originalRequest)
+    })
+  }
+
+  originalRequest._retry = true
+  isRefreshing = true
+
+  try {
+    const userStore = useUserStore()
+    const res: any = await instance.post('/auth/refresh')
+    const { token, expiresIn } = res.data
+
+    userStore.setAuth(token, expiresIn, userStore.user!)
+    processQueue(null, token)
+
+    originalRequest.headers.Authorization = `Bearer ${token}`
+    return instance(originalRequest)
+  } catch (refreshError) {
+    processQueue(refreshError)
+    const userStore = useUserStore()
+    userStore.logout()
+    router.push({ name: 'Login' })
+    throw refreshError
+  } finally {
+    isRefreshing = false
+  }
+}
+
 instance.interceptors.response.use(
   (response) => response.data,
-  async (error) => {
-    const { config: originalRequest, response } = error
+  (error) => {
+    const { response } = error
 
-    if (response?.status === 401 && !(originalRequest as any)._retry && originalRequest.url !== '/auth/refresh') {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject })
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`
-          return instance(originalRequest)
-        })
-      }
-
-      ;(originalRequest as any)._retry = true
-      isRefreshing = true
-
-      try {
-        const userStore = useUserStore()
-        const res: any = await instance.post('/auth/refresh')
-        const { token, expiresIn } = res.data
-
-        userStore.setAuth(token, expiresIn, userStore.user!)
-        processQueue(null, token)
-
-        originalRequest.headers.Authorization = `Bearer ${token}`
-        return instance(originalRequest)
-      } catch (refreshError) {
-        processQueue(refreshError)
-        const userStore = useUserStore()
-        userStore.logout()
-        router.push({ name: 'Login' })
-        return Promise.reject(refreshError)
-      } finally {
-        isRefreshing = false
-      }
+    if (response?.status === 401 && !(error.config as any)._retry && error.config?.url !== '/auth/refresh') {
+      return handle401Refresh(error.config)
     }
 
     return Promise.reject(error)

@@ -31,8 +31,12 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 sa-token:
-  token-name: satoken
-  timeout: 9999999 # TODO 暂时为
+  token-name: token
+  timeout: 604800 # refresh token
+  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+  active-timeout: 10 # access token 每次请求自动续期
+  is-share: false # 在多人登录同一账号时，每次登录新建一个 token
+  is-concurrent: true # 是否允许同一账号多地同时登录
   is-read-header: false
   is-read-cookie: true
   is-write-header: false
@@ -40,6 +44,7 @@ sa-token:
   cookie:
     http-only: true
     same-site: lax
+  is-log: true
 
 
 springdoc:
