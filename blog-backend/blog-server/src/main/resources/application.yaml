@@ -30,17 +30,17 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
-jwt:
-  secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
-  expiration: 86400000
-
 sa-token:
-  token-name: Authorization
-  timeout: 86400
-  active-timeout: -1
-  is-concurrent: true
-  is-log: true
+  token-name: satoken
+  timeout: 300
+  is-read-header: false
+  is-read-cookie: true
+  is-write-header: false
   jwt-secret-key: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
+  cookie:
+    http-only: true
+    same-site: lax
+
 
 springdoc:
   swagger-ui:

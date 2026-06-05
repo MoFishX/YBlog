@@ -54,13 +54,13 @@
         <!-- Sa-Token（认证鉴权） -->
         <dependency>
             <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-spring-boot3-starter</artifactId>
-            <version>1.39.0</version>
+            <artifactId>sa-token-spring-boot4-starter</artifactId>
+            <version>1.45.0</version>
         </dependency>
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-jwt</artifactId>
-            <version>1.39.0</version>
+            <version>1.45.0</version>
         </dependency>
 
         <!-- Validation -->

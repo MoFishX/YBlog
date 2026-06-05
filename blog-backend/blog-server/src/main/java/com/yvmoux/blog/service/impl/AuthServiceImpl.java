@@ -11,6 +11,7 @@ import com.yvmoux.blog.dto.response.UserVO;
 import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.enums.RoleEnum;
+import com.yvmoux.blog.enums.UserStatus;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.service.AsyncTaskService;
@@ -31,27 +32,36 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void register(RegisterRequest request) {
+        // 检查用户名是否已存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", request.getUsername());
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setPassword(BCrypt.hashpw(request.getPassword()));
-        user.setEmail(request.getEmail());
-        user.setRole(RoleEnum.USER.name());
-        user.setStatus("ACTIVE");
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        // 创建用户
+        User user = User.builder()
+                .username(request.getUsername())
+                .password(BCrypt.hashpw(request.getPassword())) // 使用 BCrypt 对密码进行加密
+                .email(request.getEmail())
+                .avatar(null)
+                .role(RoleEnum.USER.toString())
+                .status(UserStatus.ACTIVE.toString())
+                .articleCount(null)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        // 插入用户到数据库
         userMapper.insert(user);
 
+        // 发送欢迎邮件
         asyncTaskService.sendWelcomeEmail(user.getEmail());
     }
 
     @Override
     public LoginResult login(LoginRequest request) {
+        // 根据 username 唯一约束查询用户，selectOne 确保最多返回一行
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", request.getUsername());
         User user = userMapper.selectOne(queryWrapper);
@@ -60,12 +70,12 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.WRONG_PASSWORD);
         }
 
-        if ("BANNED".equals(user.getStatus())) {
+        if (UserStatus.BANNED.toString().equals(user.getStatus())) {
             throw new BusinessException(ErrorCode.USER_BANNED);
         }
 
+        // 登录并将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
         StpUtil.login(user.getId());
-        // 将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
         StpUtil.getSession().set("role", user.getRole());
 
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();

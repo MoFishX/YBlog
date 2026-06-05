@@ -10,6 +10,7 @@ public class AsyncTaskService {
 
     @Async
     public void sendWelcomeEmail(String email) {
+        // TODO  发送邮件
         log.info("收到邮件任务: {}", email);
     }
 }

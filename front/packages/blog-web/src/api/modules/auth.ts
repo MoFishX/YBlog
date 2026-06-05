@@ -13,28 +13,13 @@ export interface RegisterParams {
   email?: string
 }
 
-export interface LoginResult {
-  token: string
-  expiresIn: number
-  user: User
-}
-
-export interface TokenResult {
-  token: string
-  expiresIn: number
-}
-
 export const authApi = {
-  login(data: LoginParams): Promise<ApiResponse<LoginResult>> {
+  login(data: LoginParams): Promise<ApiResponse<{ user: User }>> {
     return request.post('/auth/login', data)
   },
 
   register(data: RegisterParams): Promise<ApiResponse<null>> {
     return request.post('/auth/register', data)
-  },
-
-  refresh(): Promise<ApiResponse<TokenResult>> {
-    return request.post('/auth/refresh')
   },
 
   logout(): Promise<ApiResponse<null>> {

@@ -1,28 +1,36 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { storage } from '@/utils/storage'
+import { userService } from '@/services/userService'
 import type { User } from '@shared/types/user'
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(storage.get('user') || null)
-  const token = ref<string>(storage.get('token') || '')
+  const ready = ref(false)
 
-  const isLoggedIn = computed(() => !!token.value && !!user.value)
+  const isLoggedIn = computed(() => !!user.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
 
-  function setAuth(t: string, u: User) {
-    token.value = t
+  function setUser(u: User) {
     user.value = u
-    storage.set('token', t)
     storage.set('user', u)
   }
 
   function logout() {
-    token.value = ''
     user.value = null
-    storage.remove('token')
     storage.remove('user')
   }
 
-  return { user, token, isLoggedIn, isAdmin, setAuth, logout }
+  async function restore() {
+    try {
+      const u = await userService.getMe()
+      setUser(u as User)
+    } catch {
+      logout()
+    } finally {
+      ready.value = true
+    }
+  }
+
+  return { user, ready, isLoggedIn, isAdmin, setUser, logout, restore }
 })

@@ -1,19 +1,15 @@
 import { authApi } from '@/api/modules/auth'
-import type { LoginParams, RegisterParams, LoginResult } from '@/api/modules/auth'
+import type { LoginParams, RegisterParams } from '@/api/modules/auth'
+import type { User } from '@shared/types/user'
 
 export const authService = {
-  async login(params: LoginParams): Promise<LoginResult> {
+  async login(params: LoginParams): Promise<User> {
     const res = await authApi.login(params)
-    return res.data
+    return res.data.user
   },
 
   async register(params: RegisterParams): Promise<void> {
     await authApi.register(params)
-  },
-
-  async refresh(): Promise<{ token: string; expiresIn: number }> {
-    const res = await authApi.refresh()
-    return res.data
   },
 
   async logout(): Promise<void> {
