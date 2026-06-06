@@ -3,6 +3,7 @@ package com.yvmoux.blog.service.impl;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.LoginResult;
+import com.yvmoux.blog.dto.RefreshResult;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.response.LoginVO;
@@ -104,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LoginResult refreshToken(String refreshToken) {
+    public RefreshResult refreshToken(String refreshToken) {
         // 1. 验证 refresh_token 是否有效
         if (!jwtUtils.validateToken(refreshToken)) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
@@ -123,9 +124,8 @@ public class AuthServiceImpl implements AuthService {
         // 4. 签发新的 access_token
         String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
 
-        return LoginResult.builder()
+        return RefreshResult.builder()
                 .accessToken(accessToken)
-                .refreshToken(null)
                 .expiresIn(jwtUtils.getAccessTokenExpiration())
                 .build();
     }

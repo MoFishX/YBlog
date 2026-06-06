@@ -1,6 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import com.yvmoux.blog.dto.LoginResult;
+import com.yvmoux.blog.dto.RefreshResult;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
@@ -52,12 +53,12 @@ public class AuthController {
 
     @Operation(summary = "刷新Token")
     @PostMapping("/refresh")
-    public Result<LoginResult> refresh(@CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
+    public Result<RefreshResult> refresh(@CookieValue(name = REFRESH_TOKEN_COOKIE, required = false) String refreshToken) {
         if (refreshToken == null) {
             return Result.error(401, "缺少刷新令牌");
         }
         log.info("刷新Token");
-        LoginResult result = authService.refreshToken(refreshToken);
+        RefreshResult result = authService.refreshToken(refreshToken);
         log.info("刷新Token成功");
         return Result.success(result);
     }
