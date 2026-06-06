@@ -1,9 +1,9 @@
 package com.yvmoux.blog.service;
 
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
 import com.yvmoux.blog.dto.response.ArticleVO;
-import com.yvmoux.blog.dto.PageResult;
 
 import java.util.List;
 

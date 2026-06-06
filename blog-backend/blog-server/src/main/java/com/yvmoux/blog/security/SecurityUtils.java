@@ -1,7 +1,5 @@
 package com.yvmoux.blog.security;
 
-import com.yvmoux.blog.dto.Result;
-import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;

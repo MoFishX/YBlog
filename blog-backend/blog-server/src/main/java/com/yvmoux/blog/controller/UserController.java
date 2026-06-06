@@ -1,8 +1,8 @@
 package com.yvmoux.blog.controller;
 
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.request.ChangePasswordRequest;
 import com.yvmoux.blog.dto.request.UpdateProfileRequest;
-import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.UserVO;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.UserService;

@@ -1,9 +1,9 @@
 package com.yvmoux.blog.controller;
 
+import com.yvmoux.blog.dto.LoginResult;
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
-import com.yvmoux.blog.dto.Result;
-import com.yvmoux.blog.dto.LoginResult;
 import com.yvmoux.blog.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

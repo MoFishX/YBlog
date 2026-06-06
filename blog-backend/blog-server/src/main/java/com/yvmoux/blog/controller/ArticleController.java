@@ -1,22 +1,22 @@
 package com.yvmoux.blog.controller;
 
+import com.yvmoux.blog.dto.PageResult;
+import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
-import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.ArticleVO;
-import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.enums.ArticleStatusEnum;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Tag(name = "文章")

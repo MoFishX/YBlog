@@ -1,8 +1,8 @@
 package com.yvmoux.blog.service;
 
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.CommentCreateRequest;
 import com.yvmoux.blog.dto.response.CommentVO;
-import com.yvmoux.blog.dto.PageResult;
 
 public interface CommentService {
     PageResult<CommentVO> getCommentsByArticle(Long articleId, Integer page, Integer pageSize);

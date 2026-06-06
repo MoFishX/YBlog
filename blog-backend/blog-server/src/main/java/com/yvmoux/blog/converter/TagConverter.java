@@ -1,11 +1,7 @@
 package com.yvmoux.blog.converter;
 
-import com.yvmoux.blog.dto.response.ArticleVO;
-import com.yvmoux.blog.dto.response.AuthorVO;
 import com.yvmoux.blog.dto.response.TagVO;
-import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.entity.Tag;
-import com.yvmoux.blog.entity.User;
 import org.mapstruct.Mapper;
 
 import java.util.List;

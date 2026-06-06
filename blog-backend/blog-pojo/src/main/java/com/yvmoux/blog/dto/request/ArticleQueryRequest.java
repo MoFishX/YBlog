@@ -1,6 +1,5 @@
 package com.yvmoux.blog.dto.request;
 
-import lombok.Data;
 import lombok.Getter;
 
 @Getter
