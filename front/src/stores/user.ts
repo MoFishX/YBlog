@@ -6,7 +6,7 @@ import type { User } from '@/types/user'
 
 const KEYS = {
   accessToken: 'access_token',
-  tokenExpiry: 'token_expiry',
+  tokenIssuedAt: 'token_issued_at',
   expiresIn: 'expires_in',
   user: 'user'
 }
@@ -22,11 +22,12 @@ export const useUserStore = defineStore('user', () => {
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
 
   function setAuth(accessToken: string, exp: number, u: User) {
+    const now = Date.now()
     token.value = accessToken
     expiresIn.value = exp
     user.value = u
     storage.set(KEYS.accessToken, accessToken)
-    storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
+    storage.set(KEYS.tokenIssuedAt, now)
     storage.set(KEYS.expiresIn, exp)
     storage.set(KEYS.user, u)
   }
@@ -36,22 +37,19 @@ export const useUserStore = defineStore('user', () => {
     user.value = null
     expiresIn.value = 0
     storage.remove(KEYS.accessToken)
-    storage.remove(KEYS.tokenExpiry)
+    storage.remove(KEYS.tokenIssuedAt)
     storage.remove(KEYS.expiresIn)
     storage.remove(KEYS.user)
     refreshPromise = null
   }
 
-  function getExpiry(): number {
-    return storage.get<number>(KEYS.tokenExpiry) || 0
-  }
-
   function shouldRefresh(): boolean {
-    const expiry = getExpiry()
+    const issuedAt = storage.get<number>(KEYS.tokenIssuedAt) || 0
     const exp = expiresIn.value || storage.get<number>(KEYS.expiresIn) || 0
-    if (!expiry || !exp) return false
-    const threshold = exp * 1000 * 0.2
-    return Date.now() > expiry - threshold
+    if (!issuedAt || !exp) return false
+    const elapsed = Date.now() - issuedAt
+    const threshold = exp * 1000 * 0.8
+    return elapsed > threshold
   }
 
   async function refreshAccessToken(): Promise<string> {
@@ -64,7 +62,7 @@ export const useUserStore = defineStore('user', () => {
         token.value = accessToken
         expiresIn.value = exp
         storage.set(KEYS.accessToken, accessToken)
-        storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
+        storage.set(KEYS.tokenIssuedAt, Date.now())
         storage.set(KEYS.expiresIn, exp)
         if (u) {
           user.value = u

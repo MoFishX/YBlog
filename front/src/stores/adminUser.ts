@@ -6,7 +6,7 @@ import type { User } from '@/types/user'
 
 const KEYS = {
   accessToken: 'admin_access_token',
-  tokenExpiry: 'admin_token_expiry',
+  tokenIssuedAt: 'admin_token_issued_at',
   expiresIn: 'admin_expires_in',
   user: 'admin_user'
 }
@@ -26,7 +26,7 @@ export const useUserStore = defineStore('admin_user', () => {
     expiresIn.value = exp
     user.value = u
     storage.set(KEYS.accessToken, accessToken)
-    storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
+    storage.set(KEYS.tokenIssuedAt, Date.now())
     storage.set(KEYS.expiresIn, exp)
     storage.set(KEYS.user, u)
   }
@@ -36,22 +36,19 @@ export const useUserStore = defineStore('admin_user', () => {
     user.value = null
     expiresIn.value = 0
     storage.remove(KEYS.accessToken)
-    storage.remove(KEYS.tokenExpiry)
+    storage.remove(KEYS.tokenIssuedAt)
     storage.remove(KEYS.expiresIn)
     storage.remove(KEYS.user)
     refreshPromise = null
   }
 
-  function getExpiry(): number {
-    return storage.get<number>(KEYS.tokenExpiry) || 0
-  }
-
   function shouldRefresh(): boolean {
-    const expiry = getExpiry()
+    const issuedAt = storage.get<number>(KEYS.tokenIssuedAt) || 0
     const exp = expiresIn.value || storage.get<number>(KEYS.expiresIn) || 0
-    if (!expiry || !exp) return false
-    const threshold = exp * 1000 * 0.2
-    return Date.now() > expiry - threshold
+    if (!issuedAt || !exp) return false
+    const elapsed = Date.now() - issuedAt
+    const threshold = exp * 1000 * 0.8
+    return elapsed > threshold
   }
 
   async function refreshAccessToken(): Promise<string> {
@@ -64,7 +61,7 @@ export const useUserStore = defineStore('admin_user', () => {
         token.value = accessToken
         expiresIn.value = exp
         storage.set(KEYS.accessToken, accessToken)
-        storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
+        storage.set(KEYS.tokenIssuedAt, Date.now())
         storage.set(KEYS.expiresIn, exp)
         return accessToken
       } finally {
