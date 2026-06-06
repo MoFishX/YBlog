@@ -15,7 +15,7 @@ public interface ArticleService {
     /**
      * 获取文章详情
      */
-    ArticleVO getArticleDetail(Long articleId);
+    ArticleVO getArticleDetail(Long articleId, Long currentUserId);
     /**
      * 创建文章
      */

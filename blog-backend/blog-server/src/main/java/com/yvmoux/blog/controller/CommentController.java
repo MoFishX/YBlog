@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import com.yvmoux.blog.dto.request.CommentCreateRequest;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.CommentVO;
@@ -40,7 +40,7 @@ public class CommentController {
     @SaCheckLogin
     public Result<CommentVO> create(@PathVariable Long articleId,
                                     @Valid @RequestBody CommentCreateRequest request) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("发表评论, userId: {}, articleId: {}", userId, articleId);
         CommentVO comment = commentService.createComment(userId, articleId, request);
         log.info("发表评论成功, commentId: {}", comment.getId());
@@ -51,8 +51,8 @@ public class CommentController {
     @DeleteMapping("/comments/{commentId}")
     @SaCheckLogin
     public Result<Void> delete(@PathVariable Long commentId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        boolean isAdmin = StpUtil.hasRole("ADMIN");
+        Long userId = StpKit.getLoginId();
+        boolean isAdmin = StpKit.isAdmin();
         log.info("删除评论, userId: {}, commentId: {}, isAdmin: {}", userId, commentId, isAdmin);
         commentService.deleteComment(commentId, userId, isAdmin);
         log.info("删除评论成功, commentId: {}", commentId);
@@ -66,7 +66,7 @@ public class CommentController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "0") Integer unreadOnly) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("获取评论回复, userId: {}, page: {}, pageSize: {}, unreadOnly: {}", userId, page, pageSize, unreadOnly);
         Result<PageResult<CommentVO>> result = Result.success(commentService.getReplies(userId, page, pageSize, unreadOnly == 1));
         log.info("获取评论回复成功, total: {}", result.getData().getTotal());

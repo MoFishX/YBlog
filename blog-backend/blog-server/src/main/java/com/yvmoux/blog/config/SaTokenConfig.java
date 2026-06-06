@@ -4,7 +4,7 @@ import cn.dev33.satoken.interceptor.SaInterceptor;
 import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
 import cn.dev33.satoken.router.SaRouter;
 import cn.dev33.satoken.stp.StpLogic;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -35,10 +35,10 @@ public class SaTokenConfig implements WebMvcConfigurer {
                     SaRouter.match("/tags").stop();
 
                     // 管理后台需要管理员角色
-                    SaRouter.match("/admin/**", r -> StpUtil.checkRole("ADMIN"));
+                    SaRouter.match("/admin/**", r -> StpKit.checkRole("ADMIN"));
 
                     // 其余需要登录
-                    SaRouter.match("/**", r -> StpUtil.checkLogin());
+                    SaRouter.match("/**", r -> StpKit.checkLogin());
                 }))
                 .addPathPatterns("/**");
     }

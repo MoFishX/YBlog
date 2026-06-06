@@ -1,7 +1,7 @@
 package com.yvmoux.blog.service.impl;
 
 import cn.dev33.satoken.stp.SaTokenInfo;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.request.LoginRequest;
@@ -75,10 +75,9 @@ public class AuthServiceImpl implements AuthService {
         }
 
         // 登录并将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
-        StpUtil.login(user.getId());
-        StpUtil.getSession().set("role", user.getRole());
+        StpKit.login(user.getId(), user.getRole());
 
-        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+        SaTokenInfo tokenInfo = StpKit.getTokenInfo();
 
         LoginVO loginVO = LoginVO.builder()
                 .id(user.getId())
@@ -102,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.USER_NOT_FOUND);
         }
 
-        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+        SaTokenInfo tokenInfo = StpKit.getTokenInfo();
 
         return LoginResult.builder()
                 .token(tokenInfo.getTokenValue())
@@ -112,6 +111,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String token) {
-        StpUtil.logout();
+        StpKit.logout();
     }
 }

@@ -29,7 +29,7 @@ import com.yvmoux.blog.mapper.UserLikeMapper;
 import com.yvmoux.blog.mapper.UserMapper;
 import com.yvmoux.blog.service.ArticleService;
 import com.yvmoux.blog.utils.RedisUtils;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -104,18 +104,16 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public ArticleVO getArticleDetail(Long articleId) {
+    public ArticleVO getArticleDetail(Long articleId, Long currentUserId) {
         // 获取对象
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        Long currentUserId = StpUtil.isLogin() ? StpUtil.getLoginIdAsLong() : null;
-
         // 禁止非管理员访问草稿文章
         boolean isAuthor = currentUserId != null && currentUserId.equals(article.getAuthorId());
-        boolean isAdmin = currentUserId != null && StpUtil.hasRole(RoleEnum.ADMIN.name());
+        boolean isAdmin = currentUserId != null && StpKit.isAdmin();
 
         if (!isAuthor && !isAdmin) {
             if (ArticleStatusEnum.DRAFT.name().equals(article.getStatus())) {
@@ -228,7 +226,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        boolean isAdmin = StpUtil.hasRole("ADMIN");
+        boolean isAdmin = StpKit.isAdmin();
         if (!article.getAuthorId().equals(userId) && !isAdmin) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }

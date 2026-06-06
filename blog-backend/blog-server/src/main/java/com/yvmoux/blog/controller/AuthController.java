@@ -1,6 +1,6 @@
 package com.yvmoux.blog.controller;
 
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.Result;
@@ -43,7 +43,7 @@ public class AuthController {
 //    @Operation(summary = "刷新Token")
 //    @PostMapping("/refresh")
 //    public Result<LoginResult> refresh() {
-//        Long userId = StpUtil.getLoginIdAsLong();
+//        Long userId = StpKit.getLoginId();
 //        log.info("刷新Token, userId: {}", userId);
 //        LoginResult result = authService.refreshToken(userId);
 //        log.info("刷新Token成功, userId: {}", userId);

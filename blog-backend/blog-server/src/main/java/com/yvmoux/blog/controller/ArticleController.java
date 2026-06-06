@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
 import com.yvmoux.blog.dto.Result;
@@ -58,7 +58,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String status) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("获取我的文章列表, userId: {}, page: {}, pageSize: {}, status: {}", userId, page, pageSize, status);
         Result<PageResult<ArticleVO>> result = Result.success(articleService.getArticleList(page, pageSize, null, "latest", status, userId));
         log.info("获取我的文章列表成功, total: {}", result.getData().getTotal());
@@ -68,8 +68,9 @@ public class ArticleController {
     @Operation(summary = "文章详情")
     @GetMapping("/{articleId}")
     public Result<ArticleVO> getDetail(@PathVariable Long articleId) {
+        Long userId = StpKit.getLoginId();
         log.info("获取文章详情, articleId: {}", articleId);
-        Result<ArticleVO> result = Result.success(articleService.getArticleDetail(articleId));
+        Result<ArticleVO> result = Result.success(articleService.getArticleDetail(articleId, userId));
         log.info("获取文章详情成功, articleId: {}", articleId);
         return result;
     }
@@ -78,7 +79,7 @@ public class ArticleController {
     @PostMapping
     @SaCheckLogin
     public Result<ArticleVO> create(@Valid @RequestBody ArticleCreateRequest request) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("发布文章, userId: {}, title: {}", userId, request.getTitle());
         ArticleVO article = articleService.createArticle(userId, request);
         log.info("发布文章成功, articleId: {}", article.getId());
@@ -90,7 +91,7 @@ public class ArticleController {
     @SaCheckLogin
     public Result<ArticleVO> update(@PathVariable Long articleId,
                                     @Valid @RequestBody ArticleUpdateRequest request) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("更新文章, userId: {}, articleId: {}", userId, articleId);
         ArticleVO article = articleService.updateArticle(articleId, userId, request);
         log.info("更新文章成功, articleId: {}", article.getId());
@@ -101,8 +102,8 @@ public class ArticleController {
     @DeleteMapping("/{articleId}")
     @SaCheckLogin
     public Result<Void> delete(@PathVariable Long articleId) {
-        Long userId = StpUtil.getLoginIdAsLong();
-        boolean isAdmin = StpUtil.hasRole("ADMIN");
+        Long userId = StpKit.getLoginId();
+        boolean isAdmin = StpKit.isAdmin();
         log.info("删除文章, userId: {}, articleId: {}, isAdmin: {}", userId, articleId, isAdmin);
         articleService.deleteArticle(articleId, userId, isAdmin);
         log.info("删除文章成功, articleId: {}", articleId);
@@ -113,7 +114,7 @@ public class ArticleController {
     @PostMapping("/{articleId}/like")
     @SaCheckLogin
     public Result<ArticleVO> like(@PathVariable Long articleId) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("点赞/取消点赞, userId: {}, articleId: {}", userId, articleId);
         Result<ArticleVO> result = Result.success(articleService.toggleLike(articleId, userId));
         log.info("点赞/取消点赞成功, isLiked: {}", result.getData().getIsLiked());

@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
 
 import cn.dev33.satoken.annotation.SaCheckLogin;
-import cn.dev33.satoken.stp.StpUtil;
+import com.yvmoux.blog.utils.StpKit;
 import com.yvmoux.blog.dto.request.ChangePasswordRequest;
 import com.yvmoux.blog.dto.request.UpdateProfileRequest;
 import com.yvmoux.blog.dto.Result;
@@ -27,7 +27,7 @@ public class UserController {
     @GetMapping("/me")
     @SaCheckLogin
     public Result<UserVO> getCurrentUser() {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("获取当前用户信息, userId: {}", userId);
         Result<UserVO> result = Result.success(userService.getCurrentUser(userId));
         log.info("获取当前用户信息成功, userId: {}", userId);
@@ -47,7 +47,7 @@ public class UserController {
     @PutMapping("/me")
     @SaCheckLogin
     public Result<UserVO> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("更新个人资料, userId: {}", userId);
         Result<UserVO> result = Result.success("更新成功", userService.updateProfile(userId, request));
         log.info("更新个人资料成功, userId: {}", userId);
@@ -58,7 +58,7 @@ public class UserController {
     @PutMapping("/me/password")
     @SaCheckLogin
     public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
-        Long userId = StpUtil.getLoginIdAsLong();
+        Long userId = StpKit.getLoginId();
         log.info("修改密码, userId: {}", userId);
         userService.changePassword(userId, request);
         log.info("修改密码成功, userId: {}", userId);
