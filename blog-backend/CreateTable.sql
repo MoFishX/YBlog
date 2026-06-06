@@ -7,7 +7,6 @@ create table user (
                       avatar        varchar(255)                                       comment '头像URL',
                       role          varchar(20)  not null default 'USER'               comment '角色：USER普通用户 / ADMIN管理员',
                       status        varchar(20)  not null default 'ACTIVE'             comment '状态：ACTIVE正常 / BANNED封禁',
-                      article_count int          not null default 0                    comment '文章数',
                       created_at    datetime     not null                               comment '创建时间',
                       updated_at    datetime     not null                               comment '更新时间',
                       primary key (id),

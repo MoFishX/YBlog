@@ -32,8 +32,6 @@ public class User {
 
     private String status;
 
-    private Integer articleCount;
-
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
