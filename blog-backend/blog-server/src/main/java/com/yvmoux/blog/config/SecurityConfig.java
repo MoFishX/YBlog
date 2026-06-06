@@ -50,7 +50,7 @@ public class SecurityConfig {
                         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**",
                         "/articles", "/articles/*", "/articles/hot",
                         "/articles/*/comments", "/articles/*/view",
-                        "/user/*", "/tags"
+                        "/tags"
                 ).permitAll()
                 // 后台管理需要 ADMIN 角色
                 .requestMatchers("/admin/**").hasRole("ADMIN")

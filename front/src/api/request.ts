@@ -32,12 +32,11 @@ function processQueue(error: unknown, token: string | null = null) {
   pendingQueue = []
 }
 
-instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (config.url?.includes('/auth/refresh')) return config
   const userStore = useUserStore()
-  const validToken = await userStore.getValidToken()
-  if (validToken) {
-    config.headers.Authorization = `Bearer ${validToken}`
+  if (userStore.token) {
+    config.headers.Authorization = `Bearer ${userStore.token}`
   }
   return config
 })

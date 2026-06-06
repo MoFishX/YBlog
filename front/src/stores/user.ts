@@ -15,7 +15,6 @@ let refreshPromise: Promise<string> | null = null
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(storage.get(KEYS.user) || null)
   const token = ref<string>(storage.get(KEYS.accessToken) || '')
-  const ready = ref(false)
 
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
@@ -35,16 +34,6 @@ export const useUserStore = defineStore('user', () => {
     storage.remove(KEYS.tokenExpiry)
     storage.remove(KEYS.user)
     refreshPromise = null
-  }
-
-  function getExpiry(): number {
-    return storage.get<number>(KEYS.tokenExpiry) || 0
-  }
-
-  function isTokenExpired(): boolean {
-    const expiry = getExpiry()
-    if (!expiry) return false
-    return Date.now() > expiry - 60 * 1000
   }
 
   async function refreshAccessToken(): Promise<string> {
@@ -68,36 +57,14 @@ export const useUserStore = defineStore('user', () => {
     return refreshPromise
   }
 
-  async function getValidToken(): Promise<string | null> {
-    if (!token.value) return null
-    if (isTokenExpired()) {
-      try {
-        return await refreshAccessToken()
-      } catch {
-        logout()
-        return null
-      }
-    }
-    return token.value
-  }
-
-  async function restore() {
-    try {
-      if (token.value) {
-        if (isTokenExpired()) {
-          await refreshAccessToken()
-        }
-      }
-    } catch {
-      logout()
-    } finally {
-      ready.value = true
+  function restore() {
+    if (token.value && !user.value) {
+      refreshAccessToken().catch(() => logout())
     }
   }
 
   return {
-    user, token, ready, isLoggedIn, isAdmin,
-    setAuth, logout, restore, getValidToken,
-    refreshAccessToken
+    user, token, isLoggedIn, isAdmin,
+    setAuth, logout, restore, refreshAccessToken
   }
 })

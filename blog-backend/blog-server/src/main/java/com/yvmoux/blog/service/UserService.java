@@ -5,7 +5,6 @@ import com.yvmoux.blog.dto.request.UpdateProfileRequest;
 import com.yvmoux.blog.dto.response.UserVO;
 
 public interface UserService {
-    UserVO getCurrentUser(Long userId);
     UserVO getUserById(Long userId);
     UserVO updateProfile(Long userId, UpdateProfileRequest request);
     void changePassword(Long userId, ChangePasswordRequest request);

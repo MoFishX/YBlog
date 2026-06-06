@@ -25,18 +25,6 @@ public class UserServiceImpl implements UserService {
     private final UserConverter userConverter;
 
     @Override
-    public UserVO getCurrentUser(Long userId) {
-        // 获取用户
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        // 构建返回值
-        return userConverter.toUserVO(user);
-    }
-
-    @Override
     public UserVO getUserById(Long userId) {
         // 获取用户
         User user = userMapper.selectById(userId);

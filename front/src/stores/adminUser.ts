@@ -36,16 +36,6 @@ export const useUserStore = defineStore('admin_user', () => {
     refreshPromise = null
   }
 
-  function getExpiry(): number {
-    return storage.get<number>(KEYS.tokenExpiry) || 0
-  }
-
-  function isTokenExpired(): boolean {
-    const expiry = getExpiry()
-    if (!expiry) return false
-    return Date.now() > expiry - 60 * 1000
-  }
-
   async function refreshAccessToken(): Promise<string> {
     if (refreshPromise) return refreshPromise
 
@@ -67,28 +57,14 @@ export const useUserStore = defineStore('admin_user', () => {
     return refreshPromise
   }
 
-  async function getValidToken(): Promise<string | null> {
-    if (!token.value) return null
-    if (isTokenExpired()) {
-      try {
-        return await refreshAccessToken()
-      } catch {
-        logout()
-        return null
-      }
-    }
-    return token.value
-  }
-
   function restore() {
-    if (!token.value) {
-      logout()
+    if (token.value && !user.value) {
+      refreshAccessToken().catch(() => logout())
     }
   }
 
   return {
     user, token, isLoggedIn, isAdmin,
-    setAuth, logout, restore, getValidToken,
-    refreshAccessToken
+    setAuth, logout, restore, refreshAccessToken
   }
 })

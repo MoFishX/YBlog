@@ -24,19 +24,9 @@ public class UserController {
     private final UserService userService;
     private final SecurityUtils securityUtils;
 
-    @Operation(summary = "获取当前登录用户信息")
-    @GetMapping("/me")
-    @PreAuthorize("isAuthenticated()")
-    public Result<UserVO> getCurrentUser() {
-        Long userId = securityUtils.getCurrentUserId();
-        log.info("获取当前用户信息, userId: {}", userId);
-        Result<UserVO> result = Result.success(userService.getCurrentUser(userId));
-        log.info("获取当前用户信息成功, userId: {}", userId);
-        return result;
-    }
-
-    @Operation(summary = "获取指定用户公开信息")
+    @Operation(summary = "获取指定用户信息")
     @GetMapping("/{userId}")
+    @PreAuthorize("isAuthenticated()")
     public Result<UserVO> getUserById(@PathVariable Long userId) {
         log.info("获取用户公开信息, userId: {}", userId);
         Result<UserVO> result = Result.success(userService.getUserById(userId));
