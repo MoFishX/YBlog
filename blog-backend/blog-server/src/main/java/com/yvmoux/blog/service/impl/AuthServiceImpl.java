@@ -6,17 +6,22 @@ import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.LoginResult;
 import com.yvmoux.blog.dto.response.LoginVO;
-import com.yvmoux.blog.dto.response.UserVO;
 import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.enums.RoleEnum;
 import com.yvmoux.blog.enums.UserStatus;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.UserMapper;
+import com.yvmoux.blog.security.AppUserDetails;
 import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.service.AuthService;
+import com.yvmoux.blog.utils.JwtUtils;
+import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,20 +33,21 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserMapper userMapper;
     private final AsyncTaskService asyncTaskService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtils jwtUtils;
+    private final RedisUtils redisUtils;
 
     @Override
     public void register(RegisterRequest request) {
-        // 检查用户名是否已存在
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", request.getUsername());
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
 
-        // 创建用户
         User user = User.builder()
                 .username(request.getUsername())
-                .password(BCrypt.hashpw(request.getPassword())) // 使用 BCrypt 对密码进行加密
+                .password(BCrypt.hashpw(request.getPassword()))
                 .email(request.getEmail())
                 .avatar(null)
                 .role(RoleEnum.USER.name())
@@ -50,91 +56,64 @@ public class AuthServiceImpl implements AuthService {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        // 插入用户到数据库
         userMapper.insert(user);
-
-        // 发送欢迎邮件
         asyncTaskService.sendWelcomeEmail(user.getEmail());
     }
 
     @Override
     public LoginResult login(LoginRequest request) {
-        // 根据 username 唯一约束查询用户，selectOne 确保最多返回一行
-        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("username", request.getUsername());
-        User user = userMapper.selectOne(queryWrapper);
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-        if (user == null || !BCrypt.checkpw(request.getPassword(), user.getPassword())) {
-            throw new BusinessException(ErrorCode.WRONG_PASSWORD);
-        }
+        AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
 
-        if (UserStatus.BANNED.name().equals(user.getStatus())) {
-            throw new BusinessException(ErrorCode.USER_BANNED);
-        }
-//
-//        // 登录
-//        if (request.getRememberMe() != null) {
-//            StpUtil.login(user.getId(), new SaLoginParameter()
-//                    .setIsLastingCookie(request.getRememberMe()) // 持久化cookie
-//            );
-//        } else {
-//            StpUtil.login(user.getId());
-//        }
-//
-//        // 生成访问令牌和刷新令牌
-//        String accessToken = StpUtil.getTokenValue();
-//        String refreshToken = SaTempUtil.createToken(user.getId(), 2592000L);
-//        StpUtil.getSession().set("role", user.getRole());
-
+        String accessToken = jwtUtils.generateAccessToken(
+                userDetails.getUserId(), userDetails.getUsername(), userDetails.getAuthorities()
+                        .iterator().next().getAuthority().replace("ROLE_", ""));
+        String refreshToken = jwtUtils.generateRefreshToken(userDetails.getUserId());
 
         LoginVO loginVO = LoginVO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .avatar(user.getAvatar())
-                .role(user.getRole())
+                .id(userDetails.getUserId())
+                .username(userDetails.getUsername())
+                .email("")
+                .avatar(null)
+                .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
                 .build();
 
         return LoginResult.builder()
-//                .accessToken(accessToken)
-//                .refreshToken(refreshToken)
-//                .expiresIn(StpUtil.getTokenInfo().getTokenTimeout())
-                .expiresIn(224000L)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiresIn(86400L)
                 .user(loginVO)
                 .build();
     }
 
     @Override
     public LoginResult refreshToken(String refreshToken) {
-//        try {
-//            // 验证
-//            Object userId = SaTempUtil.parseToken(refreshToken);
-//            if (userId == null) {
-//                throw new BusinessException(ErrorCode.REFRESH_TOKEN_BLACKLISTED);
-//            }
-//            // 生成新的的 AccessToken
-//            String accessToken = StpUtil.createLoginSession(userId);
-//
-//            // 刷新 RefreshToken 的有效期
-//            SaTempUtil.saveToken(refreshToken, userId, 2592000L);
-//
-//            // 返回
-//            return LoginResult.builder()
-//                    .accessToken(accessToken)
-//                    .refreshToken(null)
-//                    .expiresIn(StpUtil.getTokenInfo().getTokenTimeout())
-//                    .user(null)
-//                    .build();
-//        } catch (Exception e) {
-//            throw new BusinessException(ErrorCode.REFRESH_TOKEN_BLACKLISTED);
-//        }
-        return null;
+        if (!jwtUtils.validateToken(refreshToken)) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String subject = jwtUtils.extractUsername(refreshToken);
+        Long userId;
+        try {
+            userId = Long.parseLong(subject);
+        } catch (NumberFormatException e) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String accessToken = jwtUtils.generateAccessToken(userId, subject, "USER");
+        return LoginResult.builder()
+                .accessToken(accessToken)
+                .refreshToken(null)
+                .expiresIn(86400L)
+                .build();
     }
 
     @Override
     public void logout(String token) {
-        // 核心代码：一键销毁当前用户的AccessToken和RefreshToken
-        // 会自动删除Redis中的Token信息，解除用户与Token的关联
-//        StpKit.logout();
+        if (token != null && jwtUtils.validateToken(token)) {
+            redisUtils.set("blacklist:token:" + token, "1", 86400, java.util.concurrent.TimeUnit.SECONDS);
+        }
     }
 }

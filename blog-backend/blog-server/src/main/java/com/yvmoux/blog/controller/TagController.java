@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class TagController {
 
     @Operation(summary = "创建标签")
     @PostMapping
-//    @SaCheckRole("ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result<TagVO> create(@Valid @RequestBody TagRequest request) {
         log.info("创建标签, name: {}", request.getName());
         TagVO tag = tagService.createTag(request.getName());
@@ -51,7 +52,7 @@ public class TagController {
 
     @Operation(summary = "更新标签")
     @PutMapping("/{tagId}")
-//    @SaCheckRole("ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result<TagVO> update(@PathVariable Long tagId, @Valid @RequestBody TagRequest request) {
         log.info("更新标签, tagId: {}, name: {}", tagId, request.getName());
         TagVO tag = tagService.updateTag(tagId, request.getName());
@@ -61,7 +62,7 @@ public class TagController {
 
     @Operation(summary = "删除标签")
     @DeleteMapping("/{tagId}")
-//    @SaCheckRole("ADMIN")
+    @PreAuthorize("hasRole('ADMIN')")
     public Result<Void> delete(@PathVariable Long tagId) {
         log.info("删除标签, tagId: {}", tagId);
         tagService.deleteTag(tagId);

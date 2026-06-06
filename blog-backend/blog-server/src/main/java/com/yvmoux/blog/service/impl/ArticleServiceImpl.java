@@ -27,6 +27,7 @@ import com.yvmoux.blog.mapper.CommentMapper;
 import com.yvmoux.blog.mapper.TagMapper;
 import com.yvmoux.blog.mapper.UserLikeMapper;
 import com.yvmoux.blog.mapper.UserMapper;
+import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleTagMapper articleTagMapper;
     private final UserLikeMapper userLikeMapper;
     private final RedisUtils redisUtils;
+    private final SecurityUtils securityUtils;
     private final ArticleConverter articleConverter;
     private final TagConverter tagConverter;
 
@@ -112,8 +114,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 禁止非管理员访问草稿文章
         boolean isAuthor = currentUserId != null && currentUserId.equals(article.getAuthorId());
-//        boolean isAdmin = currentUserId != null && StpKit.isAdmin();
-        boolean isAdmin = currentUserId != null && true;
+        boolean isAdmin = currentUserId != null && securityUtils.isAdmin();
 
         if (!isAuthor && !isAdmin) {
             if (ArticleStatusEnum.DRAFT.name().equals(article.getStatus())) {
@@ -226,8 +227,7 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-//        boolean isAdmin = StpKit.isAdmin();
-        boolean isAdmin = true;
+        boolean isAdmin = securityUtils.isAdmin();
         if (!article.getAuthorId().equals(userId) && !isAdmin) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
