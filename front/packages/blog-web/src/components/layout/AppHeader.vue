@@ -22,6 +22,14 @@
             </span>
             {{ userStore.user.username }}
           </RouterLink>
+          <a
+            v-if="userStore.isAdmin"
+            :href="adminUrl"
+            target="_blank"
+            class="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+          >
+            管理后台
+          </a>
           <button @click="handleLogout" class="text-sm text-gray-400 hover:text-gray-700 transition-colors">
             退出
           </button>
@@ -60,6 +68,15 @@
               <RouterLink :to="`/user/${userStore.user.id}`" @click="mobileOpen = false" class="block px-4 py-3 text-sm text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
                 个人中心
               </RouterLink>
+              <a
+                v-if="userStore.isAdmin"
+                :href="adminUrl"
+                target="_blank"
+                @click="mobileOpen = false"
+                class="block px-4 py-3 text-sm text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                管理后台
+              </a>
               <button @click="handleLogout" class="block w-full text-left px-4 py-3 text-sm text-gray-500 rounded-md hover:bg-gray-50 transition-colors">
                 退出登录
               </button>
@@ -88,6 +105,7 @@ import { authService } from '@/services/authService'
 const userStore = useUserStore()
 const router = useRouter()
 const mobileOpen = ref(false)
+const adminUrl = import.meta.env.VITE_ADMIN_URL || 'http://localhost:5174'
 
 async function handleLogout() {
   mobileOpen.value = false
