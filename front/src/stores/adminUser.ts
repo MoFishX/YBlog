@@ -108,9 +108,11 @@ export const useUserStore = defineStore('admin_user', () => {
     return token.value
   }
 
-  function restore() {
-    if (token.value && !user.value) {
-      refreshAccessToken().catch(() => logout())
+  async function restore() {
+    if (!token.value) {
+      try { await refreshAccessToken() } catch { /* 静默忽略 */ }
+    } else if (!user.value) {
+      try { await refreshAccessToken() } catch { logout() }
     }
     if (isLoggedIn.value) scheduleNextRefresh()
   }

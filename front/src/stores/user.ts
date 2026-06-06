@@ -116,13 +116,15 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function restore() {
-    if (!token.value) return
     // 清理明显损坏的 user 数据（如被旧 refresh 写入的 undefined）
     if (user.value && !user.value.username) {
       user.value = null
       storage.remove(KEYS.user)
     }
-    if (shouldRefresh() || !user.value) {
+    if (!token.value) {
+      // 主动试探：refreshToken cookie 可能仍然有效
+      try { await refreshAccessToken() } catch { /* 静默忽略 */ }
+    } else if (shouldRefresh() || !user.value) {
       try { await refreshAccessToken() } catch { logout() }
     }
     if (isLoggedIn.value) scheduleNextRefresh()
