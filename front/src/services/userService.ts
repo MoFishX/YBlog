@@ -2,11 +2,6 @@ import { userApi } from '@/api/modules/user'
 import type { User } from '@/types/user'
 
 export const userService = {
-  async getMe() {
-    const res = await userApi.getMe()
-    return res.data
-  },
-
   async getUser(userId: number) {
     const res = await userApi.getUser(userId)
     return res.data

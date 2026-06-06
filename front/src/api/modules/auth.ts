@@ -19,6 +19,11 @@ export interface LoginResult {
   user: User
 }
 
+export interface RefreshResult {
+  accessToken: string
+  expiresIn: number
+}
+
 export const authApi = {
   login(data: LoginParams): Promise<ApiResponse<LoginResult>> {
     return request.post('/auth/login', data)
@@ -28,7 +33,7 @@ export const authApi = {
     return request.post('/auth/register', data)
   },
 
-  refresh(): Promise<ApiResponse<LoginResult>> {
+  refresh(): Promise<ApiResponse<RefreshResult>> {
     return request.post('/auth/refresh')
   },
 

@@ -5,8 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:web": "vite --open index.html",
-    "dev:admin": "vite --open admin.html",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview"
   },

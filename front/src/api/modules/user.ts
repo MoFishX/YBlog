@@ -3,10 +3,6 @@ import type { ApiResponse, PageResult } from '@/types/api'
 import type { User } from '@/types/user'
 
 export const userApi = {
-  getMe(): Promise<ApiResponse<User & { articleCount: number; createdAt: string }>> {
-    return request.get('/user/me')
-  },
-
   getUser(userId: number): Promise<ApiResponse<Pick<User, 'id' | 'username' | 'avatar'> & { articleCount: number; createdAt: string }>> {
     return request.get(`/user/${userId}`)
   },

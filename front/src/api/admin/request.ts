@@ -33,11 +33,13 @@ function processQueue(error: unknown, token: string | null = null) {
   pendingQueue = []
 }
 
-instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+instance.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   if (config.url?.includes('/auth/refresh')) return config
   const userStore = useUserStore()
-  if (userStore.token) {
-    config.headers.Authorization = `Bearer ${userStore.token}`
+  if (!userStore.token) return config
+  const validToken = await userStore.getValidToken()
+  if (validToken) {
+    config.headers.Authorization = `Bearer ${validToken}`
   }
   return config
 })
@@ -66,9 +68,9 @@ instance.interceptors.response.use(
       config._retry = true
 
       try {
-        const token = await userStore.refreshAccessToken()
-        processQueue(null, token)
-        config.headers.Authorization = `Bearer ${token}`
+        const newToken = await userStore.refreshAccessToken()
+        processQueue(null, newToken)
+        config.headers.Authorization = `Bearer ${newToken}`
         return instance(config)
       } catch {
         processQueue(new Error('refresh failed'))
