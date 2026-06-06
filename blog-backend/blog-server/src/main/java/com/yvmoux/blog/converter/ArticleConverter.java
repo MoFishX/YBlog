@@ -5,14 +5,14 @@ import com.yvmoux.blog.dto.response.AuthorVO;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.entity.User;
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
-public interface ArticleConverter {
+@Component
+public class ArticleConverter {
 
-    default ArticleVO toArticleVO(Article article, User author, List<TagVO> tags, Integer commentCount, String content) {
+    public ArticleVO toArticleVO(Article article, User author, List<TagVO> tags, Integer commentCount, String content) {
 
         ArticleVO vo = ArticleVO.builder()
                 .id(article.getId())
