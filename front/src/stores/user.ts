@@ -12,6 +12,7 @@ const KEYS = {
 }
 
 let refreshPromise: Promise<string> | null = null
+let refreshTimer: ReturnType<typeof setTimeout> | null = null
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(storage.get(KEYS.user) || null)
@@ -20,6 +21,28 @@ export const useUserStore = defineStore('user', () => {
 
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
+
+  function scheduleNextRefresh() {
+    stopRefreshTimer()
+    const exp = expiresIn.value
+    if (!exp) return
+    // 在 token 80% 生命周期时刷新（最小 1 秒，最大 30 分钟）
+    const delay = Math.max(1000, Math.min(exp * 1000 * 0.8, 30 * 60 * 1000))
+    refreshTimer = setTimeout(async () => {
+      try {
+        await refreshAccessToken()
+        // 刷新成功后，用新的 expiresIn 重新排期
+        scheduleNextRefresh()
+      } catch { /* 失败不重试 */ }
+    }, delay)
+  }
+
+  function stopRefreshTimer() {
+    if (refreshTimer != null) {
+      clearTimeout(refreshTimer)
+      refreshTimer = null
+    }
+  }
 
   function setAuth(accessToken: string, exp: number, u: User) {
     const now = Date.now()
@@ -30,6 +53,7 @@ export const useUserStore = defineStore('user', () => {
     storage.set(KEYS.tokenIssuedAt, now)
     storage.set(KEYS.expiresIn, exp)
     storage.set(KEYS.user, u)
+    scheduleNextRefresh()
   }
 
   function logout() {
@@ -41,6 +65,7 @@ export const useUserStore = defineStore('user', () => {
     storage.remove(KEYS.expiresIn)
     storage.remove(KEYS.user)
     refreshPromise = null
+    stopRefreshTimer()
   }
 
   function shouldRefresh(): boolean {
@@ -100,10 +125,11 @@ export const useUserStore = defineStore('user', () => {
     if (shouldRefresh() || !user.value) {
       try { await refreshAccessToken() } catch { logout() }
     }
+    if (isLoggedIn.value) scheduleNextRefresh()
   }
 
   return {
     user, token, expiresIn, isLoggedIn, isAdmin,
-    setAuth, logout, restore, getValidToken, refreshAccessToken
+    setAuth, logout, restore, getValidToken, refreshAccessToken, stopRefreshTimer
   }
 })

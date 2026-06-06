@@ -12,6 +12,7 @@ const KEYS = {
 }
 
 let refreshPromise: Promise<string> | null = null
+let refreshTimer: ReturnType<typeof setTimeout> | null = null
 
 export const useUserStore = defineStore('admin_user', () => {
   const user = ref<User | null>(storage.get(KEYS.user) || null)
@@ -21,6 +22,26 @@ export const useUserStore = defineStore('admin_user', () => {
   const isLoggedIn = computed(() => !!token.value && !!user.value)
   const isAdmin = computed(() => user.value?.role === 'ADMIN')
 
+  function scheduleNextRefresh() {
+    stopRefreshTimer()
+    const exp = expiresIn.value
+    if (!exp) return
+    const delay = Math.max(1000, Math.min(exp * 1000 * 0.8, 30 * 60 * 1000))
+    refreshTimer = setTimeout(async () => {
+      try {
+        await refreshAccessToken()
+        scheduleNextRefresh()
+      } catch { /* 失败不重试 */ }
+    }, delay)
+  }
+
+  function stopRefreshTimer() {
+    if (refreshTimer != null) {
+      clearTimeout(refreshTimer)
+      refreshTimer = null
+    }
+  }
+
   function setAuth(accessToken: string, exp: number, u: User) {
     token.value = accessToken
     expiresIn.value = exp
@@ -29,6 +50,7 @@ export const useUserStore = defineStore('admin_user', () => {
     storage.set(KEYS.tokenIssuedAt, Date.now())
     storage.set(KEYS.expiresIn, exp)
     storage.set(KEYS.user, u)
+    scheduleNextRefresh()
   }
 
   function logout() {
@@ -40,6 +62,7 @@ export const useUserStore = defineStore('admin_user', () => {
     storage.remove(KEYS.expiresIn)
     storage.remove(KEYS.user)
     refreshPromise = null
+    stopRefreshTimer()
   }
 
   function shouldRefresh(): boolean {
@@ -89,10 +112,11 @@ export const useUserStore = defineStore('admin_user', () => {
     if (token.value && !user.value) {
       refreshAccessToken().catch(() => logout())
     }
+    if (isLoggedIn.value) scheduleNextRefresh()
   }
 
   return {
     user, token, expiresIn, isLoggedIn, isAdmin,
-    setAuth, logout, restore, getValidToken, refreshAccessToken
+    setAuth, logout, restore, getValidToken, refreshAccessToken, stopRefreshTimer
   }
 })
