@@ -6,6 +6,9 @@ import cn.dev33.satoken.stp.parameter.SaLoginParameter;
 
 public class StpKit {
 
+    /**
+     * 登录并将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
+     */
     public static void login(Long userId, String role) {
         StpUtil.login(userId, new SaLoginParameter()
                 .setIsLastingCookie(true) // 持久化cookie
@@ -13,6 +16,9 @@ public class StpKit {
         StpUtil.getSession().set("role", role);
     }
 
+    /**
+     * 登录并将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
+     */
     public static void login(Long userId, String role, Boolean isLastingCookie) {
         StpUtil.login(userId, new SaLoginParameter()
                 .setIsLastingCookie(isLastingCookie) // 持久化cookie

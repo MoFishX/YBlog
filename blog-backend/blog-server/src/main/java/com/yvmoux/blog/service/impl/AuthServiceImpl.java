@@ -74,8 +74,12 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException(ErrorCode.USER_BANNED);
         }
 
-        // 登录并将角色存入 Sa-Token Session，供后续 @SaCheckRole 使用
-        StpKit.login(user.getId(), user.getRole());
+        // 登录
+        if (request.getIsLastingCookie() == null) {
+            StpKit.login(user.getId(), user.getRole());
+        } else {
+            StpKit.login(user.getId(), user.getRole(), request.getIsLastingCookie());
+        }
 
         SaTokenInfo tokenInfo = StpKit.getTokenInfo();
 
