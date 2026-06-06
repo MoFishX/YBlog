@@ -25,7 +25,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagVO> getAllTags() {
+        // 查询所有标签及文章数
         List<Tag> tags = tagMapper.selectAllWithArticleCount();
+
+        // 构建返回值
         return tags.stream().map(tag -> TagVO.builder()
                 .id(tag.getId())
                 .name(tag.getName())
@@ -35,16 +38,16 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public TagVO createTag(String name) {
-        QueryWrapper<Tag> wrapper = new QueryWrapper<>();
-        wrapper.eq("name", name);
-        if (tagMapper.selectCount(wrapper) > 0) {
+        // 检查标签名是否存在
+        if (tagMapper.selectCount(new QueryWrapper<Tag>().eq("name", name)) > 0) {
             throw new BusinessException(ErrorCode.TAG_NAME_EXISTS);
         }
 
-        Tag tag = new Tag();
-        tag.setName(name);
+        // 插入标签
+        Tag tag = Tag.builder().name(name).build();
         tagMapper.insert(tag);
 
+        // 构建返回值
         return TagVO.builder()
                 .id(tag.getId())
                 .name(tag.getName())
@@ -54,21 +57,22 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public TagVO updateTag(Long tagId, String name) {
+        // 获取标签
         Tag tag = tagMapper.selectById(tagId);
         if (tag == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND);
         }
 
-        QueryWrapper<Tag> wrapper = new QueryWrapper<>();
-        wrapper.eq("name", name);
-        wrapper.ne("id", tagId);
-        if (tagMapper.selectCount(wrapper) > 0) {
+        // 检查标签名是否被其他标签占用
+        if (tagMapper.selectCount(new QueryWrapper<Tag>().eq("name", name).ne("id", tagId)) > 0) {
             throw new BusinessException(ErrorCode.TAG_NAME_EXISTS);
         }
 
+        // 更新标签
         tag.setName(name);
         tagMapper.updateById(tag);
 
+        // 构建返回值
         return TagVO.builder()
                 .id(tag.getId())
                 .name(tag.getName())
@@ -78,6 +82,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void deleteTag(Long tagId) {
+        // 删除标签关联及标签本身
         articleTagMapper.deleteByTagId(tagId);
         tagMapper.deleteById(tagId);
     }

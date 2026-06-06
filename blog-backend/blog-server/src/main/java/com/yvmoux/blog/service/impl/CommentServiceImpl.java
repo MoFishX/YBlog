@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.CommentCreateRequest;
-import com.yvmoux.blog.dto.response.AuthorVO;
 import com.yvmoux.blog.dto.response.CommentVO;
 import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.entity.Comment;
-import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.ArticleMapper;
@@ -35,67 +33,59 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public PageResult<CommentVO> getCommentsByArticle(Long articleId, Integer page, Integer pageSize) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
+        // 校验文章存在
+        if (articleMapper.selectById(articleId) == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
+        // 条件查询
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId);
         wrapper.orderByAsc("created_at");
 
-        Page<Comment> commentPage = new Page<>(page, pageSize);
-        Page<Comment> result = commentMapper.selectPage(commentPage, wrapper);
+        // 分页查询
+        Page<Comment> commentPage = commentMapper.selectPage(new Page<>(page, pageSize), wrapper);
 
-        List<CommentVO> vos = result.getRecords().stream().map(comment -> {
-            AuthorVO userVO = buildAuthorVO(comment.getUserId());
-            AuthorVO replyToVO = null;
-            if (comment.getParentId() != null) {
-                Comment parentComment = commentMapper.selectById(comment.getParentId());
-                if (parentComment != null) {
-                    replyToVO = buildAuthorVO(parentComment.getUserId());
-                }
-            }
-            return CommentVO.builder()
-                    .id(comment.getId())
-                    .content(comment.getContent())
-                    .user(userVO)
-                    .replyTo(replyToVO)
-                    .articleId(comment.getArticleId())
-                    .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
-                    .status(comment.getStatus())
-                    .createdAt(comment.getCreatedAt())
-                    .build();
-        }).collect(Collectors.toList());
+        // 构建返回值
+        List<CommentVO> vos = commentPage.getRecords().stream().map(comment -> CommentVO.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .user(buildAuthorVO(comment.getUserId()))
+                .replyTo(comment.getParentId() != null ? buildAuthorVO(commentMapper.selectById(comment.getParentId()).getUserId()) : null)
+                .articleId(comment.getArticleId())
+                .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
+                .status(comment.getStatus())
+                .createdAt(comment.getCreatedAt())
+                .build()).collect(Collectors.toList());
 
-        return new PageResult<>(vos, result.getTotal());
+        return new PageResult<>(vos, commentPage.getTotal());
     }
 
     @Override
     public CommentVO createComment(Long userId, Long articleId, CommentCreateRequest request) {
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
+        // 校验文章存在
+        if (articleMapper.selectById(articleId) == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        Comment comment = new Comment();
-        comment.setArticleId(articleId);
-        comment.setUserId(userId);
-        comment.setContent(request.getContent());
-        comment.setParentId(request.getParentId());
-        comment.setStatus("APPROVED");
-        comment.setIsRead(0);
-        comment.setCreatedAt(LocalDateTime.now());
-
-        if (request.getParentId() != null) {
-            Comment parentComment = commentMapper.selectById(request.getParentId());
-            if (parentComment == null) {
-                throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
-            }
+        // 校验父评论存在
+        if (request.getParentId() != null && commentMapper.selectById(request.getParentId()) == null) {
+            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
         }
 
+        // 插入评论
+        Comment comment = Comment.builder()
+                .articleId(articleId)
+                .userId(userId)
+                .content(request.getContent())
+                .parentId(request.getParentId())
+                .status("APPROVED")
+                .isRead(0)
+                .createdAt(LocalDateTime.now())
+                .build();
         commentMapper.insert(comment);
 
+        // 构建返回值
         return CommentVO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
@@ -105,6 +95,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(Long commentId, Long userId, boolean isAdmin) {
+        // 获取评论并校验权限
         Comment comment = commentMapper.selectById(commentId);
         if (comment == null) {
             throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
@@ -118,114 +109,81 @@ public class CommentServiceImpl implements CommentService {
                 isArticleAuthor = true;
             }
         }
-
         if (!isOwner && !isAdmin && !isArticleAuthor) {
             throw new BusinessException(ErrorCode.FORBIDDEN);
         }
 
+        // 删除评论
         commentMapper.deleteById(commentId);
     }
 
     @Override
     public PageResult<CommentVO> getReplies(Long userId, Integer page, Integer pageSize, boolean unreadOnly) {
+        // 获取用户所有评论 ID
         QueryWrapper<Comment> userCommentsWrapper = new QueryWrapper<>();
         userCommentsWrapper.eq("user_id", userId);
         List<Comment> userComments = commentMapper.selectList(userCommentsWrapper);
-
         if (userComments.isEmpty()) {
             return new PageResult<>(new ArrayList<>(), 0);
         }
 
-        List<Long> userCommentIds = userComments.stream()
-                .map(Comment::getId)
-                .collect(Collectors.toList());
-
+        // 查询回复这些评论的内容
+        List<Long> userCommentIds = userComments.stream().map(Comment::getId).collect(Collectors.toList());
         QueryWrapper<Comment> replyWrapper = new QueryWrapper<>();
         replyWrapper.in("parent_id", userCommentIds);
-        if (unreadOnly) {
-            replyWrapper.eq("is_read", 0);
-        }
+        if (unreadOnly) replyWrapper.eq("is_read", 0);
         replyWrapper.orderByDesc("created_at");
 
-        Page<Comment> replyPage = new Page<>(page, pageSize);
-        Page<Comment> result = commentMapper.selectPage(replyPage, replyWrapper);
-
-        List<CommentVO> vos = result.getRecords().stream().map(reply -> {
-            AuthorVO userVO = buildAuthorVO(reply.getUserId());
-            String articleTitle = null;
-            Article article = articleMapper.selectById(reply.getArticleId());
-            if (article != null) {
-                articleTitle = article.getTitle();
-            }
-            return CommentVO.builder()
-                    .id(reply.getId())
-                    .content(reply.getContent())
-                    .user(userVO)
-                    .articleId(reply.getArticleId())
-                    .articleTitle(articleTitle)
-                    .isRead(reply.getIsRead() != null && reply.getIsRead() == 1)
-                    .status(reply.getStatus())
-                    .createdAt(reply.getCreatedAt())
-                    .build();
-        }).collect(Collectors.toList());
-
-        return new PageResult<>(vos, result.getTotal());
+        return pageResult(page, pageSize, replyWrapper);
     }
 
     @Override
     public PageResult<CommentVO> getAllComments(Integer page, Integer pageSize, String keyword, Long articleId) {
+        // 条件查询
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
-        if (keyword != null && !keyword.isBlank()) {
-            wrapper.like("content", keyword);
-        }
-        if (articleId != null) {
-            wrapper.eq("article_id", articleId);
-        }
+        if (keyword != null && !keyword.isBlank()) wrapper.like("content", keyword);
+        if (articleId != null) wrapper.eq("article_id", articleId);
         wrapper.orderByDesc("created_at");
 
-        Page<Comment> commentPage = new Page<>(page, pageSize);
-        Page<Comment> result = commentMapper.selectPage(commentPage, wrapper);
-
-        List<CommentVO> vos = result.getRecords().stream().map(comment -> {
-            AuthorVO userVO = buildAuthorVO(comment.getUserId());
-            String articleTitle = null;
-            Article article = articleMapper.selectById(comment.getArticleId());
-            if (article != null) {
-                articleTitle = article.getTitle();
-            }
-            return CommentVO.builder()
-                    .id(comment.getId())
-                    .content(comment.getContent())
-                    .user(userVO)
-                    .articleId(comment.getArticleId())
-                    .articleTitle(articleTitle)
-                    .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
-                    .status(comment.getStatus())
-                    .createdAt(comment.getCreatedAt())
-                    .build();
-        }).collect(Collectors.toList());
-
-        return new PageResult<>(vos, result.getTotal());
+        return pageResult(page, pageSize, wrapper);
     }
 
     @Override
     public void forceDeleteComment(Long commentId) {
+        // 获取评论
         Comment comment = commentMapper.selectById(commentId);
         if (comment == null) {
             throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
         }
+
+        // 强制删除
         commentMapper.deleteById(commentId);
     }
 
-    private AuthorVO buildAuthorVO(Long userId) {
-        if (userId == null) {
-            return null;
-        }
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            return null;
-        }
-        return AuthorVO.builder()
+    private PageResult<CommentVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Comment> replyWrapper) {
+        // 分页查询
+        Page<Comment> replyPage = commentMapper.selectPage(new Page<>(page, pageSize), replyWrapper);
+
+        // 构建返回值
+        List<CommentVO> vos = replyPage.getRecords().stream().map(reply -> CommentVO.builder()
+                .id(reply.getId())
+                .content(reply.getContent())
+                .user(buildAuthorVO(reply.getUserId()))
+                .articleId(reply.getArticleId())
+                .articleTitle(articleMapper.selectById(reply.getArticleId()).getTitle())
+                .isRead(reply.getIsRead() != null && reply.getIsRead() == 1)
+                .status(reply.getStatus())
+                .createdAt(reply.getCreatedAt())
+                .build()).collect(Collectors.toList());
+
+        return new PageResult<>(vos, replyPage.getTotal());
+    }
+
+    private com.yvmoux.blog.dto.response.AuthorVO buildAuthorVO(Long userId) {
+        if (userId == null) return null;
+        com.yvmoux.blog.entity.User user = userMapper.selectById(userId);
+        if (user == null) return null;
+        return com.yvmoux.blog.dto.response.AuthorVO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatar(user.getAvatar())

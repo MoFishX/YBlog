@@ -32,8 +32,7 @@ public class User {
 
     private String status;
 
-//    @TableField(exist = false)
-//    private Integer articleCount;
+    private Integer articleCount;
 
     private LocalDateTime createdAt;
 
