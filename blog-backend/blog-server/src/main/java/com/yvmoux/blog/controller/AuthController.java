@@ -40,15 +40,15 @@ public class AuthController {
         return Result.success("注册成功", null);
     }
 
-    @Operation(summary = "刷新Token")
-    @PostMapping("/refresh")
-    public Result<LoginResult> refresh() {
-        Long userId = StpUtil.getLoginIdAsLong();
-        log.info("刷新Token, userId: {}", userId);
-        LoginResult result = authService.refreshToken(userId);
-        log.info("刷新Token成功, userId: {}", userId);
-        return Result.success(result);
-    }
+//    @Operation(summary = "刷新Token")
+//    @PostMapping("/refresh")
+//    public Result<LoginResult> refresh() {
+//        Long userId = StpUtil.getLoginIdAsLong();
+//        log.info("刷新Token, userId: {}", userId);
+//        LoginResult result = authService.refreshToken(userId);
+//        log.info("刷新Token成功, userId: {}", userId);
+//        return Result.success(result);
+//    }
 
     @Operation(summary = "登出")
     @PostMapping("/logout")

@@ -396,9 +396,6 @@ function matchApi(method, url, data, config = {}) {
   if (method === 'post' && path === '/auth/register') {
     return ok(null, config)
   }
-  if (method === 'post' && path === '/auth/refresh') {
-    return ok({ token: 'mock_refreshed_token_' + nextId(), expiresIn: 7200 }, config)
-  }
   if (method === 'post' && path === '/auth/logout') {
     return ok(null, config)
   }

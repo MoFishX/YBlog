@@ -1,5 +1,5 @@
 import { authApi } from '@/api/modules/auth'
-import type { LoginParams, LoginResult, RefreshResult } from '@/api/modules/auth'
+import type { LoginParams, LoginResult } from '@/api/modules/auth'
 import { ElMessage } from 'element-plus'
 
 export const authService = {
@@ -9,11 +9,6 @@ export const authService = {
       ElMessage.error('仅管理员可登录后台')
       throw new Error('仅管理员可登录后台')
     }
-    return res.data
-  },
-
-  async refresh(): Promise<RefreshResult> {
-    const res = await authApi.refresh()
     return res.data
   },
 
