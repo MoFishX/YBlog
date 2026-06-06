@@ -1,8 +1,9 @@
 package com.yvmoux.blog.dto.request;
 
 import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class ArticleQueryRequest {
     private Integer page = 1;
     private Integer pageSize = 10;
