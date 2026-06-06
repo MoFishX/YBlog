@@ -124,9 +124,19 @@ public class AuthServiceImpl implements AuthService {
         // 4. 签发新的 access_token
         String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
 
+        // 5. 构建返回的用户信息
+        LoginVO loginVO = LoginVO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .avatar(user.getAvatar())
+                .role(user.getRole())
+                .build();
+
         return RefreshResult.builder()
                 .accessToken(accessToken)
                 .expiresIn(jwtUtils.getAccessTokenExpiration())
+                .user(loginVO)
                 .build();
     }
 

@@ -22,6 +22,7 @@ export interface LoginResult {
 export interface RefreshResult {
   accessToken: string
   expiresIn: number
+  user: User
 }
 
 export const authApi = {

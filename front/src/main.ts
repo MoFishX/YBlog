@@ -13,5 +13,4 @@ app.use(router)
 app.use(ElementPlus)
 
 const userStore = useUserStore()
-userStore.restore()
-app.mount('#app')
+userStore.restore().then(() => app.mount('#app'))

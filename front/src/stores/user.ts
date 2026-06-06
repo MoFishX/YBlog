@@ -60,12 +60,14 @@ export const useUserStore = defineStore('user', () => {
     refreshPromise = (async () => {
       try {
         const res = await authApi.refresh()
-        const { accessToken, expiresIn: exp } = res.data
+        const { accessToken, expiresIn: exp, user: u } = res.data
         token.value = accessToken
         expiresIn.value = exp
+        user.value = u
         storage.set(KEYS.accessToken, accessToken)
         storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
         storage.set(KEYS.expiresIn, exp)
+        storage.set(KEYS.user, u)
         return accessToken
       } finally {
         refreshPromise = null
@@ -88,9 +90,10 @@ export const useUserStore = defineStore('user', () => {
     return token.value
   }
 
-  function restore() {
-    if (token.value && !user.value) {
-      refreshAccessToken().catch(() => logout())
+  async function restore() {
+    if (!token.value) return
+    if (shouldRefresh() || !user.value) {
+      try { await refreshAccessToken() } catch { logout() }
     }
   }
 
