@@ -13,3 +13,9 @@ spring:
 logging:
   level:
     com.yvmoux.blog: info
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

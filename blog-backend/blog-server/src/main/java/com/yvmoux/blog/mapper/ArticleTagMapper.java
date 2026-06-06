@@ -11,6 +11,8 @@ import java.util.List;
 @Mapper
 public interface ArticleTagMapper extends BaseMapper<ArticleTag> {
 
+    void insertBatch(@Param("list") List<ArticleTag> list);
+
     @Delete("DELETE FROM article_tag WHERE article_id = #{articleId}")
     void deleteByArticleId(@Param("articleId") Long articleId);
 

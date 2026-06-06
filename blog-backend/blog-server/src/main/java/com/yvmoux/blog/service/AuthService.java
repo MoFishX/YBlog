@@ -15,6 +15,6 @@ public interface AuthService {
     /** 刷新令牌：返回当前有效的 Token 及剩余有效时间 */
     LoginResult refreshToken(String refreshToken);
 
-    /** 登出：Token 加入黑名单或直接销毁登录状态 */
+    /** 登出：Token 加入黑名单 */
     void logout(String token);
 }

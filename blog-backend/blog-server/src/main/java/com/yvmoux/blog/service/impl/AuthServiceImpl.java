@@ -25,6 +25,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -62,16 +64,28 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResult login(LoginRequest request) {
+        // 1. 认证：AuthenticationManager 内部调 AppUserDetailsService 查用户 + BCrypt 比对密码
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
+        // 2. 获取自定义 UserDetails，取得 userId（标准接口没有此字段）
         AppUserDetails userDetails = (AppUserDetails) authentication.getPrincipal();
 
+        // 3. 签发短期 access_token（payload 存 userId + username + role）
+        if (userDetails == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
         String accessToken = jwtUtils.generateAccessToken(
-                userDetails.getUserId(), userDetails.getUsername(), userDetails.getAuthorities()
-                        .iterator().next().getAuthority().replace("ROLE_", ""));
+                userDetails.getUserId(),
+                userDetails.getUsername(),
+                Objects.requireNonNull(
+                        userDetails.getAuthorities().iterator().next().getAuthority()).replace("ROLE_", "")
+        );
+
+        // 4. 签发长期 refresh_token（只存 userId）
         String refreshToken = jwtUtils.generateRefreshToken(userDetails.getUserId());
 
+        // 5. 构建返回的用户信息
         LoginVO loginVO = LoginVO.builder()
                 .id(userDetails.getUserId())
                 .username(userDetails.getUsername())
@@ -80,40 +94,46 @@ public class AuthServiceImpl implements AuthService {
                 .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
                 .build();
 
+        // 6. 打包返回
         return LoginResult.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .expiresIn(86400L)
+                .expiresIn(jwtUtils.getAccessTokenExpiration())
                 .user(loginVO)
                 .build();
     }
 
     @Override
     public LoginResult refreshToken(String refreshToken) {
+        // 1. 验证 refresh_token 是否有效
         if (!jwtUtils.validateToken(refreshToken)) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
+        // 2. 从 refresh_token 提取 userId
         String subject = jwtUtils.extractUsername(refreshToken);
-        Long userId;
-        try {
-            userId = Long.parseLong(subject);
-        } catch (NumberFormatException e) {
+        Long userId = Long.parseLong(subject);
+
+        // 3. 从 DB 获取用户最新信息（角色可能已变更）
+        User user = userMapper.selectById(userId);
+        if (user == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
-        String accessToken = jwtUtils.generateAccessToken(userId, subject, "USER");
+        // 4. 签发新的 access_token
+        String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
+
         return LoginResult.builder()
                 .accessToken(accessToken)
                 .refreshToken(null)
-                .expiresIn(86400L)
+                .expiresIn(jwtUtils.getAccessTokenExpiration())
                 .build();
     }
 
     @Override
     public void logout(String token) {
         if (token != null && jwtUtils.validateToken(token)) {
-            redisUtils.set("blacklist:token:" + token, "1", 86400, java.util.concurrent.TimeUnit.SECONDS);
+            redisUtils.set("blacklist:token:" + token, "1", jwtUtils.getAccessTokenExpiration(), TimeUnit.SECONDS);
         }
     }
 }

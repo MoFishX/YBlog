@@ -8,7 +8,7 @@ export interface LoginParams {
 }
 
 export interface LoginResult {
-  token: string
+  accessToken: string
   expiresIn: number
   user: User
 }
@@ -16,6 +16,10 @@ export interface LoginResult {
 export const authApi = {
   login(data: LoginParams): Promise<ApiResponse<LoginResult>> {
     return request.post('/auth/login', data)
+  },
+
+  refresh(): Promise<ApiResponse<LoginResult>> {
+    return request.post('/auth/refresh')
   },
 
   logout(): Promise<ApiResponse<null>> {

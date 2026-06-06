@@ -14,7 +14,7 @@ export interface RegisterParams {
 }
 
 export interface LoginResult {
-  token: string
+  accessToken: string
   expiresIn: number
   user: User
 }
@@ -26,6 +26,10 @@ export const authApi = {
 
   register(data: RegisterParams): Promise<ApiResponse<null>> {
     return request.post('/auth/register', data)
+  },
+
+  refresh(): Promise<ApiResponse<LoginResult>> {
+    return request.post('/auth/refresh')
   },
 
   logout(): Promise<ApiResponse<null>> {

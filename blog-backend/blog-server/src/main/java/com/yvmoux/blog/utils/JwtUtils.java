@@ -1,6 +1,5 @@
 package com.yvmoux.blog.utils;
 
-import com.yvmoux.blog.constant.JwtConstants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -42,8 +41,8 @@ public class JwtUtils {
     public String generateAccessToken(Long userId, String username, String role) {
         return Jwts.builder()
                 .subject(username)
-                .claim(JwtConstants.CLAIM_USER_ID, userId)
-                .claim(JwtConstants.CLAIM_ROLE, role)
+                .claim("userId", userId)
+                .claim("role", role)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration * 1000))
                 .signWith(getKey())
@@ -76,14 +75,14 @@ public class JwtUtils {
      * 从 Token 中提取用户 ID（自定义 claim）。
      */
     public Long extractUserId(String token) {
-        return extractAllClaims(token).get(JwtConstants.CLAIM_USER_ID, Long.class);
+        return extractAllClaims(token).get("userId", Long.class);
     }
 
     /**
      * 从 Token 中提取角色（自定义 claim）。
      */
     public String extractRole(String token) {
-        return extractAllClaims(token).get(JwtConstants.CLAIM_ROLE, String.class);
+        return extractAllClaims(token).get("role", String.class);
     }
 
     /**
@@ -98,6 +97,16 @@ public class JwtUtils {
         } catch (Exception e) {
             return false;
         }
+
+
+    }
+
+    public long getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
+    public long getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
     }
 
     // ==================== 私有方法 ====================
