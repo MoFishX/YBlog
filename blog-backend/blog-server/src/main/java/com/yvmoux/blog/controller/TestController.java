@@ -1,7 +1,7 @@
 package com.yvmoux.blog.controller;
-//
-//import cn.dev33.satoken.stp.StpUtil;
-//import cn.dev33.satoken.util.SaResult;
+
+import com.yvmoux.blog.dto.Result;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,20 +9,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/test")
 public class TestController {
-//    /**
-//     * 测试接口（需要登录才能访问）
-//     * @return 测试结果
-//     */
-//    @GetMapping("/hello")
-//    public SaResult hello() {
-//        // 获取当前登录用户ID（登录后才能获取，未登录会被拦截）
-//        long userId = StpUtil.getLoginIdAsLong();
-//
-//        return SaResult.ok("访问成功").setData("当前登录用户ID：" + userId);
-//    }
-@GetMapping("/hello")
-public String hello(){
-    return "hello";
-}
+    /**
+     * 放行接口（白名单）
+     *
+     * @return 结果
+     */
+    @GetMapping("/hello")
+    public Result<String> hello() {
+        return Result.success("你无需登录！");
+    }
 
+    /**
+     * 需要登录，但不需要角色（所有登录用户都能访问）
+     *
+     * @return 结果
+     */
+    @GetMapping("/auth")
+    public Result<String> auth() {
+        return Result.success("你已登录！");
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin")
+    public Result<String> admin() {
+        return Result.success("管理员页面！");
+    }
 }

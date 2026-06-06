@@ -33,11 +33,12 @@ mybatis-plus:
 
 jwt:
   secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
-  expire: 86400
+  access-token-expiration: 300 # 5 min
+  refresh-token-expiration: 86400 # 1 day
 
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-ui.html
 
 server:
   port: 8080
