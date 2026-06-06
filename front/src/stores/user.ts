@@ -63,11 +63,13 @@ export const useUserStore = defineStore('user', () => {
         const { accessToken, expiresIn: exp, user: u } = res.data
         token.value = accessToken
         expiresIn.value = exp
-        user.value = u
         storage.set(KEYS.accessToken, accessToken)
         storage.set(KEYS.tokenExpiry, Date.now() + exp * 1000)
         storage.set(KEYS.expiresIn, exp)
-        storage.set(KEYS.user, u)
+        if (u) {
+          user.value = u
+          storage.set(KEYS.user, u)
+        }
         return accessToken
       } finally {
         refreshPromise = null
@@ -92,6 +94,11 @@ export const useUserStore = defineStore('user', () => {
 
   async function restore() {
     if (!token.value) return
+    // 清理明显损坏的 user 数据（如被旧 refresh 写入的 undefined）
+    if (user.value && !user.value.username) {
+      user.value = null
+      storage.remove(KEYS.user)
+    }
     if (shouldRefresh() || !user.value) {
       try { await refreshAccessToken() } catch { logout() }
     }
