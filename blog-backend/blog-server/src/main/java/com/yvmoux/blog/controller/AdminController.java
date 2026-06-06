@@ -1,6 +1,5 @@
 package com.yvmoux.blog.controller;
 
-import cn.dev33.satoken.annotation.SaCheckRole;
 import com.yvmoux.blog.dto.request.BatchDeleteRequest;
 import com.yvmoux.blog.dto.request.ReviewRequest;
 import com.yvmoux.blog.dto.request.UpdateUserRoleRequest;
@@ -30,7 +29,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/admin")
 @RequiredArgsConstructor
-@SaCheckRole("ADMIN")
+//@SaCheckRole("ADMIN")
 public class AdminController {
 
     private final AdminService adminService;

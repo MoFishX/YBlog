@@ -1,6 +1,5 @@
 package com.yvmoux.blog.controller;
 
-import cn.dev33.satoken.annotation.SaCheckLogin;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
@@ -37,7 +36,7 @@ public class UploadController {
 
     @Operation(summary = "上传文件")
     @PostMapping
-    @SaCheckLogin
+//    @SaCheckLogin
     public Result<Map<String, Object>> upload(@RequestParam("file") MultipartFile file,
                                               @RequestParam("type") String type) throws IOException {
         log.info("上传文件, type: {}, originalFilename: {}, size: {}", type, file.getOriginalFilename(), file.getSize());

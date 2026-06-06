@@ -12,6 +12,7 @@ spring:
     redis:
       host: localhost
       port: 6379
+      database: 1
 
   servlet:
     multipart:
@@ -31,16 +32,37 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
 sa-token:
-  token-name: token
-  # token 有效期（单位：秒）
-  timeout: 20 # refresh token
-  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
-  active-timeout: 10 # access token 每次请求自动续期
-  is-share: false # 在多人登录同一账号时，每次登录新建一个 token
-  is-concurrent: true # 是否允许同一账号多地同时登录
-  is-read-header: false
-  is-read-cookie: true
-  is-write-header: false
+  # 1. 基础配置
+  token-name: token # Token在请求头中的名称（默认satoken，可自定义，比如Authorization）
+  token-style: uuid # Token生成风格（uuid更安全，可选：uuid、simple-uuid、random-32等）
+  is-concurrent: true # 是否允许同一账号多地同时登录（true允许，false新登录挤掉旧登录）
+
+  # 2. 双Token配置（核心中的核心）
+  timeout: 300 # access token 单位：秒（5分钟）
+  refresh-token-timeout: 604800 # RefreshToken有效期，单位：秒（7天，可自定义）
+  refresh-token-single: true # 是否同一账号只生成一个RefreshToken（true更安全，避免多刷新令牌泄露）
+
+  # 3. Redis配置（整合Redis，分布式部署必备）
+  redis-model: standalone
+  redis-host: localhost
+  redis-port: 6379
+#  redis-password:
+  redis-database: 1
+
+  # 4. 异常配置（可选，自定义异常提示，更友好）
+  not-login-message: 请先登录！
+  token-expire-message: 访问令牌已过期，请刷新令牌！
+  refresh-token-expire-message: 刷新令牌已过期，请重新登录！
+
+#
+
+#  # token 最低活跃频率（单位：秒），如果 token 超过此时间没有访问系统就会被冻结，默认-1 代表不限制，永不冻结
+#  active-timeout: 10 # access token 每次请求自动续期
+#  is-share: false # 在多人登录同一账号时，每次登录新建一个 token
+#
+#  is-read-header: false
+#  is-read-cookie: true
+#  is-write-header: false
   jwt-secret-key: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
   cookie:
     http-only: true

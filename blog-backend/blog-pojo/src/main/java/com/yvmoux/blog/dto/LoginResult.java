@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginResult {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private long expiresIn;
     private LoginVO user;
 }

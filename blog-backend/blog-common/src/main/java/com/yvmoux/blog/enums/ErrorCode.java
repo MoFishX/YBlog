@@ -8,7 +8,6 @@ import lombok.Getter;
 public enum ErrorCode {
     SUCCESS(200, "ok"),
     BAD_REQUEST(400, "参数错误"),
-    UNAUTHORIZED(401, "未认证或Token已过期"),
     FORBIDDEN(403, "无权限执行此操作"),
     NOT_FOUND(404, "资源不存在"),
     CONFLICT(409, "资源冲突"),
@@ -23,7 +22,9 @@ public enum ErrorCode {
     FILE_TOO_LARGE(400, "文件大小超出限制"),
     FILE_TYPE_INVALID(400, "文件类型不支持"),
     USER_BANNED(403, "用户已被封禁"),
-    TOKEN_BLACKLISTED(401, "Token已失效");
+    // TOKEN
+    UNAUTHORIZED(401, "未认证或AccessToken已过期"),
+    REFRESH_TOKEN_BLACKLISTED(401, "RefreshToken已失效，请重新登录");
 
     private final int code;
     private final String message;

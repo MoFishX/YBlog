@@ -1,6 +1,5 @@
 package com.yvmoux.blog.controller;
 
-import com.yvmoux.blog.utils.StpKit;
 import com.yvmoux.blog.dto.request.LoginRequest;
 import com.yvmoux.blog.dto.request.RegisterRequest;
 import com.yvmoux.blog.dto.Result;
@@ -40,15 +39,14 @@ public class AuthController {
         return Result.success("注册成功", null);
     }
 
-//    @Operation(summary = "刷新Token")
-//    @PostMapping("/refresh")
-//    public Result<LoginResult> refresh() {
-//        Long userId = StpKit.getLoginId();
-//        log.info("刷新Token, userId: {}", userId);
-//        LoginResult result = authService.refreshToken(userId);
-//        log.info("刷新Token成功, userId: {}", userId);
-//        return Result.success(result);
-//    }
+    @Operation(summary = "刷新Token")
+    @PostMapping("/refresh")
+    public Result<LoginResult> refresh(@RequestBody String refreshToken) {
+        //log.info("刷新Token, userId: {}", userId);
+        LoginResult result = authService.refreshToken(refreshToken);
+        //log.info("刷新Token成功, userId: {}", userId);
+        return Result.success(result);
+    }
 
     @Operation(summary = "登出")
     @PostMapping("/logout")

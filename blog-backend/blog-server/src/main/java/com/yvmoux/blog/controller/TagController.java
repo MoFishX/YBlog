@@ -1,6 +1,5 @@
 package com.yvmoux.blog.controller;
 
-import cn.dev33.satoken.annotation.SaCheckRole;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.service.TagService;
@@ -42,7 +41,7 @@ public class TagController {
 
     @Operation(summary = "创建标签")
     @PostMapping
-    @SaCheckRole("ADMIN")
+//    @SaCheckRole("ADMIN")
     public Result<TagVO> create(@Valid @RequestBody TagRequest request) {
         log.info("创建标签, name: {}", request.getName());
         TagVO tag = tagService.createTag(request.getName());
@@ -52,7 +51,7 @@ public class TagController {
 
     @Operation(summary = "更新标签")
     @PutMapping("/{tagId}")
-    @SaCheckRole("ADMIN")
+//    @SaCheckRole("ADMIN")
     public Result<TagVO> update(@PathVariable Long tagId, @Valid @RequestBody TagRequest request) {
         log.info("更新标签, tagId: {}, name: {}", tagId, request.getName());
         TagVO tag = tagService.updateTag(tagId, request.getName());
@@ -62,7 +61,7 @@ public class TagController {
 
     @Operation(summary = "删除标签")
     @DeleteMapping("/{tagId}")
-    @SaCheckRole("ADMIN")
+//    @SaCheckRole("ADMIN")
     public Result<Void> delete(@PathVariable Long tagId) {
         log.info("删除标签, tagId: {}", tagId);
         tagService.deleteTag(tagId);

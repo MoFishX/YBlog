@@ -1,7 +1,5 @@
 package com.yvmoux.blog.service.impl;
 
-import cn.dev33.satoken.stp.SaTokenInfo;
-import com.yvmoux.blog.utils.StpKit;
 import cn.hutool.crypto.digest.BCrypt;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yvmoux.blog.dto.request.LoginRequest;
@@ -73,15 +71,21 @@ public class AuthServiceImpl implements AuthService {
         if (UserStatus.BANNED.name().equals(user.getStatus())) {
             throw new BusinessException(ErrorCode.USER_BANNED);
         }
+//
+//        // 登录
+//        if (request.getRememberMe() != null) {
+//            StpUtil.login(user.getId(), new SaLoginParameter()
+//                    .setIsLastingCookie(request.getRememberMe()) // 持久化cookie
+//            );
+//        } else {
+//            StpUtil.login(user.getId());
+//        }
+//
+//        // 生成访问令牌和刷新令牌
+//        String accessToken = StpUtil.getTokenValue();
+//        String refreshToken = SaTempUtil.createToken(user.getId(), 2592000L);
+//        StpUtil.getSession().set("role", user.getRole());
 
-        // 登录
-        if (request.getIsLastingCookie() == null) {
-            StpKit.login(user.getId(), user.getRole());
-        } else {
-            StpKit.login(user.getId(), user.getRole(), request.getIsLastingCookie());
-        }
-
-        SaTokenInfo tokenInfo = StpKit.getTokenInfo();
 
         LoginVO loginVO = LoginVO.builder()
                 .id(user.getId())
@@ -92,29 +96,45 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         return LoginResult.builder()
-                .token(tokenInfo.getTokenValue())
-                .expiresIn(tokenInfo.getTokenTimeout())
+//                .accessToken(accessToken)
+//                .refreshToken(refreshToken)
+//                .expiresIn(StpUtil.getTokenInfo().getTokenTimeout())
+                .expiresIn(224000L)
                 .user(loginVO)
                 .build();
     }
 
     @Override
-    public LoginResult refreshToken(Long userId) {
-        User user = userMapper.selectById(userId);
-        if (user == null) {
-            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
-        }
-
-        SaTokenInfo tokenInfo = StpKit.getTokenInfo();
-
-        return LoginResult.builder()
-                .token(tokenInfo.getTokenValue())
-                .expiresIn(tokenInfo.getTokenTimeout())
-                .build();
+    public LoginResult refreshToken(String refreshToken) {
+//        try {
+//            // 验证
+//            Object userId = SaTempUtil.parseToken(refreshToken);
+//            if (userId == null) {
+//                throw new BusinessException(ErrorCode.REFRESH_TOKEN_BLACKLISTED);
+//            }
+//            // 生成新的的 AccessToken
+//            String accessToken = StpUtil.createLoginSession(userId);
+//
+//            // 刷新 RefreshToken 的有效期
+//            SaTempUtil.saveToken(refreshToken, userId, 2592000L);
+//
+//            // 返回
+//            return LoginResult.builder()
+//                    .accessToken(accessToken)
+//                    .refreshToken(null)
+//                    .expiresIn(StpUtil.getTokenInfo().getTokenTimeout())
+//                    .user(null)
+//                    .build();
+//        } catch (Exception e) {
+//            throw new BusinessException(ErrorCode.REFRESH_TOKEN_BLACKLISTED);
+//        }
+        return null;
     }
 
     @Override
     public void logout(String token) {
-        StpKit.logout();
+        // 核心代码：一键销毁当前用户的AccessToken和RefreshToken
+        // 会自动删除Redis中的Token信息，解除用户与Token的关联
+//        StpKit.logout();
     }
 }

@@ -14,5 +14,5 @@ public class LoginRequest {
     @Size(min = 6, max = 100)
     private String password;
 
-    private Boolean isLastingCookie;
+    private Boolean rememberMe;
 }
