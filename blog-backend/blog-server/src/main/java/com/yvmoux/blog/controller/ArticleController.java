@@ -28,16 +28,17 @@ public class ArticleController {
     private final ArticleService articleService;
     private final SecurityUtils securityUtils;
 
-    @Operation(summary = "文章列表")
+    @Operation(summary = "文章列表（支持按作者、标签、排序筛选）")
     @GetMapping
     public Result<PageResult<ArticleVO>> getList(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String tagName,
+            @RequestParam(required = false) Long authorId,
             @RequestParam(defaultValue = "latest") String orderBy) {
-        log.info("获取文章列表, page: {}, pageSize: {}, tagName: {}, orderBy: {}", page, pageSize, tagName, orderBy);
+        log.info("获取文章列表, page: {}, pageSize: {}, tagName: {}, authorId: {}, orderBy: {}", page, pageSize, tagName, authorId, orderBy);
         if (pageSize > 100) pageSize = 100;
-        Result<PageResult<ArticleVO>> result = Result.success(articleService.getArticleList(page, pageSize, null, orderBy, ArticleStatusEnum.PUBLISHED.name(), null));
+        Result<PageResult<ArticleVO>> result = Result.success(articleService.getArticleList(page, pageSize, tagName, orderBy, ArticleStatusEnum.PUBLISHED.name(), authorId));
         log.info("获取文章列表成功, total: {}", result.getData().getTotal());
         return result;
     }
@@ -54,13 +55,11 @@ public class ArticleController {
 
     @Operation(summary = "我的文章列表")
     @GetMapping("/mine")
-//    @SaCheckLogin
     @PreAuthorize("isAuthenticated()")
     public Result<PageResult<ArticleVO>> mine(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String status) {
-//        Long userId = StpKit.getLoginId();
         Long userId = securityUtils.getCurrentUserId();
         log.info("获取我的文章列表, userId: {}, page: {}, pageSize: {}, status: {}", userId, page, pageSize, status);
         Result<PageResult<ArticleVO>> result = Result.success(articleService.getArticleList(page, pageSize, null, "latest", status, userId));
@@ -71,7 +70,6 @@ public class ArticleController {
     @Operation(summary = "文章详情")
     @GetMapping("/{articleId}")
     public Result<ArticleVO> getDetail(@PathVariable Long articleId) {
-//        Long userId = StpKit.getLoginId();
         Long userId = securityUtils.getCurrentUserId();
         log.info("获取文章详情, articleId: {}", articleId);
         Result<ArticleVO> result = Result.success(articleService.getArticleDetail(articleId, userId));
@@ -83,7 +81,6 @@ public class ArticleController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public Result<ArticleVO> create(@Valid @RequestBody ArticleCreateRequest request) {
-//        Long userId = StpKit.getLoginId();
         Long userId = securityUtils.getCurrentUserId();
         log.info("发布文章, userId: {}, title: {}", userId, request.getTitle());
         ArticleVO article = articleService.createArticle(userId, request);
@@ -96,7 +93,6 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     public Result<ArticleVO> update(@PathVariable Long articleId,
                                     @Valid @RequestBody ArticleUpdateRequest request) {
-//        Long userId = StpKit.getLoginId();
         Long userId = securityUtils.getCurrentUserId();
         log.info("更新文章, userId: {}, articleId: {}", userId, articleId);
         ArticleVO article = articleService.updateArticle(articleId, userId, request);
@@ -108,8 +104,6 @@ public class ArticleController {
     @DeleteMapping("/{articleId}")
     @PreAuthorize("isAuthenticated()")
     public Result<Void> delete(@PathVariable Long articleId) {
-//        Long userId = StpKit.getLoginId();
-//        boolean isAdmin = StpKit.isAdmin();
         Long userId = securityUtils.getCurrentUserId();
         boolean isAdmin = securityUtils.isAdmin();
         log.info("删除文章, userId: {}, articleId: {}, isAdmin: {}", userId, articleId, isAdmin);
@@ -122,7 +116,6 @@ public class ArticleController {
     @PostMapping("/{articleId}/like")
     @PreAuthorize("isAuthenticated()")
     public Result<ArticleVO> like(@PathVariable Long articleId) {
-//        Long userId = StpKit.getLoginId();
         Long userId = securityUtils.getCurrentUserId();
         log.info("点赞/取消点赞, userId: {}, articleId: {}", userId, articleId);
         Result<ArticleVO> result = Result.success(articleService.toggleLike(articleId, userId));

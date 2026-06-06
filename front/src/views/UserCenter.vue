@@ -36,6 +36,10 @@
           </div>
         </div>
       </div>
+
+      <h2 class="text-base font-semibold text-gray-900 mb-4">Ta 的文章</h2>
+      <ArticleList :articles="articles" :loading="articlesLoading" />
+      <Pagination v-if="total > pageSize" :current-page="page" :total="total" :page-size="pageSize" @change="handlePageChange" />
     </template>
   </div>
 </template>
@@ -45,11 +49,20 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { formatDate, formatNumber } from '@/utils/format'
 import { userService } from '@/services/userService'
+import { articleService } from '@/services/articleService'
+import ArticleList from '@/components/article/ArticleList.vue'
+import Pagination from '@/components/common/Pagination.vue'
+import type { ArticleListItem } from '@/types/article'
 
 const route = useRoute()
 const user = ref<any>(null)
 const loading = ref(true)
 const error = ref('')
+const articles = ref<ArticleListItem[]>([])
+const articlesLoading = ref(false)
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(10)
 
 async function fetchUser() {
   const id = Number(route.params.id)
@@ -60,5 +73,18 @@ async function fetchUser() {
   finally { loading.value = false }
 }
 
-onMounted(() => { fetchUser() })
+async function fetchArticles() {
+  const id = Number(route.params.id)
+  if (!id) return
+  articlesLoading.value = true
+  try {
+    const res = await articleService.getList({ authorId: id, page: page.value, pageSize: pageSize.value })
+    articles.value = res.records; total.value = res.total
+  } catch { /* silent */ }
+  finally { articlesLoading.value = false }
+}
+
+function handlePageChange(p: number) { page.value = p; fetchArticles() }
+
+onMounted(() => { fetchUser(); fetchArticles() })
 </script>

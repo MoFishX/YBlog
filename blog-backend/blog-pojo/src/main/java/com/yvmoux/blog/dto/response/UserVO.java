@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,6 +17,7 @@ public class UserVO {
     private String email;
     private String avatar;
     private String role;
+    private List<ArticleVO> articles;
     private Integer articleCount;
     private String status;
     private LocalDateTime createdAt;

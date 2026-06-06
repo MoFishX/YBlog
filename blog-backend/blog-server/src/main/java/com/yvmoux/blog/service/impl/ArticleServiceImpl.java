@@ -46,14 +46,14 @@ public class ArticleServiceImpl implements ArticleService {
     private final TagConverter tagConverter;
 
     @Override
-    public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId) {
+    public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long authorId) {
         // 构建查询条件
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         if (status != null) {
             wrapper.eq("status", status);
         }
-        if (userId != null) {
-            wrapper.eq("author_id", userId);
+        if (authorId != null) {
+            wrapper.eq("author_id", authorId);
         }
         if (tagName != null) {
             wrapper.exists("select 1 from article_tag at " +

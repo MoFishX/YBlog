@@ -90,6 +90,7 @@ export interface ArticleQuery {
   pageSize?: number
   tagId?: number
   orderBy?: 'latest' | 'hot' | 'oldest'
+  authorId?: number
 }
 
 export interface ArticleFormData {

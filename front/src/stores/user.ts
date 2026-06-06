@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { storage } from '@/utils/storage'
-import { userService } from '@/services/userService'
 import { authApi } from '@/api/modules/auth'
 import type { User } from '@/types/user'
 
@@ -87,10 +86,6 @@ export const useUserStore = defineStore('user', () => {
       if (token.value) {
         if (isTokenExpired()) {
           await refreshAccessToken()
-        } else {
-          const u = await userService.getMe()
-          user.value = u as User
-          storage.set(KEYS.user, u)
         }
       }
     } catch {

@@ -11,7 +11,7 @@ public interface ArticleService {
     /**
      * 获取文章列表
      */
-    PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId);
+    PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long authorId);
     /**
      * 获取文章详情
      */
