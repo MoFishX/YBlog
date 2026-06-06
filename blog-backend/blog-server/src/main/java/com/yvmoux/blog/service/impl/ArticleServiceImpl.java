@@ -47,7 +47,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId) {
-        // 条件查询
+        // 构建查询条件
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         if (status != null) {
             wrapper.eq("status", status);
@@ -66,23 +66,7 @@ public class ArticleServiceImpl implements ArticleService {
             wrapper.orderByDesc("created_at");
         }
 
-        // 分页查询
-        Page<Article> articlePage = articleMapper.selectPage(new Page<>(page, pageSize), wrapper);
-
-        // 构建返回值
-        List<ArticleVO> records = new ArrayList<>();
-        articlePage.getRecords().forEach(article -> {
-            ArticleVO articleVO = articleConverter.toArticleVO(
-                    article,
-                    userMapper.selectById(article.getAuthorId()),
-                    tagConverter.toTagVOList(tagMapper.selectByArticleId(article.getId())),
-                    commentMapper.countByArticleId(article.getId()),
-                    null
-            );
-            records.add(articleVO);
-        });
-
-        return new PageResult<>(records, articlePage.getTotal());
+        return pageResult(page, pageSize, wrapper);
     }
 
     @Override
@@ -372,7 +356,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleVO> getAllArticles(Integer page, Integer pageSize, String status, String keyword) {
-        // 条件查询
+        // 构建查询条件
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
         if (status != null && !status.isBlank()) {
             wrapper.eq("status", status);
@@ -382,6 +366,10 @@ public class ArticleServiceImpl implements ArticleService {
         }
         wrapper.orderByDesc("created_at");
 
+        return pageResult(page, pageSize, wrapper);
+    }
+
+    private PageResult<ArticleVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Article> wrapper) {
         // 分页查询
         Page<Article> articlePage = articleMapper.selectPage(new Page<>(page, pageSize), wrapper);
 
@@ -397,7 +385,6 @@ public class ArticleServiceImpl implements ArticleService {
             );
             records.add(articleVO);
         });
-
         return new PageResult<>(records, articlePage.getTotal());
     }
 

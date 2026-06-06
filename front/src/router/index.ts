@@ -96,7 +96,7 @@ const router = createRouter({
   ]
 })
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to) => {
   if (to.meta.guest) {
     const userStore = useUserStore()
     if (userStore.isLoggedIn) {
@@ -114,18 +114,16 @@ router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth) {
     const userStore = useUserStore()
     if (!userStore.isLoggedIn) {
-      return next({ name: 'AdminLogin', query: { redirect: to.fullPath } })
+      return { name: 'AdminLogin', query: { redirect: to.fullPath } }
     }
   }
 
   if (to.name === 'AdminLogin') {
     const userStore = useUserStore()
     if (userStore.isLoggedIn && userStore.isAdmin) {
-      return next({ name: 'AdminDashboard' })
+      return { name: 'AdminDashboard' }
     }
   }
-
-  next()
 })
 
 export default router

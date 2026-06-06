@@ -67,8 +67,7 @@ public class CommentController {
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "0") Integer unreadOnly) {
-//        Long userId = StpKit.getLoginId();
-        Long userId = 1L;
+        Long userId = securityUtils.getCurrentUserId();
         log.info("获取评论回复, userId: {}, page: {}, pageSize: {}, unreadOnly: {}", userId, page, pageSize, unreadOnly);
         Result<PageResult<CommentVO>> result = Result.success(commentService.getReplies(userId, page, pageSize, unreadOnly == 1));
         log.info("获取评论回复成功, total: {}", result.getData().getTotal());
