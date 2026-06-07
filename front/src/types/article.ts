@@ -65,6 +65,7 @@ export interface ArticleQuery {
   page?: number
   pageSize?: number
   tagId?: number
+  tagName?: string
   orderBy?: 'latest' | 'hot' | 'oldest'
   authorId?: number
 }

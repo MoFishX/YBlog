@@ -27,7 +27,7 @@
             background: gradients[index % gradients.length],
             animationDelay: `${index * 0.05}s`,
           }"
-          @click="goToTag(tag.id)"
+          @click="goToTag(tag.name)"
         >
           <span class="relative z-10">{{ tag.name }}</span>
           <span class="tag-count-badge">{{ tag.articleCount || 0 }}</span>
@@ -70,8 +70,8 @@ function getFontSize(count: number): number {
   return min + ((count / maxCount) * (max - min))
 }
 
-function goToTag(tagId: number) {
-  router.push({ name: 'Home', query: { tagId: tagId.toString() } })
+function goToTag(name: string) {
+  router.push({ name: 'Home', query: { tagName: name } })
 }
 
 async function fetchTags() {

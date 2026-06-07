@@ -23,7 +23,12 @@
       <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-8">
         <div>
           <div class="flex items-center justify-between mb-6">
-            <h2 class="text-lg font-semibold text-gray-900">最新文章</h2>
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900">
+                <template v-if="tagFilter">#{{ tagFilter }}</template>
+                <template v-else>最新文章</template>
+              </h2>
+            </div>
             <div class="flex bg-gray-100 rounded-md p-0.5">
               <button
                 v-for="opt in orderOptions"
@@ -56,8 +61,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { ref, onMounted, watch } from 'vue'
+import { RouterLink, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import ArticleList from '@/components/article/ArticleList.vue'
 import HotRank from '@/components/article/HotRank.vue'
@@ -66,6 +71,7 @@ import { articleService } from '@/services/articleService'
 import type { ArticleListItem, HotArticle } from '@/types/article'
 
 const userStore = useUserStore()
+const route = useRoute()
 
 const articles = ref<ArticleListItem[]>([])
 const hotList = ref<HotArticle[]>([])
@@ -76,6 +82,7 @@ const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
 const orderBy = ref<'latest' | 'hot' | 'oldest'>('latest')
+const tagFilter = ref('')
 
 const orderOptions = [
   { value: 'latest' as const, label: '最新' },
@@ -87,7 +94,8 @@ async function fetchArticles() {
   loading.value = true
   error.value = ''
   try {
-    const res = await articleService.getList({ page: page.value, pageSize: pageSize.value, orderBy: orderBy.value })
+    const tagName = route.query.tagName as string | undefined
+    const res = await articleService.getList({ page: page.value, pageSize: pageSize.value, orderBy: orderBy.value, tagName })
     articles.value = res.records
     total.value = res.total
   } catch (e: any) {
@@ -114,5 +122,15 @@ function handlePageChange(p: number) {
   window.scrollTo({ top: 0 })
 }
 
-onMounted(() => { fetchArticles(); fetchHot() })
+function syncTagFilter() {
+  tagFilter.value = (route.query.tagName as string) || ''
+}
+
+onMounted(() => { syncTagFilter(); fetchArticles(); fetchHot() })
+
+watch(() => route.query.tagName, () => {
+  page.value = 1
+  syncTagFilter()
+  fetchArticles()
+})
 </script>
