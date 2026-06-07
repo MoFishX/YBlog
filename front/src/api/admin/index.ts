@@ -1,5 +1,0 @@
-export { articleApi } from './modules/article'
-export { userApi } from './modules/user'
-export { commentApi } from './modules/comment'
-export { tagApi } from './modules/tag'
-export { dashboardApi } from './modules/dashboard'

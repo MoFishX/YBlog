@@ -1,12 +1,9 @@
 import { tagApi } from '@/api/admin/modules/tag'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { Tag } from '@/types/article'
+import { tagService as publicTagService } from '@/services/tagService'
 
 export const tagService = {
-  async getList(): Promise<Tag[]> {
-    const res = await tagApi.getList()
-    return res.data
-  },
+  getList: publicTagService.getList,
 
   async create(name: string): Promise<{ id: number; name: string }> {
     const res = await tagApi.create({ name })

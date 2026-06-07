@@ -15,6 +15,19 @@ export interface Comment {
   createdAt: string
 }
 
+export interface AdminComment {
+  id: number
+  content: string
+  articleId: number
+  articleTitle: string
+  user: {
+    id: number
+    username: string
+  }
+  status: string
+  createdAt: string
+}
+
 export interface ReplyNotification {
   id: number
   content: string

@@ -1,6 +1,6 @@
 import { commentApi } from '@/api/admin/modules/comment'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import type { AdminComment } from '@/api/admin/modules/comment'
+import type { AdminComment } from '@/types/comment'
 import type { PageResult } from '@/types/api'
 
 export const commentService = {

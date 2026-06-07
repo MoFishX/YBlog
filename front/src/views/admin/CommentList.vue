@@ -58,7 +58,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { formatDate } from '@/utils/format'
 import { commentService } from '@/services/admin/commentService'
-import type { AdminComment } from '@/api/admin/modules/comment'
+import type { AdminComment } from '@/types/comment'
 
 const list = ref<AdminComment[]>([])
 const loading = ref(false)

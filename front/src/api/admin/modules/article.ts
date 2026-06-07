@@ -1,22 +1,15 @@
 import request from '@/api/request'
 import type { ApiResponse, PageResult } from '@/types/api'
-import type { ArticleListItem, Article, ArticleFormData } from '@/types/article'
+import type { ArticleListItem } from '@/types/article'
+import { articleApi as publicArticleApi } from '@/api/modules/article'
 
 export const articleApi = {
+  getDetail: publicArticleApi.getDetail,
+  create: publicArticleApi.create,
+  update: publicArticleApi.update,
+
   getList(params: { page?: number; pageSize?: number; status?: string; keyword?: string }): Promise<ApiResponse<PageResult<ArticleListItem>>> {
     return request.get('/admin/articles', { params })
-  },
-
-  getDetail(id: number): Promise<ApiResponse<Article>> {
-    return request.get(`/articles/${id}`)
-  },
-
-  create(data: ArticleFormData): Promise<ApiResponse<{ id: number; title: string; status: string; createdAt: string }>> {
-    return request.post('/articles', data)
-  },
-
-  update(id: number, data: Partial<ArticleFormData>): Promise<ApiResponse<{ id: number; title: string; status: string; updatedAt: string }>> {
-    return request.put(`/articles/${id}`, data)
   },
 
   delete(id: number): Promise<ApiResponse<null>> {
