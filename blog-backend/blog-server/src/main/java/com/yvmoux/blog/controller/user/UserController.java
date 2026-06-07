@@ -1,4 +1,4 @@
-package com.yvmoux.blog.controller;
+package com.yvmoux.blog.controller.user;
 
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.request.ChangePasswordRequest;
@@ -14,11 +14,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
 @Tag(name = "用户")
-@RestController
+@RestController("userUserController")
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Slf4j
+@PreAuthorize("isAuthenticated()")
 public class UserController {
 
     private final UserService userService;
@@ -26,7 +27,6 @@ public class UserController {
 
     @Operation(summary = "获取指定用户信息")
     @GetMapping("/{userId}")
-    @PreAuthorize("isAuthenticated()")
     public Result<UserVO> getUserById(@PathVariable Long userId) {
         log.info("获取用户公开信息, userId: {}", userId);
         Result<UserVO> result = Result.success(userService.getUserById(userId));
@@ -36,7 +36,6 @@ public class UserController {
 
     @Operation(summary = "更新个人资料")
     @PutMapping("/me")
-    @PreAuthorize("isAuthenticated()")
     public Result<UserVO> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         Long userId = securityUtils.getCurrentUserId();
         log.info("更新个人资料, userId: {}", userId);
@@ -47,7 +46,6 @@ public class UserController {
 
     @Operation(summary = "修改密码")
     @PutMapping("/me/password")
-    @PreAuthorize("isAuthenticated()")
     public Result<Void> changePassword(@Valid @RequestBody ChangePasswordRequest request) {
         Long userId = securityUtils.getCurrentUserId();
         log.info("修改密码, userId: {}", userId);

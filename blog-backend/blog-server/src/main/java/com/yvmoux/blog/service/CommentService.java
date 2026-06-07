@@ -6,7 +6,7 @@ import com.yvmoux.blog.dto.response.CommentVO;
 
 public interface CommentService {
     PageResult<CommentVO> getCommentsByArticle(Long articleId, Integer page, Integer pageSize);
-    CommentVO createComment(Long userId, Long articleId, CommentCreateRequest request);
+    CommentVO createComment(Long userId, CommentCreateRequest request);
     void deleteComment(Long commentId, Long userId, boolean isAdmin);
     PageResult<CommentVO> getReplies(Long userId, Integer page, Integer pageSize, boolean unreadOnly);
     PageResult<CommentVO> getAllComments(Integer page, Integer pageSize, String keyword, Long articleId);

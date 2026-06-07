@@ -6,6 +6,8 @@ import lombok.Getter;
 
 @Getter
 public class CommentCreateRequest {
+    private Long articleId;
+
     @NotBlank
     @Size(min = 1, max = 1000)
     private String content;

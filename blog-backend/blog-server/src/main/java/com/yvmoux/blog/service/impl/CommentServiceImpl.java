@@ -62,7 +62,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public CommentVO createComment(Long userId, Long articleId, CommentCreateRequest request) {
+    public CommentVO createComment(Long userId, CommentCreateRequest request) {
+        Long articleId = request.getArticleId();
         // 校验文章存在
         if (articleMapper.selectById(articleId) == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);

@@ -1,4 +1,4 @@
-package com.yvmoux.blog.controller;
+package com.yvmoux.blog.controller.pub;
 
 import com.yvmoux.blog.dto.LoginResult;
 import com.yvmoux.blog.dto.RefreshResult;
@@ -15,11 +15,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-@Slf4j
-@Tag(name = "认证")
-@RestController
+@Tag(name = "公共-认证")
+@RestController("pubAuthController")
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthController {
 
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
@@ -30,7 +30,7 @@ public class AuthController {
     @Operation(summary = "登录")
     @PostMapping("/login")
     public Result<LoginResult> login(@Valid @RequestBody LoginRequest request,
-                                      HttpServletResponse response) {
+                                     HttpServletResponse response) {
         log.info("用户登录, username: {}", request.getUsername());
         LoginResult result = authService.login(request);
 
