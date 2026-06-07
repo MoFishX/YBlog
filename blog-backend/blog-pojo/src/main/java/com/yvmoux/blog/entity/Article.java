@@ -38,13 +38,4 @@ public class Article {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
-
-    @TableLogic
-    private LocalDateTime deletedAt;
-//
-//    @TableField(exist = false)
-//    private List<Tag> tags;
-//
-//    @TableField(exist = false)
-//    private Integer commentCount;
 }

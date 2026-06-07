@@ -25,11 +25,9 @@ create table article (
                          like_count  bigint       not null default 0                     comment '点赞数',
                          created_at  datetime     not null                               comment '创建时间',
                          updated_at  datetime     not null                               comment '更新时间',
-                         deleted_at  datetime     default null                           comment '软删除时间',
                          primary key (id),
                          index idx_author (author_id),
-                         index idx_created (created_at),
-                         index idx_deleted (deleted_at)
+                         index idx_created (created_at)
 ) engine=InnoDB;
 
 -- 文章内容表

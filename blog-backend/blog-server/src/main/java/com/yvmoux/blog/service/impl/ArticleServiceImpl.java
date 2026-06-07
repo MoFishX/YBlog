@@ -171,7 +171,6 @@ public class ArticleServiceImpl implements ArticleService {
                 .likeCount(0L)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
-                .deletedAt(null)
                 .build();
         articleMapper.insert(article);
 
@@ -290,6 +289,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public void deleteArticleOne(Long articleId, Long userId) {
         deleteArticle(articleId.toString(), userId, false);
     }
