@@ -26,7 +26,7 @@ public class ArticleConverter {
                 .viewCount(article.getViewCount())
                 .likeCount(article.getLikeCount())
                 .commentCount(commentCount)
-                .isLiked(false) // TODO: 获取当前用户是否点赞
+                .isLiked(false)
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
                 .build();

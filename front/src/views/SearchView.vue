@@ -8,7 +8,7 @@
         <div class="flex-1 relative">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input
-            v-model="searchText" @keyup.enter="search" @input="hint = ''" type="text"
+            v-model="searchText" @keyup.enter="search" type="text"
             class="w-full border border-gray-200 rounded-md pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-gray-900 focus:border-gray-900 transition-all"
             placeholder="输入关键词搜索文章..."
           />
@@ -20,7 +20,6 @@
           {{ searching ? '搜索中...' : '搜索' }}
         </button>
       </div>
-      <p v-if="hint" class="mt-2 text-xs text-gray-400">{{ hint }}</p>
     </div>
 
     <div v-if="error" class="bg-red-50 border border-red-100 rounded-lg p-4 text-center mb-6">
@@ -73,7 +72,6 @@ const results = ref<ArticleListItem[]>([])
 const searching = ref(false)
 const searched = ref(false)
 const error = ref('')
-const hint = ref('')
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
@@ -81,11 +79,7 @@ const total = ref(0)
 async function doSearch() {
   const kw = searchText.value.trim()
   if (!kw) return
-  if (kw.length < 2) {
-    hint.value = '请输入至少2个字符进行搜索'
-    return
-  }
-  hint.value = ''; searching.value = true; searched.value = true; error.value = ''
+  searching.value = true; searched.value = true; error.value = ''
   try {
     const res = await articleService.search(kw, page.value, pageSize.value)
     results.value = res.records; total.value = res.total
