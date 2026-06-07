@@ -12,6 +12,9 @@
         <RouterLink to="/search" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
           搜索
         </RouterLink>
+        <RouterLink to="/tags" class="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md transition-colors">
+          标签
+        </RouterLink>
       </nav>
 
       <div class="hidden md:flex items-center gap-3">
@@ -60,6 +63,9 @@
           </RouterLink>
           <RouterLink to="/search" @click="mobileOpen = false" class="block px-4 py-3 text-sm text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
             搜索
+          </RouterLink>
+          <RouterLink to="/tags" @click="mobileOpen = false" class="block px-4 py-3 text-sm text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+            标签
           </RouterLink>
           <div class="border-t border-gray-50 pt-2 mt-2">
             <template v-if="userStore.isLoggedIn && userStore.user">

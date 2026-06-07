@@ -24,6 +24,11 @@ const router = createRouter({
       props: (route) => ({ keyword: route.query.q || '' })
     },
     {
+      path: '/tags',
+      name: 'TagList',
+      component: () => import('@/views/TagList.vue')
+    },
+    {
       path: '/login',
       name: 'Login',
       component: () => import('@/views/LoginView.vue'),
