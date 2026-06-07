@@ -26,7 +26,7 @@ public class StatsController {
     private final AdminService adminService;
 
     @Operation(summary = "系统统计概览")
-    @GetMapping("/stats")
+    @GetMapping
     public Result<StatsVO> stats() {
         log.info("获取系统统计概览");
         Result<StatsVO> result = Result.success(adminService.getStats());
@@ -35,7 +35,7 @@ public class StatsController {
     }
 
     @Operation(summary = "周访问趋势")
-    @GetMapping("/stats/weekly-trend")
+    @GetMapping("/weekly-trend")
     public Result<List<TrendVO>> weeklyTrend() {
         log.info("获取周访问趋势");
         Result<List<TrendVO>> result = Result.success(adminService.getWeeklyTrend());

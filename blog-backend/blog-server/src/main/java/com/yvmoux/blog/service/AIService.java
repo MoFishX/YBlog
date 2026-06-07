@@ -1,6 +1,7 @@
 package com.yvmoux.blog.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yvmoux.blog.config.AIConfig;
 import lombok.AllArgsConstructor;
@@ -62,7 +63,7 @@ public class AIService {
 
             String response = RestClient.create()
                     .post()
-                    .uri(aiConfig.getBaseUrl() + "v1/chat/completions")
+                    .uri(aiConfig.getBaseUrl() + "/v1/chat/completions")
                     .header("Content-Type", "application/json")
                     .header("Authorization", "Bearer " + aiConfig.getApiKey())
                     .body(json)
@@ -70,9 +71,9 @@ public class AIService {
                     .body(String.class);
 
             // 解析响应
-            ChatCompletionResponse resp = objectMapper.readValue(response, ChatCompletionResponse.class);
-            if (resp.getChoices() != null && !resp.getChoices().isEmpty()) {
-                String summary = resp.getChoices().getFirst().getMessage().getContent();
+            ChatCompletionResponse res = objectMapper.readValue(response, ChatCompletionResponse.class);
+            if (res.getChoices() != null && !res.getChoices().isEmpty()) {
+                String summary = res.getChoices().getFirst().getMessage().getContent();
                 log.info("AI 总结完成，长度: {} 字符", summary.length());
                 return summary;
             }
@@ -88,12 +89,14 @@ public class AIService {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ChatCompletionResponse {
         private List<Choice> choices;
 
         @Data
         @NoArgsConstructor
         @AllArgsConstructor
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Choice {
             private Message message;
         }
@@ -101,6 +104,7 @@ public class AIService {
         @Data
         @NoArgsConstructor
         @AllArgsConstructor
+        @JsonIgnoreProperties(ignoreUnknown = true)
         public static class Message {
             private String content;
         }

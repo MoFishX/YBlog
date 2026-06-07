@@ -427,6 +427,16 @@ public class ArticleServiceImpl implements ArticleService {
         articleMapper.updateById(article);
     }
 
+    @Override
+    public String getAiSummary(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        String aiSummary = article.getAiSummary();
+        if (aiSummary == null || aiSummary.isBlank()) {
+            throw new BusinessException(ErrorCode.NOT_FOUND);
+        }
+        return aiSummary;
+    }
+
     private PageResult<ArticleVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Article> wrapper) {
         // 分页查询
         Page<Article> articlePage = articleMapper.selectPage(new Page<>(page, pageSize), wrapper);

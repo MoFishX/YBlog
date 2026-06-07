@@ -57,4 +57,9 @@ public interface ArticleService {
      * 删除 AI 总结
      */
     void deleteAiSummary(Long articleId);
+
+    /**
+     * 获取 AI 总结
+     */
+    String getAiSummary(Long articleId);
 }

@@ -71,4 +71,13 @@ public class ArticleController {
         log.info("获取文章详情成功, articleId: {}", articleId);
         return result;
     }
+
+    @Operation(summary = "获取文章ai总结")
+    @GetMapping("/ai")
+    public Result<String> getAiSummary(@RequestParam Long articleId) {
+        log.info("获取文章ai总结, {}}", articleId);
+        Result<String> result = Result.success(articleService.getAiSummary(articleId));
+        log.info("获取文章ai总结成功, articleId: {}", articleId);
+        return result;
+    }
 }
