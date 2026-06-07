@@ -14,6 +14,14 @@ logging:
   level:
     com.yvmoux.blog: info
 
+ai:
+  base-url: https://api.deepseek.com
+  api-key:
+  model: deepseek-chat
+  max-tokens: 1024
+  temperature: 0.3
+  enabled: true
+
 springdoc:
   api-docs:
     enabled: false
