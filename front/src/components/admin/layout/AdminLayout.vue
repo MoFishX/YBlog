@@ -59,8 +59,8 @@
 import { computed } from 'vue'
 import { useRoute, useRouter, RouterView } from 'vue-router'
 import { HomeFilled, Document, User, ChatDotRound, PriceTag } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/adminUser'
-import { authService } from '@/services/admin/authService'
+import { useUserStore } from '@/stores/user'
+import { authService } from '@/services/authService'
 import Breadcrumb from './Breadcrumb.vue'
 
 const route = useRoute()

@@ -1,4 +1,4 @@
-import request from '../request'
+import request from '@/api/request'
 import type { ApiResponse, PageResult } from '@/types/api'
 import type { ArticleListItem, Article, ArticleFormData } from '@/types/article'
 

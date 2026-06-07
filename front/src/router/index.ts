@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { useUserStore as useAdminUserStore } from '@/stores/adminUser'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -98,30 +97,28 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  const userStore = useUserStore()
+
   if (to.meta.guest) {
-    const userStore = useUserStore()
     if (userStore.isLoggedIn) {
       return { name: 'Home' }
     }
   }
 
   if (to.meta.requiresAdmin) {
-    const adminUserStore = useAdminUserStore()
-    if (!adminUserStore.isAdmin) {
+    if (!userStore.isAdmin) {
       return { name: 'NotFound' }
     }
   }
 
   if (to.meta.requiresAuth) {
-    const adminUserStore = useAdminUserStore()
-    if (!adminUserStore.isLoggedIn) {
+    if (!userStore.isLoggedIn) {
       return { name: 'AdminLogin', query: { redirect: to.fullPath } }
     }
   }
 
   if (to.name === 'AdminLogin') {
-    const adminUserStore = useAdminUserStore()
-    if (adminUserStore.isLoggedIn && adminUserStore.isAdmin) {
+    if (userStore.isLoggedIn && userStore.isAdmin) {
       return { name: 'AdminDashboard' }
     }
   }

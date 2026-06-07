@@ -1,4 +1,3 @@
-export { authApi } from './modules/auth'
 export { articleApi } from './modules/article'
 export { userApi } from './modules/user'
 export { commentApi } from './modules/comment'

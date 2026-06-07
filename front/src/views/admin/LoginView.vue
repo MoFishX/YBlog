@@ -32,8 +32,9 @@
 import { ref, reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { User, Lock } from '@element-plus/icons-vue'
-import { useUserStore } from '@/stores/adminUser'
-import { authService } from '@/services/admin/authService'
+import { useUserStore } from '@/stores/user'
+import { authService } from '@/services/authService'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter()
 const route = useRoute()
@@ -52,6 +53,10 @@ async function handleLogin() {
   error.value = ''
   try {
     const res = await authService.login(form)
+    if (res.user.role !== 'ADMIN') {
+      ElMessage.error('仅管理员可登录后台')
+      return
+    }
     userStore.setAuth(res.accessToken, res.expiresIn, res.user)
     const redirect = (route.query.redirect as string) || '/admin'
     router.push(redirect)

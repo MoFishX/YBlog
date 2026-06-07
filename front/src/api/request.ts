@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
+import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
 import { setupMock } from '@/mock/mockData'
@@ -74,11 +75,17 @@ instance.interceptors.response.use(
       } catch {
         processQueue(new Error('refresh failed'))
         userStore.logout()
-        router.push({ name: 'Login' })
+        const isAdminRoute = router.currentRoute.value.path.startsWith('/admin')
+        router.push(isAdminRoute ? '/admin/login' : { name: 'Login' })
         return Promise.reject(error)
       } finally {
         isRefreshing = false
       }
+    }
+
+    if (response?.status && response.status !== 401) {
+      const msg = response?.data?.message
+      if (msg) ElMessage.error(msg)
     }
 
     return Promise.reject(error)
