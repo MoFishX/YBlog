@@ -3,7 +3,7 @@
     <div class="bg-white rounded-lg border border-gray-100 p-8">
       <div class="text-center mb-8">
         <h1 class="text-xl font-bold text-gray-900 mb-2">创建账号</h1>
-        <p class="text-sm text-gray-500">加入 Reasonix，分享你的思考</p>
+        <p class="text-sm text-gray-500">加入 yvmouX Blog，分享你的思考</p>
       </div>
 
       <div v-if="error" class="bg-red-50 border border-red-100 rounded-md p-3 mb-6">

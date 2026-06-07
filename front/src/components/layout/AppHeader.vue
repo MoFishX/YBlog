@@ -2,7 +2,7 @@
   <header class="sticky top-0 z-50 bg-white border-b border-gray-100">
     <div class="container mx-auto px-4 h-14 flex items-center justify-between">
       <RouterLink to="/" class="text-xl font-semibold text-gray-900 hover:text-gray-600 transition-colors">
-        Reasonix
+        yvmouX Blog
       </RouterLink>
 
       <nav class="hidden md:flex items-center gap-1">

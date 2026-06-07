@@ -41,12 +41,6 @@ const router = createRouter({
       component: () => import('@/views/UserCenter.vue')
     },
     {
-      path: '/admin/login',
-      name: 'AdminLogin',
-      component: () => import('@/views/admin/LoginView.vue'),
-      meta: { blank: true }
-    },
-    {
       path: '/admin',
       component: () => import('@/components/admin/layout/AdminLayout.vue'),
       meta: { requiresAuth: true, requiresAdmin: true, blank: true },
@@ -113,13 +107,7 @@ router.beforeEach((to) => {
 
   if (to.meta.requiresAuth) {
     if (!userStore.isLoggedIn) {
-      return { name: 'AdminLogin', query: { redirect: to.fullPath } }
-    }
-  }
-
-  if (to.name === 'AdminLogin') {
-    if (userStore.isLoggedIn && userStore.isAdmin) {
-      return { name: 'AdminDashboard' }
+      return { name: 'Login', query: { redirect: to.fullPath } }
     }
   }
 })

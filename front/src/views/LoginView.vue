@@ -38,11 +38,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { RouterLink, useRouter } from 'vue-router'
+import { RouterLink, useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { authService } from '@/services/authService'
 
 const router = useRouter()
+const route = useRoute()
 const userStore = useUserStore()
 
 const form = ref({ username: '', password: '' })
@@ -54,7 +55,8 @@ async function handleLogin() {
   try {
     const res = await authService.login(form.value)
     userStore.setAuth(res.accessToken, res.expiresIn, res.user)
-    router.push('/')
+    const redirect = (route.query.redirect as string) || '/'
+    router.push(redirect)
   } catch (e: any) { error.value = e?.response?.data?.message || '登录失败' }
   finally { loading.value = false }
 }

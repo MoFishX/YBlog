@@ -2,7 +2,7 @@
   <el-container class="admin-layout">
     <el-aside width="220px" class="admin-aside">
       <div class="logo-area">
-        <span class="text-white text-base font-semibold">Reasonix Admin</span>
+        <span class="text-white text-base font-semibold">yvmouX Blog</span>
       </div>
       <el-menu
         :default-active="activeMenu"

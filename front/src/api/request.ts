@@ -75,8 +75,7 @@ instance.interceptors.response.use(
       } catch {
         processQueue(new Error('refresh failed'))
         userStore.logout()
-        const isAdminRoute = router.currentRoute.value.path.startsWith('/admin')
-        router.push(isAdminRoute ? '/admin/login' : { name: 'Login' })
+        router.push({ name: 'Login' })
         return Promise.reject(error)
       } finally {
         isRefreshing = false

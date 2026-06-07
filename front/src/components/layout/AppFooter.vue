@@ -3,7 +3,7 @@
     <div class="container mx-auto px-4 py-10">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
         <div>
-          <h3 class="text-base font-semibold text-gray-900 mb-2">Reasonix</h3>
+          <h3 class="text-base font-semibold text-gray-900 mb-2">yvmouX Blog</h3>
           <p class="text-sm text-gray-500 leading-relaxed">一个分享技术与思考的博客平台。</p>
         </div>
         <div>
@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="border-t border-gray-50 pt-6 text-center text-sm text-gray-400">
-        &copy; {{ year }} Reasonix. All rights reserved.
+        &copy; {{ year }} yvmouX Blog. All rights reserved.
       </div>
     </div>
   </footer>
