@@ -1,14 +1,14 @@
-import request from '../request'
+import request from '@/api/request'
 import type { ApiResponse, PageResult } from '@/types/api'
 import type { Comment, ReplyNotification, CommentFormData } from '@/types/comment'
 
 export const commentApi = {
-  getList(articleId: number, params?: { page?: number; pageSize?: number }): Promise<ApiResponse<PageResult<Comment>>> {
-    return request.get(`/articles/${articleId}/comments`, { params })
+  getList(params: { articleId: number; page?: number; pageSize?: number }): Promise<ApiResponse<PageResult<Comment>>> {
+    return request.get('/comments', { params })
   },
 
-  create(articleId: number, data: CommentFormData): Promise<ApiResponse<{ id: number; content: string; createdAt: string }>> {
-    return request.post(`/articles/${articleId}/comments`, data)
+  create(data: CommentFormData): Promise<ApiResponse<{ id: number; content: string; createdAt: string }>> {
+    return request.post('/comments', data)
   },
 
   delete(commentId: number): Promise<ApiResponse<null>> {

@@ -3,13 +3,13 @@ import type { Comment, ReplyNotification, CommentFormData } from '@/types/commen
 import type { PageResult } from '@/types/api'
 
 export const commentService = {
-  async getList(articleId: number, params?: { page?: number; pageSize?: number }): Promise<PageResult<Comment>> {
-    const res = await commentApi.getList(articleId, params)
+  async getList(params: { articleId: number; page?: number; pageSize?: number }): Promise<PageResult<Comment>> {
+    const res = await commentApi.getList(params)
     return res.data
   },
 
-  async create(articleId: number, data: CommentFormData): Promise<{ id: number; content: string; createdAt: string }> {
-    const res = await commentApi.create(articleId, data)
+  async create(data: CommentFormData): Promise<{ id: number; content: string; createdAt: string }> {
+    const res = await commentApi.create(data)
     return res.data
   },
 

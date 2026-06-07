@@ -42,6 +42,7 @@ export interface ReplyNotification {
 }
 
 export interface CommentFormData {
+  articleId: number
   content: string
   parentId?: number | null
 }

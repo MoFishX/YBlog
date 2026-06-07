@@ -6,14 +6,14 @@ export const tagApi = {
   getList: publicTagApi.getList,
 
   create(data: { name: string }): Promise<ApiResponse<{ id: number; name: string }>> {
-    return request.post('/tags', data)
+    return request.post('/admin/tags', data)
   },
 
   update(id: number, data: { name: string }): Promise<ApiResponse<{ id: number; name: string }>> {
-    return request.put(`/tags/${id}`, data)
+    return request.put(`/admin/tags/${id}`, data)
   },
 
   delete(id: number): Promise<ApiResponse<null>> {
-    return request.delete(`/tags/${id}`)
+    return request.delete(`/admin/tags/${id}`)
   }
 }

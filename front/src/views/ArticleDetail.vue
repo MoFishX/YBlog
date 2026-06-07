@@ -180,7 +180,7 @@ async function fetchComments() {
   if (!id) return
   commentLoading.value = true
   try {
-    const res = await commentService.getList(id, { page: commentPage.value, pageSize: commentPageSize.value })
+    const res = await commentService.getList({ articleId: id, page: commentPage.value, pageSize: commentPageSize.value })
     comments.value = res.records; commentTotal.value = res.total
   } catch { /* silent */ }
   finally { commentLoading.value = false }
@@ -200,7 +200,7 @@ async function submitComment() {
   if (!id || !commentText.value.trim()) return
   submitting.value = true
   try {
-    await commentService.create(id, { content: commentText.value, parentId: replyParentId.value })
+    await commentService.create({ articleId: id, content: commentText.value, parentId: replyParentId.value })
     commentText.value = ''; replyTarget.value = null; replyParentId.value = null
     commentPage.value = 1; await fetchComments()
   } catch { /* keep text */ }

@@ -430,16 +430,16 @@ function matchApi(method, url, data, config = {}) {
   if (method === 'get' && path === '/tags') {
     return ok(ALL_TAGS_CACHE, config)
   }
-  if (method === 'post' && path === '/tags') {
+  if (method === 'post' && path === '/admin/tags') {
     return ok({ id: nextId(), name: data?.name || 'NewTag' }, config)
   }
-  const tagMatch = matchUrl(path, [
-    ['/tags/:tagId', null]
+  const adminTagMatch = matchUrl(path, [
+    ['/admin/tags/:tagId', null]
   ])
-  if (method === 'put' && tagMatch) {
-    return ok({ id: Number(tagMatch.params.tagId), name: data?.name || 'UpdatedTag' }, config)
+  if (method === 'put' && adminTagMatch) {
+    return ok({ id: Number(adminTagMatch.params.tagId), name: data?.name || 'UpdatedTag' }, config)
   }
-  if (method === 'delete' && tagMatch) {
+  if (method === 'delete' && adminTagMatch) {
     return ok(null, config)
   }
 
@@ -502,16 +502,14 @@ function matchApi(method, url, data, config = {}) {
   }
 
   // ========== Comments ==========
-  const commentsMatch = matchUrl(path, [
-    ['/articles/:articleId/comments', null]
-  ])
-  if (method === 'get' && commentsMatch) {
+  if (method === 'get' && path === '/comments') {
+    const articleId = data?.articleId
     const comments = Array.from({ length: randomInt(3, 15) }, () =>
-      randomComment({ replyTo: null })
+      randomComment({ replyTo: null, articleId: Number(articleId) || 1 })
     )
     return ok(paginate(comments, data?.page || 1, data?.pageSize || 10), config)
   }
-  if (method === 'post' && commentsMatch) {
+  if (method === 'post' && path === '/comments') {
     return ok({ id: nextId(), content: data?.content || '', createdAt: randomDateStr() }, config)
   }
   if (method === 'get' && path === '/comments/replies') {
