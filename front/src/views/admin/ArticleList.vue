@@ -11,7 +11,6 @@
           <el-select v-model="filters.status" placeholder="全部" clearable @change="fetchList">
             <el-option label="已发布" value="PUBLISHED" />
             <el-option label="草稿" value="DRAFT" />
-            <el-option label="审核中" value="REVIEWING" />
           </el-select>
         </el-form-item>
         <el-form-item label="关键词">
@@ -45,16 +44,14 @@
           <template #default="{ row }">
             <el-tag v-if="row.status === 'PUBLISHED'" type="success">已发布</el-tag>
             <el-tag v-else-if="row.status === 'DRAFT'" type="info">草稿</el-tag>
-            <el-tag v-else-if="row.status === 'REVIEWING'" type="warning">审核中</el-tag>
             <el-tag v-else>{{ row.status }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="viewCount" label="阅读" width="80" />
         <el-table-column prop="commentCount" label="评论" width="80" />
-        <el-table-column label="操作" width="260" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="$router.push(`/admin/articles/editor/${row.id}`)">编辑</el-button>
-            <el-button v-if="row.status === 'REVIEWING'" size="small" type="warning" @click="handleReview(row.id)">审核</el-button>
             <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -128,15 +125,6 @@ async function handleBatchDelete() {
     await fetchList()
   } catch {
     // user canceled or failed
-  }
-}
-
-async function handleReview(id: number) {
-  try {
-    await articleService.review(id, 'APPROVED')
-    await fetchList()
-  } catch {
-    // failed
   }
 }
 

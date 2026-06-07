@@ -27,9 +27,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -253,20 +255,38 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public void deleteArticle(Long articleId, Long userId, boolean isAdmin) {
-        // 获取文章并校验权限
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
-            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
-        }
-        if (!article.getAuthorId().equals(userId) && !isAdmin) {
-            throw new BusinessException(ErrorCode.FORBIDDEN);
+    public void deleteArticle(String ids, Long userId, boolean isAdmin) {
+        List<Long> articleIds;
+        try {
+            articleIds = Arrays.stream(ids.split(","))
+                    .map(Long::valueOf)
+                    .toList();
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
 
-        // 删除文章及内容
-        articleMapper.deleteById(articleId);
-        articleContentMapper.deleteById(articleId);
+        // 获取文章并校验权限
+        List<Article> articleList = articleMapper.selectBatchIds(articleIds);
+        for (Article article : articleList) {
+            if (article == null) {
+                throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+            }
+            if (!article.getAuthorId().equals(userId) && !isAdmin) {
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+
+            // 删除文章及内容
+            Long articleId = article.getId();
+            articleMapper.deleteById(articleId);
+            articleContentMapper.deleteById(articleId);
+        }
     }
+
+    @Override
+    public void deleteArticleOne(Long articleId, Long userId) {
+        deleteArticle(articleId.toString(), userId, false);
+    }
+
 
     @Override
     @Transactional
@@ -331,14 +351,6 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return records;
-    }
-
-    @Override
-    public void batchDelete(List<Long> ids) {
-        for (Long id : ids) {
-            articleMapper.deleteById(id);
-            articleContentMapper.deleteById(id);
-        }
     }
 
     @Override

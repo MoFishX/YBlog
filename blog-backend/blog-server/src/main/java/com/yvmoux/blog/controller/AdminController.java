@@ -2,8 +2,6 @@ package com.yvmoux.blog.controller;
 
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.Result;
-import com.yvmoux.blog.dto.request.BatchDeleteRequest;
-import com.yvmoux.blog.dto.request.ReviewRequest;
 import com.yvmoux.blog.dto.request.UpdateUserRoleRequest;
 import com.yvmoux.blog.dto.request.UpdateUserStatusRequest;
 import com.yvmoux.blog.dto.response.*;
@@ -85,22 +83,12 @@ public class AdminController {
     }
 
     @Operation(summary = "强制删除文章")
-    @DeleteMapping("/articles/{articleId}")
-    public Result<Void> forceDeleteArticle(@PathVariable Long articleId) {
-        log.info("强制删除文章, articleId: {}", articleId);
-        articleService.deleteArticle(articleId, null, true);
-        log.info("强制删除文章成功, articleId: {}", articleId);
+    @DeleteMapping("/articles")
+    public Result<Void> forceDeleteArticle(@RequestParam String ids) {
+        log.info("强制删除文章, articleId: {}", ids);
+        articleService.deleteArticle(ids, null, true);
+        log.info("强制删除文章成功, articleId: {}", ids);
         return Result.success("删除成功", null);
-    }
-
-    @Operation(summary = "批量删除文章")
-    @PostMapping("/articles/batch-delete")
-    public Result<Map<String, Integer>> batchDelete(@Valid @RequestBody BatchDeleteRequest request) {
-        log.info("批量删除文章, ids: {}", request.getIds());
-        articleService.batchDelete(request.getIds());
-        log.info("批量删除文章成功, count: {}", request.getIds().size());
-        return Result.success("已删除 " + request.getIds().size() + " 篇文章",
-                java.util.Map.of("deletedCount", request.getIds().size()));
     }
 
     @Operation(summary = "评论管理列表")

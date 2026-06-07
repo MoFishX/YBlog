@@ -548,19 +548,13 @@ function matchApi(method, url, data, config = {}) {
     return ok(paginate(ARTICLES_CACHE, data?.page || 1, data?.pageSize || 10), config)
   }
   const adminArticleMatch = matchUrl(path, [
-    ['/admin/articles/:articleId', null],
-    ['/admin/articles/:articleId/review', null]
+    ['/admin/articles/:articleId', null]
   ])
   if (method === 'delete' && adminArticleMatch) {
     return ok(null, config)
   }
-  if (method === 'put' && path.endsWith('/review')) {
-    const id = Number(adminArticleMatch.params.articleId)
-    return ok({ id, title: pick(TITLES), status: data?.status || 'APPROVED' }, config)
-  }
-  if (method === 'post' && path === '/admin/articles/batch-delete') {
-    const ids = data?.ids || []
-    return ok({ deletedCount: ids.length || randomInt(1, 5) }, config)
+  if (method === 'delete' && path === '/admin/articles') {
+    return ok(null, config)
   }
 
   // ========== Admin: Comments ==========

@@ -16,11 +16,7 @@ export const articleApi = {
     return request.delete(`/admin/articles/${id}`)
   },
 
-  batchDelete(ids: number[]): Promise<ApiResponse<{ deletedCount: number }>> {
-    return request.post('/admin/articles/batch-delete', { ids })
-  },
-
-  review(id: number, data: { status: 'APPROVED' | 'REJECTED'; reason?: string }): Promise<ApiResponse<{ id: number; title: string; status: string }>> {
-    return request.put(`/admin/articles/${id}/review`, data)
+  batchDelete(ids: number[]): Promise<ApiResponse<null>> {
+    return request.delete('/admin/articles', { params: { ids: ids.join(',') } })
   }
 }

@@ -35,10 +35,5 @@ export const articleService = {
     await ElMessageBox.confirm(`确认删除选中的 ${ids.length} 篇文章？此操作不可撤销。`, '警告', { type: 'warning' })
     await articleApi.batchDelete(ids)
     ElMessage.success(`已删除 ${ids.length} 篇文章`)
-  },
-
-  async review(id: number, status: 'APPROVED' | 'REJECTED', reason?: string): Promise<void> {
-    await articleApi.review(id, { status, reason })
-    ElMessage.success(status === 'APPROVED' ? '审核通过' : '已驳回')
   }
 }

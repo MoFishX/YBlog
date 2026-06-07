@@ -105,9 +105,8 @@ public class ArticleController {
     @PreAuthorize("isAuthenticated()")
     public Result<Void> delete(@PathVariable Long articleId) {
         Long userId = securityUtils.getCurrentUserId();
-        boolean isAdmin = securityUtils.isAdmin();
-        log.info("删除文章, userId: {}, articleId: {}, isAdmin: {}", userId, articleId, isAdmin);
-        articleService.deleteArticle(articleId, userId, isAdmin);
+        log.info("删除文章, userId: {}, articleId: {}", userId, articleId);
+        articleService.deleteArticleOne(articleId, userId);
         log.info("删除文章成功, articleId: {}", articleId);
         return Result.success("删除成功", null);
     }

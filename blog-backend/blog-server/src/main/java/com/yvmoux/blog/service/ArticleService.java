@@ -27,7 +27,11 @@ public interface ArticleService {
     /**
      * 删除文章
      */
-    void deleteArticle(Long articleId, Long userId, boolean isAdmin);
+    void deleteArticle(String ids, Long userId, boolean isAdmin);
+    /**
+     * 删除文章（One）
+     */
+    void deleteArticleOne(Long articleId, Long userId);
     /**
      * 点赞文章
      */
@@ -36,10 +40,6 @@ public interface ArticleService {
      * 获取最热文章
      */
     List<ArticleVO> getHotArticles(int limit);
-    /**
-     * 批量删除文章
-     */
-    void batchDelete(java.util.List<Long> ids);
     /**
      * 获取所有文章列表
      */
