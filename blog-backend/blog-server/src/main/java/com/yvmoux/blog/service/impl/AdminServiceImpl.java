@@ -17,9 +17,11 @@ import com.yvmoux.blog.service.AdminService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,17 +85,19 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public StatsVO getStats() {
         // 查询各项统计数据
+        long userCount = userMapper.selectCount(null);
         long articleCount = articleMapper.countAll();
         long totalViews = articleMapper.sumViewCount();
         long totalLikes = articleMapper.sumLikeCount();
         long todayArticles = articleMapper.countToday();
-        long userCount = userMapper.selectCount(null);
         long commentCount = commentMapper.countAll();
 
         // 从 Redis 获取今日实时数据
-        String todayKey = "stats:new_users:" + LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        String todayKey = "stats:new_users:" + LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         Long todayNewUsers = redisUtils.get(todayKey, Long.class);
-        String todayViewKey = "stats:views:" + LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+        String todayViewKey = "stats:views:" + LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         Long todayViews = redisUtils.get(todayViewKey, Long.class);
 
         // 构建返回值

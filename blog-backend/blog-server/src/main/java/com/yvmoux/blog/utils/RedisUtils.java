@@ -2,6 +2,7 @@ package com.yvmoux.blog.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
@@ -74,5 +75,9 @@ public class RedisUtils {
 
     public ZSetOperations<String, Object> opsForZSet() {
         return redisTemplate.opsForZSet();
+    }
+
+    public SetOperations<String, Object> opsForSet() {
+        return redisTemplate.opsForSet();
     }
 }

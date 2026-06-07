@@ -25,7 +25,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +49,11 @@ public class AuthServiceImpl implements AuthService {
         if (userMapper.selectCount(queryWrapper) > 0) {
             throw new BusinessException(ErrorCode.USERNAME_EXISTS);
         }
+
+        // 将注册用户 加入Redis
+        String today = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        redisUtils.increment("stats:new_users:" + today);
 
         User user = User.builder()
                 .username(request.getUsername())

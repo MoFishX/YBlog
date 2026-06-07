@@ -23,10 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -89,6 +92,18 @@ public class ArticleServiceImpl implements ArticleService {
         // 增加浏览数并将文章在ZSet中的score加1
         redisUtils.increment("article:view:" + articleId);
         redisUtils.opsForZSet().incrementScore("hot:articles", articleId.toString(), 1);
+
+        String today = LocalDate.now()
+                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        // 每日站点 PV （Page View）：每次访问都算一次
+        redisUtils.increment("stats:views:" + today);
+        redisUtils.expire("stats:views:" + today, 8, TimeUnit.DAYS);
+
+        // 每日站点 UV（Unique Visitor）：按登录用户去重
+        if (currentUserId != null) {
+            redisUtils.opsForSet().add("stats:visitors:" + today, currentUserId.toString());
+            redisUtils.expire("stats:visitors:" + today, 8, TimeUnit.DAYS);
+        }
 
         // 查询文章标签
         List<Tag> tags = tagMapper.selectByArticleId(articleId);
