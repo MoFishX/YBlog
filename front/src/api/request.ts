@@ -2,7 +2,6 @@ import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axio
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 import router from '@/router'
-import { setupMock } from '@/mock/mockData'
 
 declare module 'axios' {
   interface InternalAxiosRequestConfig {
@@ -16,8 +15,6 @@ const instance: AxiosInstance = axios.create({
   withCredentials: true,
   headers: { 'Content-Type': 'application/json' }
 })
-
-setupMock(instance)
 
 let isRefreshing = false
 let pendingQueue: Array<{

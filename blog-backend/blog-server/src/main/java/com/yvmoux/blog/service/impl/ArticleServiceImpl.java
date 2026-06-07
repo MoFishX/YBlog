@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -356,6 +353,8 @@ public class ArticleServiceImpl implements ArticleService {
             int commentCount = commentMapper.countByArticleId(articleId);
             records.add(articleConverter.toArticleVO(article, author, tagVOs, commentCount, null));
         }
+
+        Collections.reverse(records);
 
         return records;
     }

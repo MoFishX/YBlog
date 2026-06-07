@@ -9,6 +9,6 @@ import org.apache.ibatis.annotations.Select;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("SELECT COUNT(*) FROM article WHERE author_id = #{userId} AND deleted_at IS NULL")
+    @Select("SELECT COUNT(*) FROM article WHERE author_id = #{userId}")
     int countArticlesByUserId(@Param("userId") Long userId);
 }
