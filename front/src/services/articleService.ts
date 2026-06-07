@@ -3,7 +3,6 @@ import type {
   ArticleListItem,
   Article,
   HotArticle,
-  SearchResult,
   ArticleQuery,
   ArticleFormData
 } from '@/types/article'
@@ -60,7 +59,7 @@ export const articleService = {
     return res.data
   },
 
-  async search(keyword: string, page?: number, pageSize?: number): Promise<SearchResult> {
+  async search(keyword: string, page?: number, pageSize?: number): Promise<PageResult<ArticleListItem>> {
     const res = await articleApi.search(keyword, page, pageSize)
     return res.data
   },

@@ -61,30 +61,6 @@ export interface HotArticle {
   createdAt: string
 }
 
-export interface SearchArticle {
-  id: number
-  title: string
-  titleHighlight?: string
-  summary: string
-  contentHighlight?: string
-  author: {
-    id: number
-    username: string
-  }
-  tags: Tag[]
-  viewCount: number
-  likeCount: number
-  createdAt: string
-}
-
-export interface SearchResult {
-  records: SearchArticle[]
-  total: number
-  page: number
-  pageSize: number
-  took: number
-}
-
 export interface ArticleQuery {
   page?: number
   pageSize?: number

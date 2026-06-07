@@ -1,10 +1,9 @@
-import request from '../request'
+import request from '@/api/request'
 import type { ApiResponse, PageResult } from '@/types/api'
 import type {
   ArticleListItem,
   Article,
   HotArticle,
-  SearchResult,
   ArticleQuery,
   ArticleFormData
 } from '@/types/article'
@@ -38,7 +37,7 @@ export const articleApi = {
     return request.get('/articles/hot', { params: { limit } })
   },
 
-  search(keyword: string, page?: number, pageSize?: number): Promise<ApiResponse<SearchResult>> {
+  search(keyword: string, page?: number, pageSize?: number): Promise<ApiResponse<PageResult<ArticleListItem>>> {
     return request.get('/articles/search', { params: { keyword, page, pageSize } })
   },
 
