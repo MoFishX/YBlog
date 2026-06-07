@@ -25,6 +25,8 @@ public class Article {
 
     private String summary;
 
+    private String aiSummary;
+
     private String coverImage;
 
     private Long authorId;

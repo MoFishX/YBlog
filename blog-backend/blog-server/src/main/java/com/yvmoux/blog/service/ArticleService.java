@@ -48,4 +48,13 @@ public interface ArticleService {
      * 搜索文章
      */
     PageResult<ArticleVO> search(String keyword, Integer page, Integer pageSize);
+    /**
+     * 触发 AI 总结生成
+     */
+    void triggerAiSummary(Long articleId);
+
+    /**
+     * 删除 AI 总结
+     */
+    void deleteAiSummary(Long articleId);
 }

@@ -26,4 +26,7 @@ public class ArticleVO {
     private Boolean isLiked;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String aiSummary;
+    private Integer aiSummaryStatus;
 }

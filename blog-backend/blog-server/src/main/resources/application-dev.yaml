@@ -13,3 +13,11 @@ spring:
 logging:
   level:
     com.yvmoux.blog: debug
+
+ai:
+  base-url: https://api.deepseek.com
+  api-key: ${AI_API_KEY:sk-your-key-here}
+  model: deepseek-chat
+  max-tokens: 1024
+  temperature: 0.3
+  enabled: true

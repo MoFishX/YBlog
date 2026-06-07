@@ -29,6 +29,8 @@ public class ArticleConverter {
                 .isLiked(false)
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
+                .aiSummary(article.getAiSummary())
+                .aiSummaryStatus(determineAiStatus(article.getAiSummary()))
                 .build();
 
         if (author != null) {
@@ -41,5 +43,12 @@ public class ArticleConverter {
         }
 
         return vo;
+    }
+
+    private Integer determineAiStatus(String aiSummary) {
+        if (aiSummary == null || aiSummary.isBlank()) {
+            return 0;
+        }
+        return 1;
     }
 }

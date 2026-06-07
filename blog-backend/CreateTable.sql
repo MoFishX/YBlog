@@ -18,6 +18,7 @@ create table article (
                          id          bigint       not null auto_increment                comment '文章ID',
                          title       varchar(200) not null                               comment '标题',
                          summary     varchar(500)                                        comment '摘要',
+                         ai_summary  longtext                                            comment 'AI生成的摘要',
                          cover_image varchar(255)                                        comment '封面图URL',
                          author_id   bigint       not null                               comment '作者ID',
                          status      varchar(20)  not null default 'PUBLISHED'           comment '状态：DRAFT草稿 / PUBLISHED已发布',

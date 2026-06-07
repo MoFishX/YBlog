@@ -17,6 +17,7 @@ import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.*;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
+import com.yvmoux.blog.service.AsyncTaskService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final SecurityUtils securityUtils;
     private final ArticleConverter articleConverter;
     private final TagConverter tagConverter;
+    private final AsyncTaskService asyncTaskService;
 
     @Override
     public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long authorId) {
@@ -193,6 +195,12 @@ public class ArticleServiceImpl implements ArticleService {
         User author = userMapper.selectById(userId);
         List<Tag> tags = tagMapper.selectByArticleId(article.getId());
         List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
+
+        // 如果发布状态，异步生成 AI 总结
+        if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+            asyncTaskService.generateArticleSummary(article.getId());
+        }
+
         return articleConverter.toArticleVO(article, author, tagVOs, 0, request.getContent());
     }
 
@@ -247,6 +255,12 @@ public class ArticleServiceImpl implements ArticleService {
         List<Tag> tags = tagMapper.selectByArticleId(articleId);
         List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
         int commentCount = commentMapper.countByArticleId(articleId);
+
+        // 如果更新后为发布状态，异步重新生成 AI 总结
+        if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+            asyncTaskService.generateArticleSummary(articleId);
+        }
+
         return articleConverter.toArticleVO(article, author, tagVOs, commentCount, request.getContent());
     }
 
@@ -392,6 +406,25 @@ public class ArticleServiceImpl implements ArticleService {
             records.add(vo);
         }
         return new PageResult<>(records, total);
+    }
+
+    @Override
+    public void triggerAiSummary(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
+        asyncTaskService.generateArticleSummary(articleId);
+    }
+
+    @Override
+    public void deleteAiSummary(Long articleId) {
+        Article article = articleMapper.selectById(articleId);
+        if (article == null) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
+        article.setAiSummary(null);
+        articleMapper.updateById(article);
     }
 
     private PageResult<ArticleVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Article> wrapper) {
