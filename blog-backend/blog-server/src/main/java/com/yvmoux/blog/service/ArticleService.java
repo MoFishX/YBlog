@@ -3,6 +3,7 @@ package com.yvmoux.blog.service;
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
+import com.yvmoux.blog.dto.response.AiSummaryVO;
 import com.yvmoux.blog.dto.response.ArticleVO;
 
 import java.util.List;
@@ -61,5 +62,5 @@ public interface ArticleService {
     /**
      * 获取 AI 总结
      */
-    String getAiSummary(Long articleId);
+    AiSummaryVO getAiSummary(Long articleId);
 }

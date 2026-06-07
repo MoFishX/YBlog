@@ -43,5 +43,9 @@ export const articleApi = {
 
   getMine(params: { page?: number; pageSize?: number; status?: string }): Promise<ApiResponse<PageResult<ArticleListItem>>> {
     return request.get('/articles/mine', { params })
+  },
+
+  getAiSummary(id: number): Promise<ApiResponse<{ status: number; summary: string }>> {
+    return request.get('/articles/ai', { params: { articleId: id } })
   }
 }

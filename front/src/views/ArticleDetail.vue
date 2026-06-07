@@ -82,6 +82,34 @@
         </span>
       </div>
 
+      <div v-if="aiLoading || aiSummaryReady" class="mb-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-5 border border-purple-100">
+        <div class="flex items-center gap-2 mb-3">
+          <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <span class="text-sm font-semibold text-purple-700">AI 总结</span>
+        </div>
+        <div v-if="aiLoading && !aiSummary" class="text-sm text-purple-500">
+          AI总结中<span class="inline-block animate-pulse tracking-[0.3em]">...</span>
+        </div>
+        <div v-else-if="aiError" class="text-sm text-gray-400">{{ aiError }}</div>
+        <div v-else-if="aiSummary" class="text-sm text-gray-700 leading-relaxed">
+          <template v-if="!aiDone">
+            <span class="whitespace-pre-wrap">{{ aiDisplayText }}</span>
+            <span class="inline-block w-0.5 h-4 bg-purple-400 align-middle animate-pulse ml-0.5"></span>
+          </template>
+          <div v-else v-html="renderedAiSummary"></div>
+        </div>
+        <div v-else-if="aiNeedGenerate" class="text-center py-2">
+          <button
+            class="px-5 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg hover:bg-purple-700 transition-colors"
+            @click="generateAiSummary"
+          >
+            生成 AI 总结
+          </button>
+        </div>
+      </div>
+
       <div class="prose prose-gray max-w-none mb-12 border-t border-gray-100 pt-8" v-html="renderedContent"></div>
 
       <div class="border-t border-gray-100 pt-8">
@@ -124,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { marked } from 'marked'
 import { formatDateTime, formatNumber } from '@/utils/format'
@@ -155,6 +183,20 @@ const commentText = ref('')
 const submitting = ref(false)
 const replyTarget = ref<string | null>(null)
 const replyParentId = ref<number | null>(null)
+
+const aiSummary = ref('')
+const aiDisplayText = ref('')
+const aiLoading = ref(false)
+const aiSummaryReady = ref(false)
+const aiDone = ref(false)
+const aiError = ref('')
+const aiNeedGenerate = ref(false)
+let typewriterTimer: ReturnType<typeof setInterval> | null = null
+
+const renderedAiSummary = computed(() => {
+  if (!aiSummary.value) return ''
+  return marked(aiSummary.value, { breaks: true })
+})
 
 const renderedContent = computed(() => {
   if (!article.value?.content) return ''
@@ -213,11 +255,62 @@ function handleReply(commentId: number, username: string) {
 
 function cancelReply() { replyTarget.value = null; replyParentId.value = null; commentText.value = '' }
 
+async function fetchAiSummary() {
+  const id = Number(route.params.id)
+  if (!id) return
+  aiLoading.value = true
+  aiSummaryReady.value = true
+  aiError.value = ''
+  aiNeedGenerate.value = false
+  try {
+    const res = await articleService.getAiSummary(id)
+    if (res.status === 1) {
+      aiSummary.value = res.summary
+      startTypewriter(res.summary)
+    } else {
+      aiNeedGenerate.value = true
+    }
+  } catch {
+    aiError.value = 'AI 总结暂不可用'
+    aiSummaryReady.value = false
+  } finally {
+    aiLoading.value = false
+  }
+}
+
+function generateAiSummary() {
+  // TODO: 待实现
+}
+
+function startTypewriter(text: string) {
+  stopTypewriter()
+  aiDone.value = false
+  aiDisplayText.value = ''
+  let index = 0
+  typewriterTimer = setInterval(() => {
+    if (index < text.length) {
+      aiDisplayText.value += text[index]
+      index++
+    } else {
+      stopTypewriter()
+      aiDone.value = true
+    }
+  }, 30)
+}
+
+function stopTypewriter() {
+  if (typewriterTimer) {
+    clearInterval(typewriterTimer)
+    typewriterTimer = null
+  }
+}
+
 async function handleDeleteComment(commentId: number) {
   try { await commentService.delete(commentId); await fetchComments() } catch { /* silent */ }
 }
 
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
 
-onMounted(() => { fetchDetail(); fetchComments() })
+onMounted(() => { fetchDetail(); fetchComments(); fetchAiSummary() })
+onBeforeUnmount(() => { stopTypewriter() })
 </script>

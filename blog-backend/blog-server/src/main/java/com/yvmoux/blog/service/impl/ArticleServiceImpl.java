@@ -8,6 +8,7 @@ import com.yvmoux.blog.converter.TagConverter;
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
+import com.yvmoux.blog.dto.response.AiSummaryVO;
 import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.*;
@@ -428,13 +429,20 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public String getAiSummary(Long articleId) {
+    public AiSummaryVO getAiSummary(Long articleId) {
         Article article = articleMapper.selectById(articleId);
+
         String aiSummary = article.getAiSummary();
+        int status = 1;
+
         if (aiSummary == null || aiSummary.isBlank()) {
-            throw new BusinessException(ErrorCode.NOT_FOUND);
+            status = 0;
         }
-        return aiSummary;
+
+        return AiSummaryVO.builder()
+                .status(status)
+                .summary(aiSummary)
+                .build();
     }
 
     private PageResult<ArticleVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Article> wrapper) {

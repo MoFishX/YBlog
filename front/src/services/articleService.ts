@@ -67,5 +67,10 @@ export const articleService = {
   async getMine(params: { page?: number; pageSize?: number; status?: string }): Promise<PageResult<ArticleListItem>> {
     const res = await articleApi.getMine(params)
     return res.data
+  },
+
+  async getAiSummary(id: number): Promise<{ status: number; summary: string }> {
+    const res = await articleApi.getAiSummary(id)
+    return res.data
   }
 }
