@@ -255,6 +255,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
+    @Transactional
     public void deleteArticle(String ids, Long userId, boolean isAdmin) {
         List<Long> articleIds;
         try {
@@ -265,20 +266,26 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ErrorCode.BAD_REQUEST);
         }
 
-        // 获取文章并校验权限
+        // 获取文章
         List<Article> articleList = articleMapper.selectBatchIds(articleIds);
+        if (articleList.size() != articleIds.size()) {
+            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
+        }
+
+        // 先校验全部文章的权限
         for (Article article : articleList) {
-            if (article == null) {
-                throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
-            }
             if (!article.getAuthorId().equals(userId) && !isAdmin) {
                 throw new BusinessException(ErrorCode.FORBIDDEN);
             }
+        }
 
-            // 删除文章及内容
-            Long articleId = article.getId();
-            articleMapper.deleteById(articleId);
+        // 删除文章、标签、评论、喜欢、文章内容
+        for (Long articleId : articleIds) {
+            articleTagMapper.deleteByArticleId(articleId);
+            userLikeMapper.delete(new LambdaQueryWrapper<UserLike>().eq(UserLike::getArticleId, articleId));
+            commentMapper.delete(new LambdaQueryWrapper<Comment>().eq(Comment::getArticleId, articleId));
             articleContentMapper.deleteById(articleId);
+            articleMapper.deleteById(articleId);
         }
     }
 
