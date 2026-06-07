@@ -34,6 +34,24 @@
           </el-col>
         </el-row>
 
+        <el-form-item label="标签">
+          <el-select
+            v-model="form.selectedTagIds"
+            multiple
+            filterable
+            placeholder="选择标签"
+            class="w-full"
+            :loading="tagsLoading"
+          >
+            <el-option
+              v-for="tag in availableTags"
+              :key="tag.id"
+              :label="tag.name"
+              :value="tag.id"
+            />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="内容">
           <div class="editor-wrapper">
             <div class="editor-toolbar">
@@ -66,6 +84,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { articleService } from '@/services/admin/articleService'
+import { tagService } from '@/services/admin/tagService'
+import type { Tag } from '@/types/article'
 
 const route = useRoute()
 const router = useRouter()
@@ -76,11 +96,22 @@ const form = reactive({
   title: '',
   content: '',
   summary: '',
-  status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT'
+  status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT',
+  selectedTagIds: [] as number[]
 })
 
+const availableTags = ref<Tag[]>([])
+const tagsLoading = ref(false)
 const submitting = ref(false)
 const error = ref('')
+
+async function loadTags() {
+  tagsLoading.value = true
+  try {
+    availableTags.value = await tagService.getList()
+  } catch { /* ignore */ }
+  finally { tagsLoading.value = false }
+}
 
 async function loadArticle() {
   const id = Number(route.params.id)
@@ -91,6 +122,7 @@ async function loadArticle() {
     form.content = article.content
     form.summary = article.summary
     form.status = article.status as 'PUBLISHED' | 'DRAFT'
+    form.selectedTagIds = article.tags?.map((t: Tag) => t.id) || []
   } catch (e: any) {
     error.value = '加载文章失败'
   }
@@ -109,14 +141,16 @@ async function handleSave() {
         title: form.title,
         content: form.content,
         summary: form.summary,
-        status: form.status
+        status: form.status,
+        tagIds: form.selectedTagIds
       })
     } else {
       await articleService.create({
         title: form.title,
         content: form.content,
         summary: form.summary,
-        status: form.status
+        status: form.status,
+        tagIds: form.selectedTagIds
       })
     }
     router.push('/admin/articles')
@@ -128,6 +162,7 @@ async function handleSave() {
 }
 
 onMounted(() => {
+  loadTags()
   if (isEdit.value) loadArticle()
 })
 </script>

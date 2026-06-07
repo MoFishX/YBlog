@@ -25,7 +25,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagVO> getAllTags() {
-        // 查询所有标签及文章数
+        // 查询所有标签及对应的文章数文章数
         List<Tag> tags = tagMapper.selectAllWithArticleCount();
 
         // 构建返回值
