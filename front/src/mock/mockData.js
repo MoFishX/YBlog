@@ -547,12 +547,6 @@ function matchApi(method, url, data, config = {}) {
   if (method === 'get' && path === '/admin/articles') {
     return ok(paginate(ARTICLES_CACHE, data?.page || 1, data?.pageSize || 10), config)
   }
-  const adminArticleMatch = matchUrl(path, [
-    ['/admin/articles/:articleId', null]
-  ])
-  if (method === 'delete' && adminArticleMatch) {
-    return ok(null, config)
-  }
   if (method === 'delete' && path === '/admin/articles') {
     return ok(null, config)
   }

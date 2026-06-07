@@ -24,16 +24,11 @@ export const articleService = {
     return res.data
   },
 
-  async delete(id: number): Promise<void> {
-    await ElMessageBox.confirm('确认删除该文章？此操作不可撤销。', '警告', { type: 'warning' })
-    await articleApi.delete(id)
-    ElMessage.success('文章已删除')
-  },
-
-  async batchDelete(ids: number[]): Promise<void> {
+  async delete(ids: number[]): Promise<void> {
     if (ids.length === 0) return
-    await ElMessageBox.confirm(`确认删除选中的 ${ids.length} 篇文章？此操作不可撤销。`, '警告', { type: 'warning' })
-    await articleApi.batchDelete(ids)
-    ElMessage.success(`已删除 ${ids.length} 篇文章`)
+    const msg = ids.length === 1 ? '确认删除该文章？此操作不可撤销。' : `确认删除选中的 ${ids.length} 篇文章？此操作不可撤销。`
+    await ElMessageBox.confirm(msg, '警告', { type: 'warning' })
+    await articleApi.delete(ids)
+    ElMessage.success(ids.length === 1 ? '文章已删除' : `已删除 ${ids.length} 篇文章`)
   }
 }

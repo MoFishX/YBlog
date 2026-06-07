@@ -112,7 +112,7 @@ async function fetchList() {
 
 async function handleDelete(id: number) {
   try {
-    await articleService.delete(id)
+    await articleService.delete([id])
     await fetchList()
   } catch {
     // user canceled or failed
@@ -121,7 +121,7 @@ async function handleDelete(id: number) {
 
 async function handleBatchDelete() {
   try {
-    await articleService.batchDelete(selectedIds.value)
+    await articleService.delete(selectedIds.value)
     await fetchList()
   } catch {
     // user canceled or failed

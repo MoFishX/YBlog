@@ -12,11 +12,7 @@ export const articleApi = {
     return request.get('/admin/articles', { params })
   },
 
-  delete(id: number): Promise<ApiResponse<null>> {
-    return request.delete(`/admin/articles/${id}`)
-  },
-
-  batchDelete(ids: number[]): Promise<ApiResponse<null>> {
+  delete(ids: number[]): Promise<ApiResponse<null>> {
     return request.delete('/admin/articles', { params: { ids: ids.join(',') } })
   }
 }
