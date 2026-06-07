@@ -14,6 +14,7 @@ import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.*;
 import com.yvmoux.blog.enums.ArticleStatusEnum;
 import com.yvmoux.blog.enums.ErrorCode;
+import com.yvmoux.blog.enums.RoleEnum;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.*;
 import com.yvmoux.blog.security.SecurityUtils;
@@ -410,11 +411,22 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public void triggerAiSummary(Long articleId) {
+    public void triggerAiSummary(Long userId, Long articleId) {
+        User user = userMapper.selectById(userId);
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        // 如果用户不是管理员，文章的 AI 总结存在，则不允许修改
+        if (!user.getRole().equals(RoleEnum.ADMIN.name())) {
+            if (article.getAiSummary() != null && !article.getAiSummary().isBlank()) {
+                throw new BusinessException(ErrorCode.FORBIDDEN);
+            }
+        }
+
         asyncTaskService.generateArticleSummary(articleId);
     }
 
