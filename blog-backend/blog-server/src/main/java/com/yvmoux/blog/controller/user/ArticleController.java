@@ -82,4 +82,12 @@ public class ArticleController {
         log.info("点赞/取消点赞成功, isLiked: {}", result.getData().getIsLiked());
         return result;
     }
+
+    @Operation(summary = "生成AI总结")
+    @PostMapping("/genai")
+    public Result<Void> generateSummary(@RequestParam Long articleId) {
+        log.info("手动生成AI总结, articleId: {}", articleId);
+        articleService.triggerAiSummary(articleId);
+        return Result.success("已提交AI总结任务", null);
+    }
 }

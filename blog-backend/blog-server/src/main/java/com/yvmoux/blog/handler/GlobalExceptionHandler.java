@@ -40,6 +40,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(Result.error(401, "用户名或密码错误"));
     }
 
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<Result<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        return ResponseEntity.status(403).body(Result.error(403, "无权限"));
+    }
+
     // 处理其他异常
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Result<Object>> handleException(Exception e) {

@@ -72,5 +72,9 @@ export const articleService = {
   async getAiSummary(id: number): Promise<{ status: number; summary: string }> {
     const res = await articleApi.getAiSummary(id)
     return res.data
+  },
+
+  async genAiSummary(id: number): Promise<void> {
+    await articleApi.genAiSummary(id)
   }
 }
