@@ -103,17 +103,6 @@ public class AdminController {
                 java.util.Map.of("deletedCount", request.getIds().size()));
     }
 
-    @Operation(summary = "审核文章")
-    @PutMapping("/articles/{articleId}/review")
-    public Result<ArticleVO> review(@PathVariable Long articleId,
-                                    @Valid @RequestBody ReviewRequest request) {
-        log.info("审核文章, articleId: {}, status: {}", articleId, request.getStatus());
-        ArticleVO article = articleService.reviewArticle(articleId, request.getStatus(), request.getReason());
-        String msg = "APPROVED".equals(request.getStatus()) ? "审核通过" : "已驳回";
-        log.info("审核文章完成, articleId: {}, result: {}", articleId, msg);
-        return Result.success(msg, article);
-    }
-
     @Operation(summary = "评论管理列表")
     @GetMapping("/comments")
     public Result<PageResult<CommentVO>> commentList(

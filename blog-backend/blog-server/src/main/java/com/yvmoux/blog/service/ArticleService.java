@@ -41,10 +41,6 @@ public interface ArticleService {
      */
     void batchDelete(java.util.List<Long> ids);
     /**
-     * 审核文章
-     */
-    ArticleVO reviewArticle(Long articleId, String status, String reason);
-    /**
      * 获取所有文章列表
      */
     PageResult<ArticleVO> getAllArticles(Integer page, Integer pageSize, String status, String keyword);

@@ -342,34 +342,6 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    @Transactional
-    public ArticleVO reviewArticle(Long articleId, String status, String reason) {
-        // 获取文章
-        Article article = articleMapper.selectById(articleId);
-        if (article == null) {
-            throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
-        }
-
-        // 更新文章状态
-        if ("APPROVED".equals(status)) {
-            article.setStatus(ArticleStatusEnum.PUBLISHED.name());
-        } else if ("REJECTED".equals(status)) {
-            article.setStatus(ArticleStatusEnum.DRAFT.name());
-        } else {
-            article.setStatus(status);
-        }
-        article.setUpdatedAt(LocalDateTime.now());
-        articleMapper.updateById(article);
-
-        // 构建返回值
-        User author = userMapper.selectById(article.getAuthorId());
-        List<Tag> tags = tagMapper.selectByArticleId(articleId);
-        List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
-        int commentCount = commentMapper.countByArticleId(articleId);
-        return articleConverter.toArticleVO(article, author, tagVOs, commentCount, null);
-    }
-
-    @Override
     public PageResult<ArticleVO> getAllArticles(Integer page, Integer pageSize, String status, String keyword) {
         // 构建查询条件
         QueryWrapper<Article> wrapper = new QueryWrapper<>();
