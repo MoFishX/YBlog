@@ -27,14 +27,16 @@ create table article (
                          updated_at  datetime     not null                               comment '更新时间',
                          primary key (id),
                          index idx_author (author_id),
-                         index idx_created (created_at)
+                         index idx_created (created_at),
+                         fulltext index ft_article_title_summary (title, summary) with parser ngram
 ) engine=InnoDB;
 
 -- 文章内容表
 create table article_content (
                                  article_id bigint   not null comment '文章ID',
                                  content    longtext not null comment '内容（Markdown）',
-                                 primary key (article_id)
+                                 primary key (article_id),
+                                 fulltext index ft_article_content (content) with parser ngram
 ) engine=InnoDB;
 
 -- 评论表

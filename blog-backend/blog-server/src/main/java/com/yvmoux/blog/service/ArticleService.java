@@ -44,4 +44,8 @@ public interface ArticleService {
      * 获取所有文章列表
      */
     PageResult<ArticleVO> getAllArticles(Integer page, Integer pageSize, String status, String keyword);
+    /**
+     * 搜索文章
+     */
+    PageResult<ArticleVO> search(String keyword, Integer page, Integer pageSize);
 }

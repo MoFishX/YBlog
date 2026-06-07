@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
@@ -28,5 +30,19 @@ public interface ArticleMapper extends BaseMapper<Article> {
     @Select("SELECT COUNT(*) FROM article WHERE DATE(created_at) = CURDATE()")
     long countToday();
 
-//    List<Article> getListByCondition(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long userId);
+    @Select("SELECT a.*, MATCH(a.title, a.summary) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) AS relevance " +
+            "FROM article a LEFT JOIN article_content ac ON a.id = ac.article_id " +
+            "WHERE a.status = 'PUBLISHED' " +
+            "AND (MATCH(a.title, a.summary) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) " +
+            "OR MATCH(ac.content) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE)) " +
+            "ORDER BY relevance DESC LIMIT #{offset}, #{pageSize}")
+    List<Article> searchByKeyword(@Param("keyword") String keyword,
+                                   @Param("offset") int offset,
+                                   @Param("pageSize") int pageSize);
+
+    @Select("SELECT COUNT(*) FROM article a LEFT JOIN article_content ac ON a.id = ac.article_id " +
+            "WHERE a.status = 'PUBLISHED' " +
+            "AND (MATCH(a.title, a.summary) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE) " +
+            "OR MATCH(ac.content) AGAINST(#{keyword} IN NATURAL LANGUAGE MODE))")
+    long countSearch(@Param("keyword") String keyword);
 }

@@ -49,6 +49,19 @@ public class ArticleController {
         return result;
     }
 
+    @Operation(summary = "搜索文章")
+    @GetMapping("/search")
+    public Result<PageResult<ArticleVO>> search(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("搜索文章, keyword: {}, page: {}, pageSize: {}", keyword, page, pageSize);
+        if (pageSize > 50) pageSize = 50;
+        Result<PageResult<ArticleVO>> result = Result.success(articleService.search(keyword, page, pageSize));
+        log.info("搜索文章成功, total: {}", result.getData().getTotal());
+        return result;
+    }
+
     @Operation(summary = "文章详情")
     @GetMapping("/{articleId}")
     public Result<ArticleVO> getDetail(@PathVariable Long articleId) {

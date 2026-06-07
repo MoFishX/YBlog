@@ -374,6 +374,26 @@ public class ArticleServiceImpl implements ArticleService {
         return pageResult(page, pageSize, wrapper);
     }
 
+    @Override
+    public PageResult<ArticleVO> search(String keyword, Integer page, Integer pageSize) {
+        int offset = (page - 1) * pageSize;
+        long total = articleMapper.countSearch(keyword);
+        List<Article> articles = articleMapper.searchByKeyword(keyword, offset, pageSize);
+
+        List<ArticleVO> records = new ArrayList<>();
+        for (Article article : articles) {
+            ArticleVO vo = articleConverter.toArticleVO(
+                    article,
+                    userMapper.selectById(article.getAuthorId()),
+                    tagConverter.toTagVOList(tagMapper.selectByArticleId(article.getId())),
+                    commentMapper.countByArticleId(article.getId()),
+                    null
+            );
+            records.add(vo);
+        }
+        return new PageResult<>(records, total);
+    }
+
     private PageResult<ArticleVO> pageResult(Integer page, Integer pageSize, QueryWrapper<Article> wrapper) {
         // 分页查询
         Page<Article> articlePage = articleMapper.selectPage(new Page<>(page, pageSize), wrapper);
