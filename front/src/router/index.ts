@@ -46,6 +46,24 @@ const router = createRouter({
       component: () => import('@/views/UserCenter.vue')
     },
     {
+      path: '/dashboard',
+      name: 'Dashboard',
+      component: () => import('@/views/Dashboard.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/dashboard/write',
+      name: 'ArticleWrite',
+      component: () => import('@/views/ArticleWrite.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/dashboard/write/:id',
+      name: 'ArticleEdit',
+      component: () => import('@/views/ArticleWrite.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/admin',
       component: () => import('@/components/admin/layout/AdminLayout.vue'),
       meta: { requiresAuth: true, requiresAdmin: true, blank: true },

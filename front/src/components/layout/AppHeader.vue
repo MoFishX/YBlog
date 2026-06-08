@@ -26,6 +26,12 @@
             {{ userStore.user.username }}
           </RouterLink>
           <RouterLink
+            to="/dashboard"
+            class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
+          >
+            创作中心
+          </RouterLink>
+          <RouterLink
             v-if="userStore.isAdmin"
             to="/admin"
             class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
@@ -71,6 +77,13 @@
             <template v-if="userStore.isLoggedIn && userStore.user">
               <RouterLink :to="`/user/${userStore.user.id}`" @click="mobileOpen = false" class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200">
                 个人中心
+              </RouterLink>
+              <RouterLink
+                to="/dashboard"
+                @click="mobileOpen = false"
+                class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200"
+              >
+                创作中心
               </RouterLink>
               <RouterLink
                 v-if="userStore.isAdmin"

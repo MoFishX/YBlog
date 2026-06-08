@@ -5,6 +5,6 @@ export interface User {
   avatar?: string | null
   role: 'USER' | 'ADMIN'
   articleCount?: number
-  status?: 'ACTIVE' | 'BANNED'
+  status?: 'INACTIVE' | 'ACTIVE' | 'BANNED'
   createdAt?: string
 }

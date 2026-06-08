@@ -29,10 +29,10 @@
               <h1 class="text-xl font-bold text-zinc-900 font-serif">{{ user.username }}</h1>
               <span
                 class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
-                :class="user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'"
+                :class="statusClass"
               >
-                <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="user.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'"></span>
-                {{ user.status === 'ACTIVE' ? '正常' : '已封禁' }}
+                <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="statusDotClass"></span>
+                {{ statusLabel }}
               </span>
               <span v-if="user.role === 'ADMIN'" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent">
                 管理员
@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { formatDate, formatDateYearMonth, formatNumber } from '@/utils/format'
 import { userService } from '@/services/userService'
@@ -80,6 +80,27 @@ const articlesLoading = ref(false)
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+
+const statusLabel = computed(() => {
+  const map: Record<string, string> = { ACTIVE: '正常', INACTIVE: '未激活', BANNED: '已封禁' }
+  return map[user.value?.status || ''] || '未知'
+})
+const statusClass = computed(() => {
+  const map: Record<string, string> = {
+    ACTIVE: 'bg-emerald-50 text-emerald-700',
+    INACTIVE: 'bg-amber-50 text-amber-700',
+    BANNED: 'bg-red-50 text-red-600'
+  }
+  return map[user.value?.status || ''] || 'bg-zinc-50 text-zinc-500'
+})
+const statusDotClass = computed(() => {
+  const map: Record<string, string> = {
+    ACTIVE: 'bg-emerald-500',
+    INACTIVE: 'bg-amber-500',
+    BANNED: 'bg-red-500'
+  }
+  return map[user.value?.status || ''] || 'bg-zinc-400'
+})
 
 async function fetchUser() {
   const id = Number(route.params.id)
