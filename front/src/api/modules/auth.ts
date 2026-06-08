@@ -40,5 +40,9 @@ export const authApi = {
 
   logout(): Promise<ApiResponse<null>> {
     return request.post('/auth/logout')
+  },
+
+  activate(): Promise<ApiResponse<null>> {
+    return request.post('/auth/activate')
   }
 }

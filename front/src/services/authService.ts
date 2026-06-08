@@ -13,5 +13,9 @@ export const authService = {
 
   async logout(): Promise<void> {
     await authApi.logout()
+  },
+
+  async activate(): Promise<void> {
+    await authApi.activate()
   }
 }

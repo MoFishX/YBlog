@@ -19,6 +19,24 @@
     </div>
 
     <template v-else-if="user">
+
+      <div v-if="isOwnProfile && user.status === 'INACTIVE'" class="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-6">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
+            <div>
+              <p class="text-sm font-semibold text-amber-800 mb-1">账号未激活</p>
+              <p class="text-sm text-amber-600">激活后可发布文章和参与评论。</p>
+            </div>
+          </div>
+          <RouterLink to="/settings" class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 transition-colors duration-200 flex-shrink-0">
+            去激活
+          </RouterLink>
+        </div>
+      </div>
+
       <div class="bg-white rounded-xl border border-zinc-100 p-8 mb-10 shadow-sm">
         <div class="flex items-center gap-5 mb-6">
           <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-2xl font-bold flex-shrink-0">
@@ -41,19 +59,28 @@
             <p class="text-sm text-zinc-500">加入于 {{ formatDate(user.createdAt || '') }}</p>
           </div>
         </div>
-        <div class="flex gap-3">
-          <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
-            <p class="text-2xl font-bold text-zinc-900">{{ formatNumber(user.articleCount || 0) }}</p>
-            <p class="text-xs text-zinc-500 mt-1 font-medium">文章</p>
+        <div class="flex items-end gap-3">
+          <div class="flex gap-3 flex-1">
+            <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
+              <p class="text-2xl font-bold text-zinc-900">{{ formatNumber(user.articleCount || 0) }}</p>
+              <p class="text-xs text-zinc-500 mt-1 font-medium">文章</p>
+            </div>
+            <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
+              <p class="text-base font-bold text-zinc-900">{{ formatDateYearMonth(user.createdAt || '') }}</p>
+              <p class="text-xs text-zinc-500 mt-1 font-medium">加入于</p>
+            </div>
           </div>
-          <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
-            <p class="text-base font-bold text-zinc-900">{{ formatDateYearMonth(user.createdAt || '') }}</p>
-            <p class="text-xs text-zinc-500 mt-1 font-medium">加入于</p>
-          </div>
+          <RouterLink
+            v-if="isOwnProfile"
+            to="/settings"
+            class="px-4 py-2 text-sm font-medium text-zinc-500 border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:text-zinc-700 transition-colors duration-200 flex-shrink-0"
+          >
+            编辑资料
+          </RouterLink>
         </div>
       </div>
 
-      <h2 class="text-lg font-bold text-zinc-900 mb-5 font-serif">Ta 的文章</h2>
+      <h2 class="text-lg font-bold text-zinc-900 mb-5 font-serif">{{ isOwnProfile ? '我的文章' : 'Ta 的文章' }}</h2>
       <ArticleList :articles="articles" :loading="articlesLoading" />
       <Pagination v-if="total > pageSize" :current-page="page" :total="total" :page-size="pageSize" @change="handlePageChange" />
     </template>
@@ -62,8 +89,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { formatDate, formatDateYearMonth, formatNumber } from '@/utils/format'
+import { useUserStore } from '@/stores/user'
 import { userService } from '@/services/userService'
 import { articleService } from '@/services/articleService'
 import ArticleList from '@/components/article/ArticleList.vue'
@@ -72,6 +100,7 @@ import type { User } from '@/types/user'
 import type { ArticleListItem } from '@/types/article'
 
 const route = useRoute()
+const userStore = useUserStore()
 const user = ref<User | null>(null)
 const loading = ref(true)
 const error = ref('')
@@ -80,6 +109,11 @@ const articlesLoading = ref(false)
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(10)
+
+const isOwnProfile = computed(() => {
+  const uid = Number(route.params.id)
+  return uid > 0 && Number(userStore.user?.id) === uid
+})
 
 const statusLabel = computed(() => {
   const map: Record<string, string> = { ACTIVE: '正常', INACTIVE: '未激活', BANNED: '已封禁' }

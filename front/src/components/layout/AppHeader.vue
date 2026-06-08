@@ -32,6 +32,12 @@
             创作中心
           </RouterLink>
           <RouterLink
+            to="/settings"
+            class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
+          >
+            设置
+          </RouterLink>
+          <RouterLink
             v-if="userStore.isAdmin"
             to="/admin"
             class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
@@ -84,6 +90,13 @@
                 class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200"
               >
                 创作中心
+              </RouterLink>
+              <RouterLink
+                to="/settings"
+                @click="mobileOpen = false"
+                class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200"
+              >
+                设置
               </RouterLink>
               <RouterLink
                 v-if="userStore.isAdmin"
