@@ -6,6 +6,13 @@ export function formatDate(dateStr: string): string {
   return `${y}-${m}-${day}`
 }
 
+export function formatDateYearMonth(dateStr: string): string {
+  const d = new Date(dateStr)
+  const y = d.getFullYear()
+  const m = d.getMonth() + 1
+  return `${y}年${m}月`
+}
+
 export function formatDateTime(dateStr: string): string {
   const d = new Date(dateStr)
   const y = d.getFullYear()

@@ -93,13 +93,19 @@ public class AuthServiceImpl implements AuthService {
         // 4. 签发长期 refresh_token（只存 userId）
         String refreshToken = jwtUtils.generateRefreshToken(userDetails.getUserId());
 
+        // 获取用户的状态
+        String status = userMapper.selectById(userDetails.getUserId()).getStatus();
+        if (Objects.equals(status.toUpperCase(), UserStatus.BANNED.name())) {
+            throw new BusinessException(ErrorCode.USER_BANNED);
+        }
+
         // 5. 构建返回的用户信息
         LoginVO loginVO = LoginVO.builder()
                 .id(userDetails.getUserId())
                 .username(userDetails.getUsername())
                 .email("")
                 .avatar(null)
-                .role(userDetails.getAuthorities().iterator().next().getAuthority().replace("ROLE_", ""))
+                .role(Objects.requireNonNull(userDetails.getAuthorities().iterator().next().getAuthority()).replace("ROLE_", ""))
                 .build();
 
         // 6. 打包返回
@@ -130,6 +136,12 @@ public class AuthServiceImpl implements AuthService {
 
         // 4. 签发新的 access_token
         String accessToken = jwtUtils.generateAccessToken(user.getId(), user.getUsername(), user.getRole());
+
+        // 获取用户的状态
+        String status = user.getStatus();
+        if (Objects.equals(status.toUpperCase(), UserStatus.BANNED.name())) {
+            throw new BusinessException(ErrorCode.USER_BANNED);
+        }
 
         // 5. 构建返回的用户信息
         LoginVO loginVO = LoginVO.builder()

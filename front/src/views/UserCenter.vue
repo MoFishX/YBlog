@@ -25,14 +25,30 @@
             {{ user.username.charAt(0).toUpperCase() }}
           </div>
           <div>
-            <h1 class="text-xl font-bold text-zinc-900 mb-1 font-serif">{{ user.username }}</h1>
+            <div class="flex items-center gap-2.5 mb-1">
+              <h1 class="text-xl font-bold text-zinc-900 font-serif">{{ user.username }}</h1>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold"
+                :class="user.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-600'"
+              >
+                <span class="w-1.5 h-1.5 rounded-full mr-1.5" :class="user.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-red-500'"></span>
+                {{ user.status === 'ACTIVE' ? '正常' : '已封禁' }}
+              </span>
+              <span v-if="user.role === 'ADMIN'" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-accent/10 text-accent">
+                管理员
+              </span>
+            </div>
             <p class="text-sm text-zinc-500">加入于 {{ formatDate(user.createdAt || '') }}</p>
           </div>
         </div>
-        <div class="flex gap-6">
-          <div class="bg-zinc-50 rounded-xl px-6 py-4 text-center">
+        <div class="flex gap-3">
+          <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
             <p class="text-2xl font-bold text-zinc-900">{{ formatNumber(user.articleCount || 0) }}</p>
             <p class="text-xs text-zinc-500 mt-1 font-medium">文章</p>
+          </div>
+          <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
+            <p class="text-base font-bold text-zinc-900">{{ formatDateYearMonth(user.createdAt || '') }}</p>
+            <p class="text-xs text-zinc-500 mt-1 font-medium">加入于</p>
           </div>
         </div>
       </div>
@@ -47,15 +63,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { formatDate, formatNumber } from '@/utils/format'
+import { formatDate, formatDateYearMonth, formatNumber } from '@/utils/format'
 import { userService } from '@/services/userService'
 import { articleService } from '@/services/articleService'
 import ArticleList from '@/components/article/ArticleList.vue'
 import Pagination from '@/components/common/Pagination.vue'
+import type { User } from '@/types/user'
 import type { ArticleListItem } from '@/types/article'
 
 const route = useRoute()
-const user = ref<any>(null)
+const user = ref<User | null>(null)
 const loading = ref(true)
 const error = ref('')
 const articles = ref<ArticleListItem[]>([])

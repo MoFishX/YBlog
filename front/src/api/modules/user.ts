@@ -3,7 +3,7 @@ import type { ApiResponse, PageResult } from '@/types/api'
 import type { User } from '@/types/user'
 
 export const userApi = {
-  getUser(userId: number): Promise<ApiResponse<Pick<User, 'id' | 'username' | 'avatar'> & { articleCount: number; createdAt: string }>> {
+  getUser(userId: number): Promise<ApiResponse<Pick<User, 'id' | 'username' | 'avatar' | 'role' | 'status'> & { articleCount: number; createdAt: string }>> {
     return request.get(`/user/${userId}`)
   },
 
