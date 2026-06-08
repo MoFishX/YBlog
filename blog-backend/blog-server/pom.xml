@@ -51,6 +51,13 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!-- AOP -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+            <version>4.0.0-M2</version>
+        </dependency>
+
         <!--jwt依赖-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
