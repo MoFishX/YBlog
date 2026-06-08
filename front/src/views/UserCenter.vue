@@ -42,7 +42,7 @@
           <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-2xl font-bold flex-shrink-0">
             {{ user.username.charAt(0).toUpperCase() }}
           </div>
-          <div>
+          <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2.5 mb-1">
               <h1 class="text-xl font-bold text-zinc-900 font-serif">{{ user.username }}</h1>
               <span
@@ -58,24 +58,20 @@
             </div>
             <p class="text-sm text-zinc-500">加入于 {{ formatDate(user.createdAt || '') }}</p>
           </div>
-        </div>
-        <div class="flex items-end gap-3">
-          <div class="flex gap-3 flex-1">
-            <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
-              <p class="text-2xl font-bold text-zinc-900">{{ formatNumber(user.articleCount || 0) }}</p>
-              <p class="text-xs text-zinc-500 mt-1 font-medium">文章</p>
-            </div>
-            <div class="flex-1 bg-zinc-50 rounded-xl px-5 py-4 text-center min-w-0">
-              <p class="text-base font-bold text-zinc-900">{{ formatDateYearMonth(user.createdAt || '') }}</p>
-              <p class="text-xs text-zinc-500 mt-1 font-medium">加入于</p>
-            </div>
+          <div class="bg-zinc-50 rounded-xl px-5 py-3 text-center flex-shrink-0">
+            <p class="text-xl font-bold text-zinc-900">{{ formatNumber(user.articleCount || 0) }}</p>
+            <p class="text-xs text-zinc-500 font-medium">文章</p>
           </div>
-          <RouterLink
-            v-if="isOwnProfile"
-            to="/settings"
-            class="px-4 py-2 text-sm font-medium text-zinc-500 border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:text-zinc-700 transition-colors duration-200 flex-shrink-0"
-          >
-            编辑资料
+        </div>
+
+        <div v-if="isOwnProfile" class="flex gap-3 pt-4 border-t border-zinc-100">
+          <RouterLink to="/dashboard" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-50 rounded-xl hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            创作中心
+          </RouterLink>
+          <RouterLink to="/settings" class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-zinc-600 bg-zinc-50 rounded-xl hover:bg-zinc-100 hover:text-zinc-900 transition-colors duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            账号设置
           </RouterLink>
         </div>
       </div>
@@ -90,7 +86,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
-import { formatDate, formatDateYearMonth, formatNumber } from '@/utils/format'
+import { formatDate, formatNumber } from '@/utils/format'
 import { useUserStore } from '@/stores/user'
 import { userService } from '@/services/userService'
 import { articleService } from '@/services/articleService'

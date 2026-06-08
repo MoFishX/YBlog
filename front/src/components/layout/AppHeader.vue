@@ -26,25 +26,13 @@
             {{ userStore.user.username }}
           </RouterLink>
           <RouterLink
-            to="/dashboard"
-            class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
-          >
-            创作中心
-          </RouterLink>
-          <RouterLink
-            to="/settings"
-            class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
-          >
-            设置
-          </RouterLink>
-          <RouterLink
             v-if="userStore.isAdmin"
             to="/admin"
             class="text-sm font-medium text-zinc-500 hover:text-accent transition-colors duration-200"
           >
             管理后台
           </RouterLink>
-          <button @click="handleLogout" class="text-sm font-medium text-zinc-400 hover:text-zinc-700 transition-colors duration-200 cursor-pointer">
+          <button @click="showLogoutConfirm = true" class="text-sm font-medium text-zinc-400 hover:text-zinc-700 transition-colors duration-200 cursor-pointer">
             退出</button>
         </template>
         <template v-else>
@@ -85,20 +73,6 @@
                 个人中心
               </RouterLink>
               <RouterLink
-                to="/dashboard"
-                @click="mobileOpen = false"
-                class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200"
-              >
-                创作中心
-              </RouterLink>
-              <RouterLink
-                to="/settings"
-                @click="mobileOpen = false"
-                class="block px-4 py-3 text-sm font-medium text-zinc-700 rounded-lg hover:bg-zinc-50 transition-colors duration-200"
-              >
-                设置
-              </RouterLink>
-              <RouterLink
                 v-if="userStore.isAdmin"
                 to="/admin"
                 @click="mobileOpen = false"
@@ -106,7 +80,7 @@
               >
                 管理后台
               </RouterLink>
-              <button @click="handleLogout" class="block w-full text-left px-4 py-3 text-sm font-medium text-zinc-500 rounded-lg hover:bg-zinc-50 transition-colors duration-200 cursor-pointer">
+              <button @click="showLogoutConfirm = true" class="block w-full text-left px-4 py-3 text-sm font-medium text-zinc-500 rounded-lg hover:bg-zinc-50 transition-colors duration-200 cursor-pointer">
                 退出登录</button>
             </template>
             <template v-else>
@@ -121,6 +95,33 @@
         </div>
       </div>
     </Transition>
+
+    <Teleport to="body">
+      <div
+        v-if="showLogoutConfirm"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        @click.self="showLogoutConfirm = false"
+      >
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+          <h3 class="text-lg font-bold text-zinc-900 mb-2 font-serif">退出登录</h3>
+          <p class="text-sm text-zinc-500 mb-6">确定要退出当前账号吗？</p>
+          <div class="flex gap-3 justify-end">
+            <button
+              @click="showLogoutConfirm = false"
+              class="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors duration-200 cursor-pointer"
+            >
+              取消
+            </button>
+            <button
+              @click="handleLogout"
+              class="px-4 py-2 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors duration-200 cursor-pointer"
+            >
+              确认退出
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </header>
 </template>
 
@@ -133,9 +134,11 @@ import { authService } from '@/services/authService'
 const userStore = useUserStore()
 const router = useRouter()
 const mobileOpen = ref(false)
+const showLogoutConfirm = ref(false)
 
 async function handleLogout() {
   mobileOpen.value = false
+  showLogoutConfirm.value = false
   try { await authService.logout() } catch { /* ignore */ }
   userStore.logout()
   router.push('/')
