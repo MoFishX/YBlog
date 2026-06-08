@@ -1,32 +1,32 @@
 <template>
   <article
-    class="group bg-white rounded-lg border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200 cursor-pointer overflow-hidden"
+    class="group bg-white rounded-xl border border-zinc-100 hover:border-accent/30 hover:shadow-md transition-all duration-200 cursor-pointer overflow-hidden"
     @click="goDetail"
   >
-    <div v-if="article.coverImage" class="aspect-[16/9] overflow-hidden bg-gray-50">
-      <img :src="article.coverImage" :alt="article.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+    <div v-if="article.coverImage" class="aspect-[16/9] overflow-hidden bg-zinc-100">
+      <img :src="article.coverImage" :alt="article.title" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" loading="lazy" />
     </div>
 
-    <div class="p-5">
+    <div class="p-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 text-xs font-medium flex-shrink-0">
+        <span class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0">
           {{ article.author.username.charAt(0).toUpperCase() }}
         </span>
-        <span class="text-sm text-gray-500 truncate">{{ article.author.username }}</span>
-        <span class="text-gray-300">·</span>
-        <span class="text-xs text-gray-400 whitespace-nowrap">{{ formatDate(article.createdAt) }}</span>
+        <span class="text-sm font-medium text-zinc-500 truncate">{{ article.author.username }}</span>
+        <span class="text-zinc-300">&middot;</span>
+        <span class="text-xs text-zinc-400 whitespace-nowrap">{{ formatDate(article.createdAt) }}</span>
       </div>
 
-      <h3 class="text-base font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-gray-600 transition-colors">
+      <h3 class="text-lg font-bold text-zinc-900 mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-200 font-serif">
         {{ article.title }}
       </h3>
 
-      <p class="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed">
+      <p class="text-sm text-zinc-500 mb-4 line-clamp-2 leading-relaxed">
         {{ article.summary || '暂无简介' }}
       </p>
 
       <div class="flex items-center justify-between gap-2">
-        <div class="flex items-center gap-3 text-xs text-gray-400">
+        <div class="flex items-center gap-4 text-xs text-zinc-400">
           <span class="flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             {{ formatNumber(article.viewCount) }}
@@ -40,8 +40,8 @@
             {{ formatNumber(article.commentCount) }}
           </span>
         </div>
-        <div v-if="article.tags?.length" class="flex gap-1">
-          <span v-for="tag in article.tags.slice(0, 2)" :key="tag.id" class="px-2 py-0.5 text-xs text-gray-500 bg-gray-50 rounded">
+        <div v-if="article.tags?.length" class="flex gap-1.5">
+          <span v-for="tag in article.tags.slice(0, 2)" :key="tag.id" class="px-2.5 py-0.5 text-xs font-medium text-zinc-500 bg-zinc-100 rounded-md">
             {{ tag.name }}
           </span>
         </div>

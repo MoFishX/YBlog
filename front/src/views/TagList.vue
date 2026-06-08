@@ -1,20 +1,20 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <div class="container mx-auto px-4 py-12 max-w-4xl">
-      <div class="text-center mb-12">
-        <h1 class="text-3xl font-bold text-gray-900 mb-3">探索标签</h1>
-        <p class="text-gray-500 text-sm">共 {{ tags.length }} 个标签，点击浏览相关文章</p>
+  <div class="min-h-screen bg-zinc-50">
+    <div class="container mx-auto px-4 py-14 max-w-4xl">
+      <div class="text-center mb-14">
+        <h1 class="text-3xl font-bold text-zinc-900 mb-3 font-serif">探索标签</h1>
+        <p class="text-zinc-500 text-sm">共 {{ tags.length }} 个标签，点击浏览相关文章</p>
       </div>
 
       <div v-if="loading" class="flex justify-center py-20">
         <div class="flex gap-2">
-          <span v-for="i in 3" :key="i" class="w-3 h-3 rounded-full bg-purple-400 animate-bounce" :style="{ animationDelay: `${i * 0.15}s` }"></span>
+          <span v-for="i in 3" :key="i" class="w-3 h-3 rounded-full bg-accent opacity-60 animate-bounce" :style="{ animationDelay: `${i * 0.15}s` }"></span>
         </div>
       </div>
 
       <div v-else-if="error" class="text-center py-20">
-        <p class="text-gray-400 mb-4">{{ error }}</p>
-        <button @click="fetchTags" class="text-purple-600 text-sm hover:underline">重试</button>
+        <p class="text-zinc-400 mb-4">{{ error }}</p>
+        <button @click="fetchTags" class="text-accent text-sm font-medium hover:underline cursor-pointer">重试</button>
       </div>
 
       <div v-else class="flex flex-wrap justify-center gap-4">
@@ -50,16 +50,16 @@ const loading = ref(true)
 const error = ref('')
 
 const gradients = [
-  'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-  'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-  'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-  'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-  'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-  'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-  'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)',
-  'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
-  'linear-gradient(135deg, #f5576c 0%, #ff6f91 100%)',
-  'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+  'linear-gradient(135deg, #EC4899 0%, #BE185D 100%)',
+  'linear-gradient(135deg, #ec4899cc 0%, #f472b6 100%)',
+  'linear-gradient(135deg, #3F3F46 0%, #18181B 100%)',
+  'linear-gradient(135deg, #52525B 0%, #27272A 100%)',
+  'linear-gradient(135deg, #71717A 0%, #EC4899 100%)',
+  'linear-gradient(135deg, #3F3F46 0%, #ec4899cc 100%)',
+  'linear-gradient(135deg, #18181B 0%, #EC4899 100%)',
+  'linear-gradient(135deg, #f472b6 0%, #BE185D 100%)',
+  'linear-gradient(135deg, #52525B 0%, #EC4899 100%)',
+  'linear-gradient(135deg, #27272A 0%, #3F3F46 100%)',
 ]
 
 function getFontSize(count: number): number {
@@ -117,7 +117,7 @@ onMounted(() => fetchTags())
   top: -8px;
   right: -8px;
   background: rgba(255, 255, 255, 0.95);
-  color: #4a5568;
+  color: #3F3F46;
   font-size: 11px;
   font-weight: 700;
   min-width: 20px;

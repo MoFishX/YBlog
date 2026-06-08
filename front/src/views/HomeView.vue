@@ -1,50 +1,50 @@
 <template>
   <div>
-    <section class="bg-white border-b border-gray-100">
-      <div class="container mx-auto px-4 py-16 md:py-20 text-center">
-        <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight">
+    <section class="bg-white border-b border-zinc-100">
+      <div class="container mx-auto px-4 py-20 md:py-28 text-center">
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-zinc-900 mb-4 tracking-tight font-serif">
           探索技术的无限可能
         </h1>
-        <p class="text-base text-gray-500 mb-8 max-w-xl mx-auto">
+        <p class="text-lg text-zinc-500 mb-10 max-w-xl mx-auto leading-relaxed">
           在这里发现关于前端、后端、架构与设计的前沿思考与实践
         </p>
-        <div class="flex items-center justify-center gap-3">
-          <RouterLink to="/search" class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-md hover:bg-gray-800 transition-colors">
+        <div class="flex items-center justify-center gap-4">
+          <RouterLink to="/search" class="px-6 py-3 text-sm font-semibold text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors duration-200 cursor-pointer">
             探索文章
           </RouterLink>
-          <RouterLink v-if="!userStore.isLoggedIn" to="/register" class="px-5 py-2.5 text-sm font-medium text-gray-600 border border-gray-200 rounded-md hover:bg-gray-50 transition-colors">
+          <RouterLink v-if="!userStore.isLoggedIn" to="/register" class="px-6 py-3 text-sm font-semibold text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-200 cursor-pointer">
             加入我们
           </RouterLink>
         </div>
       </div>
     </section>
 
-    <div class="container mx-auto px-4 py-8">
-      <div class="lg:grid lg:grid-cols-[1fr_300px] lg:gap-8">
+    <div class="container mx-auto px-4 py-10">
+      <div class="lg:grid lg:grid-cols-[1fr_320px] lg:gap-10">
         <div>
-          <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center justify-between mb-8">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900">
+              <h2 class="text-xl font-bold text-zinc-900 font-serif">
                 <template v-if="tagFilter">#{{ tagFilter }}</template>
                 <template v-else>最新文章</template>
               </h2>
             </div>
-            <div class="flex bg-gray-100 rounded-md p-0.5">
+            <div class="flex bg-zinc-100 rounded-lg p-1">
               <button
                 v-for="opt in orderOptions"
                 :key="opt.value"
                 @click="orderBy = opt.value; fetchArticles()"
-                class="px-3 py-1 text-xs rounded transition-colors"
-                :class="orderBy === opt.value ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'"
+                class="px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer"
+                :class="orderBy === opt.value ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
               >
                 {{ opt.label }}
               </button>
             </div>
           </div>
 
-          <div v-if="error" class="bg-red-50 border border-red-100 rounded-lg p-4 text-center mb-6">
-            <p class="text-sm text-red-600 mb-2">{{ error }}</p>
-            <button @click="fetchArticles" class="text-sm text-red-600 underline">重试</button>
+          <div v-if="error" class="bg-red-50 border border-red-200 rounded-xl p-5 text-center mb-8">
+            <p class="text-sm text-red-600 mb-3">{{ error }}</p>
+            <button @click="fetchArticles" class="text-sm font-medium text-red-600 underline cursor-pointer">重试</button>
           </div>
 
           <ArticleList :articles="articles" :loading="loading" />
@@ -52,7 +52,7 @@
           <Pagination v-if="total > pageSize" :current-page="page" :total="total" :page-size="pageSize" @change="handlePageChange" />
         </div>
 
-        <aside class="mt-8 lg:mt-0">
+        <aside class="mt-10 lg:mt-0">
           <HotRank :list="hotList" :loading="hotLoading" />
         </aside>
       </div>

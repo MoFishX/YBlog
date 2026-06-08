@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h3 class="text-base font-semibold text-gray-900 mb-5">评论 <span class="text-sm font-normal text-gray-400">({{ total }})</span></h3>
+    <h3 class="text-base font-bold text-zinc-900 mb-6 font-serif">评论 <span class="text-sm font-normal text-zinc-400">({{ total }})</span></h3>
     <LoadingSkeleton v-if="loading" :rows="3" />
     <EmptyState v-else-if="list.length === 0" text="暂无评论，来发表第一条吧" />
-    <div v-else class="divide-y divide-gray-50">
+    <div v-else class="divide-y divide-zinc-100">
       <CommentItem
         v-for="item in list" :key="item.id" :comment="item" :article-author-id="articleAuthorId"
         @reply="(id, name) => $emit('reply', id, name)"

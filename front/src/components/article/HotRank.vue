@@ -1,29 +1,28 @@
 <template>
-  <div class="bg-white rounded-lg border border-gray-100 p-5">
-    <h3 class="text-base font-semibold text-gray-900 mb-4">热门文章</h3>
+  <div class="bg-white rounded-xl border border-zinc-100 p-6 sticky top-20">
+    <h3 class="text-base font-bold text-zinc-900 mb-5 font-serif uppercase tracking-wider">热门文章</h3>
     <LoadingSkeleton v-if="loading" :rows="5" />
     <EmptyState v-else-if="list.length === 0" text="暂无数据" />
     <ul v-else class="space-y-1">
       <li
         v-for="item in list"
         :key="item.id"
-        class="group cursor-pointer rounded-md p-2.5 hover:bg-gray-50 transition-colors"
+        class="group cursor-pointer rounded-lg p-2.5 hover:bg-zinc-50 transition-colors duration-200"
         @click="goDetail(item.id)"
       >
         <div class="flex items-center gap-3">
           <span
-            class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-            :class="item.rank <= 3 ? 'bg-gray-900' : 'bg-gray-300'"
-            :style="item.rank <= 3 ? { opacity: 1 - (item.rank - 1) * 0.25 } : {}"
+            class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
+            :class="item.rank === 1 ? 'bg-accent' : item.rank <= 3 ? 'bg-zinc-800' : 'bg-zinc-300'"
           >
             {{ item.rank }}
           </span>
           <div class="min-w-0 flex-1">
-            <p class="text-sm text-gray-800 truncate group-hover:text-gray-600 transition-colors">
+            <p class="text-sm font-medium text-zinc-800 truncate group-hover:text-accent transition-colors duration-200">
               {{ item.title }}
             </p>
-            <p class="text-xs text-gray-400 mt-0.5">
-              {{ formatNumber(item.viewCount) }} 阅读 · {{ formatNumber(item.likeCount) }} 点赞
+            <p class="text-xs text-zinc-400 mt-0.5">
+              {{ formatNumber(item.viewCount) }} 阅读 &middot; {{ formatNumber(item.likeCount) }} 点赞
             </p>
           </div>
         </div>

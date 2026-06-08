@@ -1,29 +1,29 @@
 <template>
-  <div class="min-h-screen bg-[#0f1115]">
-    <div class="max-w-[1400px] mx-auto px-6 py-8">
-      <div class="flex items-center justify-between mb-6">
+  <div class="min-h-screen bg-zinc-950">
+    <div class="max-w-[1400px] mx-auto px-6 py-10">
+      <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-6">
-          <h1 class="text-xl font-bold text-white tracking-tight">视频中心</h1>
-          <nav class="flex items-center gap-1 bg-[#1a1d24] rounded-lg p-1">
+          <h1 class="text-xl font-bold text-white tracking-tight font-serif">视频中心</h1>
+          <nav class="flex items-center gap-1 bg-zinc-900 rounded-lg p-1">
             <button
               v-for="cat in categories"
               :key="cat.value"
               @click="activeCategory = cat.value"
-              class="px-4 py-1.5 text-sm rounded-md transition-all duration-200"
+              class="px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 cursor-pointer"
               :class="activeCategory === cat.value
-                ? 'bg-white/10 text-white'
-                : 'text-gray-400 hover:text-gray-200'"
+                ? 'bg-zinc-800 text-white'
+                : 'text-zinc-400 hover:text-zinc-200'"
             >
               {{ cat.label }}
             </button>
           </nav>
         </div>
         <div class="flex items-center gap-3">
-          <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition-colors">
+          <button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent hover:bg-pink-600 text-white text-sm font-medium transition-colors duration-200 cursor-pointer">
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             播放全部
           </button>
-          <button class="px-4 py-2 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/20 text-sm transition-colors">
+          <button class="px-4 py-2 rounded-lg border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 text-sm font-medium transition-colors duration-200 cursor-pointer">
             查看更多
           </button>
         </div>
@@ -31,9 +31,9 @@
 
       <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
         <div v-for="i in 8" :key="i" class="animate-pulse">
-          <div class="aspect-video rounded-xl bg-[#1a1d24] mb-3"></div>
-          <div class="h-4 bg-[#1a1d24] rounded w-3/4 mb-2"></div>
-          <div class="h-3 bg-[#1a1d24] rounded w-1/3"></div>
+          <div class="aspect-video rounded-xl bg-zinc-900 mb-3"></div>
+          <div class="h-4 bg-zinc-900 rounded w-3/4 mb-2"></div>
+          <div class="h-3 bg-zinc-900 rounded w-1/3"></div>
         </div>
       </div>
 
