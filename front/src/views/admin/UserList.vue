@@ -32,7 +32,7 @@
         <el-table-column prop="articleCount" label="文章数" width="80" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'danger'">{{ row.status }}</el-tag>
+            <el-tag :type="statusTagType(row.status)">{{ statusLabel(row.status) }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="注册时间" width="180">
@@ -41,7 +41,7 @@
         <el-table-column label="操作" width="220" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="handleToggleStatus(row)">
-              {{ row.status === 'ACTIVE' ? '封禁' : '解封' }}
+              {{ toggleLabel(row.status) }}
             </el-button>
             <el-button size="small" @click="handleChangeRole(row)">
               {{ row.role === 'ADMIN' ? '降为用户' : '升管理员' }}
@@ -76,6 +76,21 @@ const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
 const keyword = ref('')
+
+function statusTagType(status: string): string {
+  const map: Record<string, string> = { ACTIVE: 'success', INACTIVE: 'warning', BANNED: 'danger' }
+  return map[status] || 'info'
+}
+
+function statusLabel(status: string): string {
+  const map: Record<string, string> = { ACTIVE: '正常', INACTIVE: '未激活', BANNED: '已封禁' }
+  return map[status] || status
+}
+
+function toggleLabel(status: string): string {
+  const map: Record<string, string> = { ACTIVE: '封禁', INACTIVE: '激活', BANNED: '解封' }
+  return map[status] || '操作'
+}
 
 async function fetchList() {
   loading.value = true
