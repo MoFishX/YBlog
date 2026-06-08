@@ -32,7 +32,23 @@
         <!-- 依赖版本管理 -->
         <lombok.version>1.18.36</lombok.version>
         <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <qiniu.skd.oss>[7.19.0, 7.19.99]</qiniu.skd.oss>
     </properties>
+
+    <dependencies>
+        <!-- Spring Web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- 七牛云Oss -->
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-java-sdk</artifactId>
+            <version>${qiniu.skd.oss}</version>
+        </dependency>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
