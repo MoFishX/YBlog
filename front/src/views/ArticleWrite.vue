@@ -34,6 +34,19 @@
           placeholder="用一两句话概括文章内容（选填）"
         ></textarea>
         <div class="text-xs text-zinc-400 mt-1">{{ form.summary.length }}/300</div>
+
+        <div class="flex items-center gap-2 mt-3">
+          <button
+            type="button"
+            @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1"
+            class="w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer flex-shrink-0"
+            :class="form.genAiSummary === 1 ? 'bg-accent border-accent' : 'border-zinc-300'"
+          >
+            <svg v-if="form.genAiSummary === 1" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <span class="text-xs text-zinc-500 select-none cursor-pointer" @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1">发布后生成 AI 摘要</span>
+        </div>
+        <p v-if="form.genAiSummary === 1" class="text-xs text-amber-600 mt-1.5">开启后你填写的摘要将被 AI 生成的摘要替代</p>
       </div>
 
       <div>
@@ -78,18 +91,6 @@
 
       <div v-if="error" class="bg-red-50 border border-red-200 rounded-xl p-4">
         <p class="text-sm text-red-600">{{ error }}</p>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1"
-          class="w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer flex-shrink-0"
-          :class="form.genAiSummary === 1 ? 'bg-accent border-accent' : 'border-zinc-300'"
-        >
-          <svg v-if="form.genAiSummary === 1" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
-        </button>
-        <span class="text-xs text-zinc-500 select-none cursor-pointer" @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1">发布后生成 AI 摘要</span>
       </div>
 
       <div class="flex items-center gap-3 pt-2">
