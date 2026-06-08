@@ -133,4 +133,8 @@ watch(() => route.query.tagName, () => {
   syncTagFilter()
   fetchArticles()
 })
+
+watch(() => route.path, (to) => {
+  if (to === '/') { page.value = 1; syncTagFilter(); fetchArticles(); fetchHot() }
+})
 </script>

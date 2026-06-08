@@ -8,22 +8,9 @@ import type {
 } from '@/types/article'
 import type { PageResult } from '@/types/api'
 
-const CACHE_TTL = 3 * 60 * 1000
-const listCache = new Map<string, { data: PageResult<ArticleListItem>; timestamp: number }>()
-
 export const articleService = {
-  clearListCache() {
-    listCache.clear()
-  },
-
   async getList(params: ArticleQuery): Promise<PageResult<ArticleListItem>> {
-    const cacheKey = JSON.stringify(params)
-    const cached = listCache.get(cacheKey)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      return cached.data
-    }
     const res = await articleApi.getList(params)
-    listCache.set(cacheKey, { data: res.data, timestamp: Date.now() })
     return res.data
   },
 
@@ -34,19 +21,16 @@ export const articleService = {
 
   async create(data: ArticleFormData): Promise<{ id: number; title: string; status: string; createdAt: string }> {
     const res = await articleApi.create(data)
-    this.clearListCache()
     return res.data
   },
 
   async update(id: number, data: Partial<ArticleFormData>): Promise<{ id: number; title: string; status: string; updatedAt: string }> {
     const res = await articleApi.update(id, data)
-    this.clearListCache()
     return res.data
   },
 
   async delete(id: number): Promise<void> {
     await articleApi.delete(id)
-    this.clearListCache()
   },
 
   async like(id: number): Promise<{ isLiked: boolean; likeCount: number }> {
