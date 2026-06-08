@@ -23,7 +23,7 @@
       </h3>
 
       <p class="text-sm text-zinc-500 mb-4 line-clamp-2 leading-relaxed">
-        {{ article.summary || '暂无简介' }}
+        {{ article.aiSummary || article.summary || '暂无简介' }}
       </p>
 
       <div class="flex items-center justify-between gap-2">

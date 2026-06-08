@@ -199,8 +199,10 @@ public class ArticleServiceImpl implements ArticleService {
         List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
 
         // 如果发布状态，异步生成 AI 总结
-        if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-            asyncTaskService.generateArticleSummary(article.getId());
+        if (request.getGenAiSummary() == 1) {
+            if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+                asyncTaskService.generateArticleSummary(article.getId());
+            }
         }
 
         return articleConverter.toArticleVO(article, author, tagVOs, 0, request.getContent());

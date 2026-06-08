@@ -1,58 +1,45 @@
 <template>
   <div class="container mx-auto px-4 py-8 max-w-3xl">
-    <div class="flex items-center gap-4 mb-8">
-      <RouterLink to="/dashboard" class="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors duration-200">
+    <div class="flex items-center gap-3 mb-8">
+      <RouterLink to="/dashboard" class="p-1.5 -ml-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors duration-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </RouterLink>
       <h1 class="text-2xl font-bold text-zinc-900 font-serif">{{ isEdit ? '编辑文章' : '写文章' }}</h1>
     </div>
 
-    <div v-if="loadError" class="bg-red-50 border border-red-200 rounded-xl p-5 text-center mb-6">
+    <div v-if="loadError" class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
       <p class="text-sm text-red-600">{{ loadError }}</p>
     </div>
 
-    <form v-else @submit.prevent="handleSave" class="space-y-6">
+    <form v-else @submit.prevent="handleSave" class="space-y-8">
       <div>
         <input
           v-model="form.title"
           type="text"
           required
           maxlength="200"
-          class="w-full border-none text-2xl font-bold text-zinc-900 placeholder:text-zinc-300 focus:outline-none bg-transparent"
+          class="w-full border-none text-3xl font-bold text-zinc-900 placeholder:text-zinc-300 focus:outline-none bg-transparent"
           placeholder="文章标题"
         />
-        <div class="text-xs text-zinc-400 mt-1 pl-0.5">{{ form.title.length }}/200</div>
+        <div class="text-xs text-zinc-400 mt-1">{{ form.title.length }}/200</div>
       </div>
 
       <div>
-        <div class="flex items-center gap-3 mb-3">
-          <div class="flex bg-zinc-100 rounded-lg p-1">
-            <button
-              type="button"
-              v-for="opt in statusOptions"
-              :key="opt.value"
-              @click="form.status = opt.value"
-              class="px-4 py-1.5 text-xs font-medium rounded-md transition-all duration-200 cursor-pointer"
-              :class="form.status === opt.value ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'"
-            >
-              {{ opt.label }}
-            </button>
-          </div>
-        </div>
-
+        <label class="block text-sm font-medium text-zinc-700 mb-2">摘要</label>
         <textarea
           v-model="form.summary"
           maxlength="300"
           rows="2"
-          class="w-full border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-200 resize-none bg-white"
-          placeholder="文章摘要（选填）"
+          class="w-full border border-zinc-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-200 resize-none"
+          placeholder="用一两句话概括文章内容（选填）"
         ></textarea>
-        <div class="text-xs text-zinc-400 mt-1 pl-0.5">{{ form.summary.length }}/300</div>
+        <div class="text-xs text-zinc-400 mt-1">{{ form.summary.length }}/300</div>
       </div>
 
       <div>
         <label class="block text-sm font-medium text-zinc-700 mb-2">标签</label>
-        <div class="flex flex-wrap gap-2 mb-2">
+        <div v-if="tagsLoading" class="text-xs text-zinc-400">加载中...</div>
+        <div v-else class="flex flex-wrap gap-2">
           <button
             type="button"
             v-for="tag in availableTags"
@@ -66,7 +53,7 @@
             {{ tag.name }}
           </button>
         </div>
-        <div v-if="tagsLoading" class="text-xs text-zinc-400">加载标签中...</div>
+        <div v-if="form.selectedTagIds.length" class="text-xs text-zinc-400 mt-1">已选 {{ form.selectedTagIds.length }} 个</div>
       </div>
 
       <div>
@@ -74,22 +61,35 @@
           <label class="text-sm font-medium text-zinc-700">正文 <span class="text-zinc-400 font-normal">(Markdown)</span></label>
           <span class="text-xs text-zinc-400">{{ form.content.length }} 字</span>
         </div>
-        <div class="border border-zinc-200 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-accent/20 focus-within:border-accent transition-all duration-200">
-          <div class="bg-zinc-50 border-b border-zinc-100 px-4 py-2">
+        <div class="border border-zinc-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-accent/20 focus-within:border-accent transition-all duration-200">
+          <div class="bg-zinc-50 border-b border-zinc-100 px-4 py-2.5 flex items-center justify-between">
             <span class="text-xs text-zinc-400 font-mono">Markdown</span>
+            <span class="text-xs text-zinc-300">支持 Markdown 语法</span>
           </div>
           <textarea
             v-model="form.content"
             required
-            rows="18"
+            rows="20"
             class="w-full border-none px-4 py-4 text-sm font-mono leading-relaxed text-zinc-700 placeholder:text-zinc-300 resize-y focus:outline-none bg-white"
             placeholder="# 开始写作..."
           ></textarea>
         </div>
       </div>
 
-      <div v-if="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
+      <div v-if="error" class="bg-red-50 border border-red-200 rounded-xl p-4">
         <p class="text-sm text-red-600">{{ error }}</p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1"
+          class="w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer flex-shrink-0"
+          :class="form.genAiSummary === 1 ? 'bg-accent border-accent' : 'border-zinc-300'"
+        >
+          <svg v-if="form.genAiSummary === 1" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+        </button>
+        <span class="text-xs text-zinc-500 select-none cursor-pointer" @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1">发布后生成 AI 摘要</span>
       </div>
 
       <div class="flex items-center gap-3 pt-2">
@@ -98,9 +98,17 @@
           :disabled="submitting || !form.title.trim() || !form.content.trim()"
           class="px-6 py-2.5 bg-zinc-900 text-white text-sm font-semibold rounded-lg hover:bg-zinc-800 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
         >
-          {{ submitting ? '保存中...' : isEdit ? '更新文章' : '发布文章' }}
+          {{ submitting && form.status === 'PUBLISHED' ? '发布中...' : isEdit ? '更新文章' : '发布文章' }}
         </button>
-        <RouterLink to="/dashboard" class="px-6 py-2.5 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors duration-200">
+        <button
+          type="button"
+          :disabled="submitting || !form.title.trim()"
+          @click="handleSaveDraft"
+          class="px-6 py-2.5 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
+        >
+          {{ submitting && form.status === 'DRAFT' ? '保存中...' : '保存草稿' }}
+        </button>
+        <RouterLink to="/dashboard" class="px-6 py-2.5 text-sm font-medium text-zinc-400 hover:text-zinc-600 transition-colors duration-200">
           取消
         </RouterLink>
       </div>
@@ -125,7 +133,8 @@ const form = reactive({
   content: '',
   summary: '',
   status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT',
-  selectedTagIds: [] as number[]
+  selectedTagIds: [] as number[],
+  genAiSummary: 0 as 0 | 1
 })
 
 const availableTags = ref<Tag[]>([])
@@ -133,11 +142,6 @@ const tagsLoading = ref(false)
 const submitting = ref(false)
 const error = ref('')
 const loadError = ref('')
-
-const statusOptions = [
-  { label: '发布', value: 'PUBLISHED' as const },
-  { label: '草稿', value: 'DRAFT' as const }
-]
 
 function isTagSelected(id: number) {
   return form.selectedTagIds.includes(id)
@@ -178,11 +182,16 @@ async function loadArticle() {
   }
 }
 
-async function handleSave() {
-  if (!form.title.trim() || !form.content.trim()) {
-    error.value = '标题和内容不能为空'
+async function doSave(status: 'PUBLISHED' | 'DRAFT') {
+  if (!form.title.trim()) {
+    error.value = '请填写标题'
     return
   }
+  if (status === 'PUBLISHED' && !form.content.trim()) {
+    error.value = '请填写正文内容'
+    return
+  }
+  form.status = status
   submitting.value = true
   error.value = ''
   try {
@@ -190,8 +199,9 @@ async function handleSave() {
       title: form.title.trim(),
       content: form.content,
       summary: form.summary.trim() || undefined,
-      status: form.status,
-      tagIds: form.selectedTagIds
+      status: status,
+      tagIds: form.selectedTagIds,
+      genAiSummary: status === 'PUBLISHED' ? form.genAiSummary : 0
     }
     if (isEdit.value) {
       await articleService.update(Number(route.params.id), data)
@@ -204,6 +214,14 @@ async function handleSave() {
   } finally {
     submitting.value = false
   }
+}
+
+async function handleSave() {
+  await doSave('PUBLISHED')
+}
+
+async function handleSaveDraft() {
+  await doSave('DRAFT')
 }
 
 onMounted(() => {

@@ -18,4 +18,6 @@ public class ArticleCreateRequest {
     private String coverImage;
     private List<Long> tagIds;
     private String status;
+
+    private Integer genAiSummary;
 }

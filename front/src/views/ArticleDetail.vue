@@ -83,7 +83,7 @@
         </span>
       </div>
 
-      <div v-if="aiLoading || aiSummaryReady" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
+      <div v-if="article.aiSummaryStatus === 1 || aiGenerating" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
             <span class="text-sm font-semibold text-zinc-700">AI 总结</span>
           </div>
           <button
-            v-if="aiSummary"
+            v-if="article.aiSummaryStatus === 1 && !aiGenerating"
             class="text-zinc-400 hover:text-zinc-600 transition-colors duration-200 p-1 rounded cursor-pointer"
             @click="aiCollapsed = !aiCollapsed"
           >
@@ -101,7 +101,7 @@
             </svg>
           </button>
         </div>
-        <div v-if="aiCollapsed && aiSummary">
+        <div v-if="aiCollapsed && article.aiSummaryStatus === 1 && !aiGenerating">
           <div class="text-sm text-zinc-500 cursor-pointer hover:text-accent transition-colors duration-200" @click="aiCollapsed = false">
             点击展开AI总结
             <svg class="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,30 +109,33 @@
             </svg>
           </div>
         </div>
-        <div v-show="!aiCollapsed">
-          <div v-if="aiLoading && !aiSummary" class="text-sm text-zinc-500">
-            {{ aiGenerating ? '生成中' : 'AI总结中' }}<span class="inline-block animate-pulse tracking-[0.3em]">...</span>
+        <div v-show="!aiCollapsed || aiGenerating">
+          <div v-if="aiGenerating" class="text-sm text-zinc-500">
+            生成中<span class="inline-block animate-pulse tracking-[0.3em]">...</span>
           </div>
-          <div v-else-if="aiSummary" class="text-sm text-zinc-700 leading-relaxed">
-            <template v-if="!aiDone">
-              <span class="whitespace-pre-wrap">{{ aiDisplayText }}</span>
-              <span class="inline-block w-0.5 h-4 bg-accent align-middle animate-pulse ml-0.5"></span>
-            </template>
-            <div v-else class="prose prose-zinc prose-sm max-w-none" v-html="renderedAiSummary"></div>
+          <div v-else-if="article.aiSummaryStatus === 1" class="text-sm text-zinc-700 leading-relaxed">
+            <div class="prose prose-zinc prose-sm max-w-none" v-html="renderedAiSummary"></div>
           </div>
-          <template v-else-if="aiNeedGenerate">
-            <div v-if="aiError" class="text-sm text-red-400 mb-3">{{ aiError }}</div>
-            <div class="text-center py-2">
-              <button
-                class="px-5 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-pink-600 transition-colors duration-200 cursor-pointer"
-                @click="generateAiSummary"
-              >
-                生成 AI 总结
-              </button>
-            </div>
-          </template>
-          <div v-else-if="aiError" class="text-sm text-zinc-400">{{ aiError }}</div>
+          <div v-if="aiError" class="text-sm text-red-400 mt-2">{{ aiError }}</div>
         </div>
+      </div>
+
+      <div v-else-if="article.aiSummaryStatus === 0" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <span class="text-sm font-semibold text-zinc-700">AI 总结</span>
+          </div>
+          <button
+            class="px-4 py-1.5 bg-accent text-white text-xs font-medium rounded-lg hover:bg-pink-600 transition-colors duration-200 cursor-pointer"
+            @click="generateAiSummary"
+          >
+            生成 AI 总结
+          </button>
+        </div>
+        <div v-if="aiError" class="text-sm text-red-400 mt-2">{{ aiError }}</div>
       </div>
 
       <div class="prose prose-zinc max-w-none mb-12 border-t border-zinc-100 pt-10" v-html="renderedContent"></div>
@@ -209,21 +212,14 @@ const submitting = ref(false)
 const replyTarget = ref<string | null>(null)
 const replyParentId = ref<number | null>(null)
 
-const aiSummary = ref('')
-const aiDisplayText = ref('')
-const aiLoading = ref(false)
-const aiSummaryReady = ref(false)
-const aiDone = ref(false)
 const aiError = ref('')
-const aiNeedGenerate = ref(false)
 const aiGenerating = ref(false)
 const aiCollapsed = ref(true)
-let typewriterTimer: ReturnType<typeof setInterval> | null = null
 let aiPollActive = false
 
 const renderedAiSummary = computed(() => {
-  if (!aiSummary.value) return ''
-  return marked(aiSummary.value, { breaks: true })
+  if (!article.value?.aiSummary) return ''
+  return marked(article.value.aiSummary, { breaks: true })
 })
 
 const renderedContent = computed(() => {
@@ -283,44 +279,16 @@ function handleReply(commentId: number, username: string) {
 
 function cancelReply() { replyTarget.value = null; replyParentId.value = null; commentText.value = '' }
 
-async function fetchAiSummary() {
-  const id = Number(route.params.id)
-  if (!id) return
-  aiLoading.value = true
-  aiSummaryReady.value = true
-  aiError.value = ''
-  aiNeedGenerate.value = false
-  try {
-    const res = await articleService.getAiSummary(id)
-    if (res.status === 1) {
-      aiSummary.value = res.summary
-      startTypewriter(res.summary)
-    } else {
-      aiNeedGenerate.value = true
-      aiCollapsed.value = false
-    }
-  } catch {
-    aiError.value = 'AI 总结暂不可用'
-    aiSummaryReady.value = false
-  } finally {
-    aiLoading.value = false
-  }
-}
-
 async function generateAiSummary() {
   const id = Number(route.params.id)
   if (!id) return
-  aiNeedGenerate.value = false
-  aiLoading.value = true
   aiGenerating.value = true
   aiError.value = ''
   try {
     await articleService.genAiSummary(id)
     await pollAiSummary(id)
   } catch {
-    aiLoading.value = false
     aiGenerating.value = false
-    aiNeedGenerate.value = true
     aiError.value = '生成失败，请重试'
   }
 }
@@ -335,39 +303,19 @@ async function pollAiSummary(id: number) {
       const res = await articleService.getAiSummary(id)
       if (res.status === 1) {
         aiGenerating.value = false
-        aiSummary.value = res.summary
-        startTypewriter(res.summary)
-        aiLoading.value = false
+        if (article.value) {
+          article.value.aiSummary = res.summary
+          article.value.aiSummaryStatus = 1
+        }
+        aiCollapsed.value = false
         aiPollActive = false
         return
       }
     } catch { /* continue polling */ }
   }
   aiPollActive = false
-  throw new Error('timeout')
-}
-
-function startTypewriter(text: string) {
-  stopTypewriter()
-  aiDone.value = false
-  aiDisplayText.value = ''
-  let index = 0
-  typewriterTimer = setInterval(() => {
-    if (index < text.length) {
-      aiDisplayText.value += text[index]
-      index++
-    } else {
-      stopTypewriter()
-      aiDone.value = true
-    }
-  }, 10)
-}
-
-function stopTypewriter() {
-  if (typewriterTimer) {
-    clearInterval(typewriterTimer)
-    typewriterTimer = null
-  }
+  aiGenerating.value = false
+  aiError.value = '生成超时，请重试'
 }
 
 async function handleDeleteComment(commentId: number) {
@@ -376,6 +324,6 @@ async function handleDeleteComment(commentId: number) {
 
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
 
-onMounted(() => { fetchDetail(); fetchComments(); fetchAiSummary() })
-onBeforeUnmount(() => { stopTypewriter(); aiPollActive = false })
+onMounted(() => { fetchDetail(); fetchComments() })
+onBeforeUnmount(() => { aiPollActive = false })
 </script>

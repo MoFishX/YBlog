@@ -10,6 +10,7 @@ export interface ArticleListItem {
   id: number
   title: string
   summary: string
+  aiSummary?: string
   coverImage?: string | null
   author: {
     id: number
@@ -42,6 +43,8 @@ export interface Article {
   likeCount: number
   isLiked?: boolean
   commentCount?: number
+  aiSummary?: string
+  aiSummaryStatus?: number
   createdAt: string
   updatedAt?: string
 }
@@ -77,4 +80,5 @@ export interface ArticleFormData {
   coverImage?: string
   tagIds?: number[]
   status?: 'PUBLISHED' | 'DRAFT'
+  genAiSummary?: 0 | 1
 }
