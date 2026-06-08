@@ -34,6 +34,16 @@ public class UserController {
         return result;
     }
 
+    @GetMapping("/info")
+    @Operation(summary = "用户信息")
+    public Result<UserVO> info() {
+        log.info("获取用户信息");
+        Long currentUserId = securityUtils.getCurrentUserId();
+        UserVO userVO = userService.getUserById(currentUserId);
+        log.info("获取用户信息成功, userId: {}", userVO.getId());
+        return Result.success(userVO);
+    }
+
     @Operation(summary = "更新个人资料")
     @PutMapping("/me")
     public Result<UserVO> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {

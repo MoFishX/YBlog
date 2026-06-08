@@ -1,7 +1,7 @@
 <template>
   <div class="container mx-auto px-4 py-8 max-w-lg">
     <div class="flex items-center gap-4 mb-8">
-      <RouterLink :to="`/user/${userStore.user?.id}`" class="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors duration-200">
+      <RouterLink :to="`/user/${userStore.user?.id}`" class="p-1.5 -ml-1.5 text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors duration-200">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
       </RouterLink>
       <h1 class="text-2xl font-bold text-zinc-900 font-serif">账号设置</h1>
