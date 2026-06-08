@@ -10,6 +10,12 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   level:
     com.yvmoux.blog: info
@@ -22,8 +28,12 @@ ai:
   temperature: 0.3
   enabled: true
 
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
+oss:
+  qiniu:
+    access-key-id:
+    access-key-secret:
+    bucket-name:
+email:
+  resend:
+    api-key:
+
