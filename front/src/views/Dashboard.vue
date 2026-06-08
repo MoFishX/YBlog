@@ -1,9 +1,14 @@
 <template>
   <div class="container mx-auto px-4 py-8 max-w-3xl">
     <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-zinc-900 font-serif">创作中心</h1>
-        <p class="text-sm text-zinc-500 mt-1">管理你的文章</p>
+      <div class="flex items-center gap-3">
+        <RouterLink :to="`/user/${userStore.user?.id}`" class="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors duration-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </RouterLink>
+        <div>
+          <h1 class="text-2xl font-bold text-zinc-900 font-serif">创作中心</h1>
+          <p class="text-sm text-zinc-500 mt-1">管理你的文章</p>
+        </div>
       </div>
       <RouterLink to="/dashboard/write" class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-zinc-900 text-white text-sm font-semibold rounded-lg hover:bg-zinc-800 transition-colors duration-200">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -118,6 +123,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import { formatDate, formatNumber } from '@/utils/format'
 import { articleService } from '@/services/articleService'
 import LoadingSkeleton from '@/components/common/LoadingSkeleton.vue'
@@ -125,6 +131,7 @@ import EmptyState from '@/components/common/EmptyState.vue'
 import Pagination from '@/components/common/Pagination.vue'
 import type { ArticleListItem } from '@/types/article'
 
+const userStore = useUserStore()
 const articles = ref<ArticleListItem[]>([])
 const loading = ref(true)
 const error = ref('')
