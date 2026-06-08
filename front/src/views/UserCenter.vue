@@ -137,9 +137,15 @@ async function fetchUser() {
   const id = Number(route.params.id)
   if (!id) { error.value = '用户不存在'; loading.value = false; return }
   loading.value = true; error.value = ''
-  try { user.value = await userService.getUser(id) }
+  try { user.value = await userService.getUser(id); if (isOwnProfile.value) syncStoreUser() }
   catch (e: any) { error.value = e?.response?.data?.message || '加载失败' }
   finally { loading.value = false }
+}
+
+function syncStoreUser() {
+  if (!user.value || !userStore.user) return
+  userStore.user.avatar = user.value.avatar
+  userStore.user.email = user.value.email
 }
 
 async function fetchArticles() {

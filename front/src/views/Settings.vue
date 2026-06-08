@@ -156,8 +156,14 @@ async function handleSaveProfile() {
   profileSuccess.value = ''
   try {
     const updated = await userService.updateProfile({ email: profileForm.email || undefined })
-    if (user.value) user.value.email = updated.email
-    if (userStore.user) userStore.user.email = updated.email
+    if (user.value) {
+      user.value.email = updated.email
+      user.value.avatar = updated.avatar
+    }
+    if (userStore.user) {
+      userStore.user.email = updated.email
+      userStore.user.avatar = updated.avatar
+    }
     profileSuccess.value = '保存成功'
   } catch (e: any) {
     profileError.value = e?.response?.data?.message || '保存失败'

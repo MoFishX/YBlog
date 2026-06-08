@@ -14,5 +14,10 @@ export const userService = {
 
   async changePassword(data: { oldPassword: string; newPassword: string }): Promise<void> {
     await userApi.changePassword(data)
+  },
+
+  async getInfo(): Promise<User> {
+    const res = await userApi.getInfo()
+    return res.data
   }
 }

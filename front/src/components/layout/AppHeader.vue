@@ -127,15 +127,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { authService } from '@/services/authService'
+import { userService } from '@/services/userService'
 
 const userStore = useUserStore()
 const router = useRouter()
 const mobileOpen = ref(false)
 const showLogoutConfirm = ref(false)
+
+async function fetchUserInfo() {
+  if (!userStore.isLoggedIn) return
+  try {
+    const u = await userService.getInfo()
+    if (u) {
+      userStore.user = u
+    }
+  } catch { /* 401 由拦截器自动 refresh + 重试 */ }
+}
 
 async function handleLogout() {
   mobileOpen.value = false
@@ -144,6 +155,8 @@ async function handleLogout() {
   userStore.logout()
   router.push('/')
 }
+
+onMounted(() => { fetchUserInfo() })
 </script>
 
 <style scoped>

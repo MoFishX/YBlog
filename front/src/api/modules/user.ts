@@ -13,5 +13,9 @@ export const userApi = {
 
   changePassword(data: { oldPassword: string; newPassword: string }): Promise<ApiResponse<null>> {
     return request.put('/user/me/password', data)
+  },
+
+  getInfo(): Promise<ApiResponse<User>> {
+    return request.get('/user/info')
   }
 }
