@@ -1,8 +1,9 @@
 <template>
   <div class="py-4 first:pt-0 last:pb-0">
     <div class="flex items-start gap-3">
-      <div class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0">
-        {{ comment.user.username.charAt(0).toUpperCase() }}
+      <div class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0 overflow-hidden">
+        <img v-if="comment.user.avatar" :src="comment.user.avatar" class="w-full h-full object-cover" />
+        <template v-else>{{ comment.user.username.charAt(0).toUpperCase() }}</template>
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex items-center flex-wrap gap-x-2 gap-y-1 mb-1">

@@ -20,8 +20,9 @@
       <div class="hidden md:flex items-center gap-3">
         <template v-if="userStore.isLoggedIn && userStore.user">
           <RouterLink :to="`/user/${userStore.user.id}`" class="flex items-center gap-2 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors duration-200">
-            <span class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold">
-              {{ userStore.user.username.charAt(0).toUpperCase() }}
+            <span class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold overflow-hidden">
+              <img v-if="userStore.user.avatar" :src="userStore.user.avatar" class="w-full h-full object-cover" />
+              <template v-else>{{ userStore.user.username.charAt(0).toUpperCase() }}</template>
             </span>
             {{ userStore.user.username }}
           </RouterLink>

@@ -42,8 +42,9 @@
       </h1>
 
       <div class="flex items-center gap-3 mb-6">
-        <span class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 font-semibold text-sm flex-shrink-0">
-          {{ article.author.username.charAt(0).toUpperCase() }}
+        <span class="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 font-semibold text-sm flex-shrink-0 overflow-hidden">
+          <img v-if="article.author.avatar" :src="article.author.avatar" class="w-full h-full object-cover" />
+          <template v-else>{{ article.author.username.charAt(0).toUpperCase() }}</template>
         </span>
         <div>
           <div class="text-sm font-semibold text-zinc-900">{{ article.author.username }}</div>

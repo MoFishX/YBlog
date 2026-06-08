@@ -9,8 +9,9 @@
 
     <div class="p-6">
       <div class="flex items-center gap-2 mb-3">
-        <span class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0">
-          {{ article.author.username.charAt(0).toUpperCase() }}
+        <span class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0 overflow-hidden">
+          <img v-if="article.author.avatar" :src="article.author.avatar" class="w-full h-full object-cover" />
+          <template v-else>{{ article.author.username.charAt(0).toUpperCase() }}</template>
         </span>
         <span class="text-sm font-medium text-zinc-500 truncate">{{ article.author.username }}</span>
         <span class="text-zinc-300">&middot;</span>

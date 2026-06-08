@@ -39,8 +39,9 @@
 
       <div class="bg-white rounded-xl border border-zinc-100 p-8 mb-10 shadow-sm">
         <div class="flex items-center gap-5 mb-6">
-          <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-2xl font-bold flex-shrink-0">
-            {{ user.username.charAt(0).toUpperCase() }}
+          <div class="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-2xl font-bold flex-shrink-0 overflow-hidden">
+            <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
+            <template v-else>{{ user.username.charAt(0).toUpperCase() }}</template>
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2.5 mb-1">
