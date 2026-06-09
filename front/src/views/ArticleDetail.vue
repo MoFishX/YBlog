@@ -180,7 +180,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
 import { marked } from 'marked'
 import { formatDateTime, formatNumber } from '@/utils/format'
@@ -217,9 +217,36 @@ const aiGenerating = ref(false)
 const aiCollapsed = ref(true)
 let aiPollActive = false
 
-const renderedAiSummary = computed(() => {
-  if (!article.value?.aiSummaryLong) return ''
-  return marked(article.value.aiSummaryLong, { breaks: true })
+const renderedAiSummary = ref('')
+let typingTimer: ReturnType<typeof setInterval> | null = null
+
+function startTyping(fullText: string) {
+  stopTyping()
+  let pos = 0
+  renderedAiSummary.value = ''
+  const speed = 15
+  typingTimer = setInterval(() => {
+    pos += 3
+    if (pos >= fullText.length) {
+      renderedAiSummary.value = marked(fullText, { breaks: true }) as string
+      stopTyping()
+      return
+    }
+    renderedAiSummary.value = marked(fullText.slice(0, pos), { breaks: true }) as string
+  }, speed)
+}
+
+function stopTyping() {
+  if (typingTimer != null) {
+    clearInterval(typingTimer)
+    typingTimer = null
+  }
+}
+
+watch(() => article.value?.aiSummaryLong, (val) => {
+  if (val && !aiGenerating.value) {
+    startTyping(val)
+  }
 })
 
 const renderedContent = computed(() => {
@@ -325,5 +352,5 @@ async function handleDeleteComment(commentId: number) {
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
 
 onMounted(() => { fetchDetail(); fetchComments() })
-onBeforeUnmount(() => { aiPollActive = false })
+onBeforeUnmount(() => { aiPollActive = false; stopTyping() })
 </script>
