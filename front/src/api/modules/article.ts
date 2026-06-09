@@ -45,7 +45,7 @@ export const articleApi = {
     return request.get('/articles/mine', { params })
   },
 
-  getAiSummary(id: number): Promise<ApiResponse<{ status: number; summary: string }>> {
+  getAiSummary(id: number): Promise<ApiResponse<{ status: number; summaryLong: string }>> {
     return request.get('/articles/getAiSummaryLong', { params: { articleId: id } })
   },
 

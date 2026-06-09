@@ -53,7 +53,7 @@ export const articleService = {
     return res.data
   },
 
-  async getAiSummary(id: number): Promise<{ status: number; summary: string }> {
+  async getAiSummary(id: number): Promise<{ status: number; summaryLong: string }> {
     const res = await articleApi.getAiSummary(id)
     return res.data
   },

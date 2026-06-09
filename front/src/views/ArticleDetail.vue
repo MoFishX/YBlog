@@ -304,7 +304,7 @@ async function pollAiSummary(id: number) {
       if (res.status === 1) {
         aiGenerating.value = false
         if (article.value) {
-          article.value.aiSummaryLong = res.summary
+          article.value.aiSummaryLong = res.summaryLong
           article.value.aiSummaryLongStatus = 1
         }
         aiCollapsed.value = false
