@@ -18,4 +18,10 @@ public interface AuthService {
 
     /** 登出：Token 加入黑名单 */
     void logout(String token);
+
+    /** 激活邮箱 */
+    void verifyEmail(String token);
+
+    /** 重发激活邮件 */
+    void resendActivation(String email);
 }

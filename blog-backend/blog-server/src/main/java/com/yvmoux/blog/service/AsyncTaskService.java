@@ -17,4 +17,10 @@ public interface AsyncTaskService {
      */
     @Async
     void generateArticleSummaryLong(Long articleId);
+
+    /**
+     * 发送激活邮件
+     */
+    @Async
+    void sendActivationEmail(Long userId, String email);
 }

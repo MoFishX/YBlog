@@ -75,6 +75,24 @@ public class AuthController {
         return Result.success("已登出", null);
     }
 
+    @Operation(summary = "激活邮箱")
+    @GetMapping("/verify-email")
+    public Result<Void> verifyEmail(@RequestParam String token) {
+        log.info("激活邮箱, token: {}", token);
+        authService.verifyEmail(token);
+        log.info("激活邮箱成功");
+        return Result.success("邮箱激活成功", null);
+    }
+
+    @Operation(summary = "重发激活邮件")
+    @PostMapping("/resend-activation")
+    public Result<Void> resendActivation(@RequestParam String email) {
+        log.info("重发激活邮件, email: {}", email);
+        authService.resendActivation(email);
+        log.info("重发激活邮件成功");
+        return Result.success("激活邮件已重新发送", null);
+    }
+
     private void addRefreshTokenCookie(HttpServletResponse response, String token) {
         Cookie cookie = new Cookie(REFRESH_TOKEN_COOKIE, token);
         cookie.setHttpOnly(true);

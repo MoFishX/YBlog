@@ -167,4 +167,42 @@ public class AuthServiceImpl implements AuthService {
             redisUtils.set("blacklist:token:" + token, "1", jwtUtils.getAccessTokenExpiration(), TimeUnit.SECONDS);
         }
     }
+
+    @Override
+    public void verifyEmail(String token) {
+        String redisKey = "email:verify:" + token;
+        Long userId = redisUtils.get(redisKey, Long.class);
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED.getCode(), "激活链接已过期或无效");
+        }
+
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (UserStatus.ACTIVE.name().equals(user.getStatus())) {
+            redisUtils.delete(redisKey);
+            return;
+        }
+
+        user.setStatus(UserStatus.ACTIVE.name());
+        userMapper.updateById(user);
+        redisUtils.delete(redisKey);
+        log.info("用户邮箱激活成功, userId: {}", userId);
+    }
+
+    @Override
+    public void resendActivation(String email) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);
+        User user = userMapper.selectOne(queryWrapper);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.USER_NOT_FOUND);
+        }
+        if (UserStatus.ACTIVE.name().equals(user.getStatus())) {
+            throw new BusinessException(ErrorCode.USER_NOT_ACTIVATED.getCode(), "该邮箱已激活");
+        }
+
+        asyncTaskService.sendActivationEmail(user.getId(), email);
+    }
 }

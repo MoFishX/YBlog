@@ -6,12 +6,15 @@ import com.yvmoux.blog.mapper.ArticleContentMapper;
 import com.yvmoux.blog.mapper.ArticleMapper;
 import com.yvmoux.blog.service.AIService;
 import com.yvmoux.blog.service.AsyncTaskService;
+import com.yvmoux.blog.utils.MailUtil;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -23,6 +26,10 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
     private final ArticleContentMapper articleContentMapper;
     private final AIService aiService;
     private final RedisUtils redisUtils;
+    private final MailUtil mailUtil;
+
+    @Value("${app.frontend-url:http://localhost:5173}")
+    private String frontendUrl;
 
     @Async
     @Override
@@ -91,6 +98,21 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
         } finally {
             redisUtils.delete(lockKey);
         }
+    }
+
+    @Async
+    @Override
+    public void sendActivationEmail(Long userId, String email) {
+        String token = UUID.randomUUID().toString();
+        redisUtils.set("email:verify:" + token, userId, 24, TimeUnit.HOURS);
+
+        String verifyUrl = frontendUrl + "/verify-email?token=" + token;
+        mailUtil.sendHtml("Blog <noreply@yvmoux.com>", email, "激活你的博客账号",
+                "<p>点击以下链接激活你的博客账号：</p>" +
+                "<p><a href=\"" + verifyUrl + "\">" + verifyUrl + "</a></p>" +
+                "<p>链接 24 小时内有效。</p>");
+
+        log.info("激活邮件已发送至 {}, userId: {}", email, userId);
     }
 
     enum ArticleAiType {
