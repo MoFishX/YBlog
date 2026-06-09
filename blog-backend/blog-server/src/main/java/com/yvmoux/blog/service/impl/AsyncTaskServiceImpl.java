@@ -34,38 +34,67 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
     @Async
     @Override
     public void generateArticleSummary(Long articleId) {
+        generateArticleAi(articleId, ArticleAiType.SUMMARY);
+    }
+
+    @Override
+    public void generateArticleSummaryLong(Long articleId) {
+        generateArticleAi(articleId, ArticleAiType.SUMMARY_LONG);
+    }
+
+    private void generateArticleAi(Long articleId, ArticleAiType type) {
         // Redis 防重
-        String lockKey = "ai:summary:lock:" + articleId;
-        if (Boolean.TRUE.equals(redisUtils.hasKey(lockKey))) {{
-            log.info("文章 {} 的 AI 总结任务已被锁定，跳过", articleId);
+        String lockKey = "ai:generate:lock:" + type.toString().toUpperCase() + ":" + articleId;
+        if (Boolean.TRUE.equals(redisUtils.hasKey(lockKey))) {
+            log.warn("文章 {} 的 AI 生成 {} 任务已被锁定，跳过", articleId, type.toString().toUpperCase());
             return;
-        }}
+        }
         redisUtils.set(lockKey, "1", 10, TimeUnit.MINUTES);
 
         try {
             Article article = articleMapper.selectById(articleId);
             if (article == null) {
-                log.warn("文章 {} 不存在，跳过 AI 总结", articleId);
+                log.warn("文章 {} 不存在，跳过 AI 生成", articleId);
                 return;
             }
-
             ArticleContent content = articleContentMapper.selectById(articleId);
             if (content == null || content.getContent() == null || content.getContent().isBlank()) {
-                log.warn("文章 {} 内容为空，跳过 AI 总结", articleId);
+                log.warn("文章 {} 内容为空，跳过 AI 生成", articleId);
                 return;
             }
 
-            String summary = aiService.summarize(article.getTitle(), content.getContent());
-
-            if (summary != null && !summary.isBlank()) {
-                article.setAiSummary(summary);
-                articleMapper.updateById(article);
-                log.info("文章 {} AI 总结写入成功", articleId);
+            boolean success = switch (type) {
+                case SUMMARY -> {
+                    String result = aiService.summarize(article.getTitle(), content.getContent());
+                    if (result != null && !result.isBlank()) {
+                        article.setAiSummary(result);
+                        articleMapper.updateById(article);
+                        yield true;
+                    }
+                    yield false;
+                }
+                case SUMMARY_LONG -> {
+                    String result = aiService.summarizeLong(article.getTitle(), content.getContent());
+                    if (result != null && !result.isBlank()) {
+                        article.setAiSummaryLong(result);
+                        articleMapper.updateById(article);
+                        yield true;
+                    }
+                    yield false;
+                }
+            };
+            if (success) {
+                log.info("文章 {} AI 总结生成成功", articleId);
             }
         } catch (Exception e) {
             log.error("文章 {} AI 总结生成失败", articleId, e);
         } finally {
             redisUtils.delete(lockKey);
         }
+    }
+
+    enum ArticleAiType {
+        SUMMARY,
+        SUMMARY_LONG
     }
 }

@@ -11,6 +11,9 @@ export interface ArticleListItem {
   title: string
   summary: string
   aiSummary?: string
+  aiSummaryStatus?: number
+  aiSummaryLong?: string
+  aiSummaryLongStatus?: number
   coverImage?: string | null
   author: {
     id: number
@@ -45,6 +48,8 @@ export interface Article {
   commentCount?: number
   aiSummary?: string
   aiSummaryStatus?: number
+  aiSummaryLong?: string
+  aiSummaryLongStatus?: number
   createdAt: string
   updatedAt?: string
 }
@@ -81,4 +86,5 @@ export interface ArticleFormData {
   tagIds?: number[]
   status?: 'PUBLISHED' | 'DRAFT'
   genAiSummary?: 0 | 1
+  genAiSummaryLong?: 0 | 1
 }

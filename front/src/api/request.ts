@@ -47,6 +47,7 @@ instance.interceptors.response.use(
     const { config, response } = error
 
     if (response?.status === 401 && config && !config._retry) {
+      if (config.url?.includes('/auth/refresh')) return Promise.reject(error)
       const userStore = useUserStore()
 
       if (isRefreshing) {

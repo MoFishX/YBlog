@@ -198,10 +198,15 @@ public class ArticleServiceImpl implements ArticleService {
         List<Tag> tags = tagMapper.selectByArticleId(article.getId());
         List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
 
-        // 如果发布状态，异步生成 AI 总结
+        // 如果发布状态，异步生成 AI 摘要/总结
         if (request.getGenAiSummary() == 1) {
             if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
                 asyncTaskService.generateArticleSummary(article.getId());
+            }
+        }
+        if (request.getGenAiSummaryLong() == 1) {
+            if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+                asyncTaskService.generateArticleSummaryLong(article.getId());
             }
         }
 
@@ -243,7 +248,7 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         // 更新文章标签
-        if (request.getTagIds() != null) {
+        if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
             articleTagMapper.deleteByArticleId(articleId);
             List<ArticleTag> tags = request.getTagIds().stream()
                     .map(tagId -> ArticleTag.builder()
@@ -260,9 +265,16 @@ public class ArticleServiceImpl implements ArticleService {
         List<TagVO> tagVOs = tagConverter.toTagVOList(tags);
         int commentCount = commentMapper.countByArticleId(articleId);
 
-        // 如果更新后为发布状态，异步重新生成 AI 总结
-        if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-            asyncTaskService.generateArticleSummary(articleId);
+        // 如果发布状态，异步生成 AI 摘要/总结
+        if (request.getGenAiSummary() == 1) {
+            if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+                asyncTaskService.generateArticleSummary(article.getId());
+            }
+        }
+        if (request.getGenAiSummaryLong() == 1) {
+            if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
+                asyncTaskService.generateArticleSummaryLong(article.getId());
+            }
         }
 
         return articleConverter.toArticleVO(article, author, tagVOs, commentCount, request.getContent());
@@ -413,7 +425,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public void triggerAiSummary(Long userId, Long articleId) {
+    public void triggerAiSummaryLong(Long userId, Long articleId) {
         User user = userMapper.selectById(userId);
         Article article = articleMapper.selectById(articleId);
         if (article == null) {
@@ -424,12 +436,12 @@ public class ArticleServiceImpl implements ArticleService {
         }
         // 如果用户不是管理员，文章的 AI 总结存在，则不允许修改
         if (!user.getRole().equals(RoleEnum.ADMIN.name())) {
-            if (article.getAiSummary() != null && !article.getAiSummary().isBlank()) {
+            if (article.getAiSummaryLong() != null && !article.getAiSummaryLong().isBlank()) {
                 throw new BusinessException(ErrorCode.FORBIDDEN);
             }
         }
 
-        asyncTaskService.generateArticleSummary(articleId);
+        asyncTaskService.generateArticleSummaryLong(articleId);
     }
 
     @Override

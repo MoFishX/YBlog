@@ -39,7 +39,7 @@
         @click="goDetail(item.id)"
       >
         <h3 class="text-lg font-bold text-zinc-900 mb-2 font-serif group-hover:text-accent transition-colors duration-200">{{ item.title }}</h3>
-        <p class="text-sm text-zinc-500 mb-4 line-clamp-2 leading-relaxed">{{ item.aiSummary || item.summary }}</p>
+        <p class="text-sm text-zinc-500 mb-4 line-clamp-2 leading-relaxed">{{ item.aiSummaryStatus === 1 ? item.aiSummary : item.summary }}</p>
         <div class="flex items-center justify-between text-xs text-zinc-400">
           <div class="flex items-center gap-3">
             <span class="font-medium">{{ item.author.username }}</span>

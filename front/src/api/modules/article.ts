@@ -46,10 +46,10 @@ export const articleApi = {
   },
 
   getAiSummary(id: number): Promise<ApiResponse<{ status: number; summary: string }>> {
-    return request.get('/articles/ai', { params: { articleId: id } })
+    return request.get('/articles/getAiSummaryLong', { params: { articleId: id } })
   },
 
-  genAiSummary(id: number): Promise<ApiResponse<null>> {
-    return request.post('/articles/genai', null, { params: { articleId: id } })
+  genSummaryLong(id: number): Promise<ApiResponse<null>> {
+    return request.post('/articles/genSummaryLong', null, { params: { articleId: id } })
   }
 }

@@ -74,7 +74,7 @@ public class ArticleController {
     }
 
     @Operation(summary = "获取文章ai总结")
-    @GetMapping("/ai")
+    @GetMapping("/getAiSummaryLong")
     public Result<AiSummaryVO> getAiSummary(@RequestParam Long articleId) {
         log.info("获取文章ai总结, {}}", articleId);
         Result<AiSummaryVO> result = Result.success(articleService.getAiSummary(articleId));

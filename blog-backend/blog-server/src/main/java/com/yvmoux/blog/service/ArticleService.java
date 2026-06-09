@@ -52,7 +52,7 @@ public interface ArticleService {
     /**
      * 触发 AI 总结生成
      */
-    void triggerAiSummary(Long userId, Long articleId);
+    void triggerAiSummaryLong(Long userId, Long articleId);
 
     /**
      * 删除 AI 总结

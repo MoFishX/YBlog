@@ -31,6 +31,8 @@ public class ArticleConverter {
                 .updatedAt(article.getUpdatedAt())
                 .aiSummary(article.getAiSummary())
                 .aiSummaryStatus(determineAiStatus(article.getAiSummary()))
+                .aiSummaryLong(article.getAiSummaryLong())
+                .aiSummaryLongStatus(determineAiStatus(article.getAiSummaryLong()))
                 .build();
 
         if (author != null) {

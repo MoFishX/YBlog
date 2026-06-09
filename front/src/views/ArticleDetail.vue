@@ -83,7 +83,7 @@
         </span>
       </div>
 
-      <div v-if="article.aiSummaryStatus === 1 || aiGenerating" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
+      <div v-if="article.aiSummaryLongStatus === 1 || aiGenerating" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +92,7 @@
             <span class="text-sm font-semibold text-zinc-700">AI 总结</span>
           </div>
           <button
-            v-if="article.aiSummaryStatus === 1 && !aiGenerating"
+            v-if="article.aiSummaryLongStatus === 1 && !aiGenerating"
             class="text-zinc-400 hover:text-zinc-600 transition-colors duration-200 p-1 rounded cursor-pointer"
             @click="aiCollapsed = !aiCollapsed"
           >
@@ -101,7 +101,7 @@
             </svg>
           </button>
         </div>
-        <div v-if="aiCollapsed && article.aiSummaryStatus === 1 && !aiGenerating">
+        <div v-if="aiCollapsed && article.aiSummaryLongStatus === 1 && !aiGenerating">
           <div class="text-sm text-zinc-500 cursor-pointer hover:text-accent transition-colors duration-200" @click="aiCollapsed = false">
             点击展开AI总结
             <svg class="w-3.5 h-3.5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -113,14 +113,14 @@
           <div v-if="aiGenerating" class="text-sm text-zinc-500">
             生成中<span class="inline-block animate-pulse tracking-[0.3em]">...</span>
           </div>
-          <div v-else-if="article.aiSummaryStatus === 1" class="text-sm text-zinc-700 leading-relaxed">
+          <div v-else-if="article.aiSummaryLongStatus === 1" class="text-sm text-zinc-700 leading-relaxed">
             <div class="prose prose-zinc prose-sm max-w-none" v-html="renderedAiSummary"></div>
           </div>
           <div v-if="aiError" class="text-sm text-red-400 mt-2">{{ aiError }}</div>
         </div>
       </div>
 
-      <div v-else-if="article.aiSummaryStatus === 0" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
+      <div v-else-if="article.aiSummaryLongStatus === 0" class="mb-8 bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-5 border border-pink-100/50">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,8 +218,8 @@ const aiCollapsed = ref(true)
 let aiPollActive = false
 
 const renderedAiSummary = computed(() => {
-  if (!article.value?.aiSummary) return ''
-  return marked(article.value.aiSummary, { breaks: true })
+  if (!article.value?.aiSummaryLong) return ''
+  return marked(article.value.aiSummaryLong, { breaks: true })
 })
 
 const renderedContent = computed(() => {
@@ -285,11 +285,11 @@ async function generateAiSummary() {
   aiGenerating.value = true
   aiError.value = ''
   try {
-    await articleService.genAiSummary(id)
+    await articleService.genSummaryLong(id)
     await pollAiSummary(id)
-  } catch {
+  } catch (e: any) {
     aiGenerating.value = false
-    aiError.value = '生成失败，请重试'
+    aiError.value = e?.response?.data?.message || '生成失败，请重试'
   }
 }
 
@@ -304,8 +304,8 @@ async function pollAiSummary(id: number) {
       if (res.status === 1) {
         aiGenerating.value = false
         if (article.value) {
-          article.value.aiSummary = res.summary
-          article.value.aiSummaryStatus = 1
+          article.value.aiSummaryLong = res.summary
+          article.value.aiSummaryLongStatus = 1
         }
         aiCollapsed.value = false
         aiPollActive = false

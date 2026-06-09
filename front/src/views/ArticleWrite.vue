@@ -47,6 +47,18 @@
           <span class="text-xs text-zinc-500 select-none cursor-pointer" @click="form.genAiSummary = form.genAiSummary === 1 ? 0 : 1">发布后生成 AI 摘要</span>
         </div>
         <p v-if="form.genAiSummary === 1" class="text-xs text-amber-600 mt-1.5">开启后你填写的摘要将被 AI 生成的摘要替代</p>
+
+        <div class="flex items-center gap-2 mt-3">
+          <button
+            type="button"
+            @click="form.genAiSummaryLong = form.genAiSummaryLong === 1 ? 0 : 1"
+            class="w-4 h-4 rounded border-2 flex items-center justify-center transition-colors duration-200 cursor-pointer flex-shrink-0"
+            :class="form.genAiSummaryLong === 1 ? 'bg-accent border-accent' : 'border-zinc-300'"
+          >
+            <svg v-if="form.genAiSummaryLong === 1" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <span class="text-xs text-zinc-500 select-none cursor-pointer" @click="form.genAiSummaryLong = form.genAiSummaryLong === 1 ? 0 : 1">生成 AI 总结</span>
+        </div>
       </div>
 
       <div>
@@ -135,7 +147,8 @@ const form = reactive({
   summary: '',
   status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT',
   selectedTagIds: [] as number[],
-  genAiSummary: 0 as 0 | 1
+  genAiSummary: 0 as 0 | 1,
+  genAiSummaryLong: 0 as 0 | 1
 })
 
 const availableTags = ref<Tag[]>([])
@@ -202,7 +215,8 @@ async function doSave(status: 'PUBLISHED' | 'DRAFT') {
       summary: form.summary.trim() || undefined,
       status: status,
       tagIds: form.selectedTagIds,
-      genAiSummary: status === 'PUBLISHED' ? form.genAiSummary : 0
+      genAiSummary: status === 'PUBLISHED' ? form.genAiSummary : 0,
+      genAiSummaryLong: status === 'PUBLISHED' ? form.genAiSummaryLong : 0
     }
     if (isEdit.value) {
       await articleService.update(Number(route.params.id), data)

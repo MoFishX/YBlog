@@ -9,7 +9,7 @@ import java.util.List;
 @Getter
 public class ArticleCreateRequest {
     @NotBlank
-    @Size(min = 1, max = 200)
+    @Size(min = 1, max = 50)
     private String title;
 
     private String content;
@@ -20,4 +20,5 @@ public class ArticleCreateRequest {
     private String status;
 
     private Integer genAiSummary;
+    private Integer genAiSummaryLong;
 }

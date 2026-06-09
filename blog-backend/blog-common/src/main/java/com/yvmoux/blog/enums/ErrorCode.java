@@ -13,7 +13,7 @@ public enum ErrorCode {
     BAD_REQUEST(400, "参数错误"),
 
     WRONG_PASSWORD(401, "用户名或密码错误"),
-    UNAUTHORIZED(401, "未认证或AccessToken已过期"),
+    UNAUTHORIZED(401, "未认证或Token已过期"),
     REFRESH_TOKEN_BLACKLISTED(401, "RefreshToken已失效，请重新登录"),
 
     FORBIDDEN(403, "无权限执行此操作"),

@@ -1,5 +1,6 @@
 package com.yvmoux.blog.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
@@ -7,7 +8,8 @@ import java.util.List;
 
 @Getter
 public class ArticleUpdateRequest {
-    @Size(min = 1, max = 200)
+    @NotBlank
+    @Size(min = 1, max = 50)
     private String title;
 
     private String content;
@@ -15,4 +17,7 @@ public class ArticleUpdateRequest {
     private String coverImage;
     private List<Long> tagIds;
     private String status;
+
+    private Integer genAiSummary;
+    private Integer genAiSummaryLong;
 }

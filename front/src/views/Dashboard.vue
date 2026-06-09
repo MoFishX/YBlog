@@ -66,7 +66,7 @@
                 {{ item.title }}
               </h3>
             </div>
-            <p v-if="item.aiSummary || item.summary" class="text-xs text-zinc-400 line-clamp-1 mb-2">{{ item.aiSummary || item.summary }}</p>
+            <p v-if="item.aiSummary || item.summary" class="text-xs text-zinc-400 line-clamp-1 mb-2">{{ item.aiSummaryStatus === 1 ? item.aiSummary : item.summary }}</p>
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-4 text-xs text-zinc-400">
                 <span>{{ formatDate(item.createdAt) }}</span>

@@ -58,7 +58,7 @@ export const articleService = {
     return res.data
   },
 
-  async genAiSummary(id: number): Promise<void> {
-    await articleApi.genAiSummary(id)
+  async genSummaryLong(id: number): Promise<void> {
+    await articleApi.genSummaryLong(id)
   }
 }

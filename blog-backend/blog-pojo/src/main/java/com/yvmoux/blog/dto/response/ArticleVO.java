@@ -29,4 +29,7 @@ public class ArticleVO {
 
     private String aiSummary;
     private Integer aiSummaryStatus;
+
+    private String aiSummaryLong;
+    private Integer aiSummaryLongStatus;
 }

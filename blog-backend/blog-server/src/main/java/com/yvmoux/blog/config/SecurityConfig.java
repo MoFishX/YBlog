@@ -48,9 +48,9 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/auth/**",
                         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/webjars/**",
-                        "/articles", "/articles/*", "/articles/hot",
+                        "/articles", "/articles/*", "/articles/hot", "/articles/search",
                         "/articles/*/comments", "/articles/*/view",
-                        "/tags"
+                        "/comments", "/tags"
                 ).permitAll()
                 // 后台管理需要 ADMIN 角色
                 .requestMatchers("/admin/**").hasRole("ADMIN")
@@ -86,10 +86,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        config.setAllowedOriginPatterns(List.of("http://localhost:*", "http://127.0.0.1:*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;

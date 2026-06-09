@@ -84,11 +84,11 @@ public class ArticleController {
     }
 
     @Operation(summary = "生成AI总结")
-    @PostMapping("/genai")
+    @PostMapping("/genSummaryLong")
     public Result<Void> generateSummary(@RequestParam Long articleId) {
         log.info("手动生成AI总结, articleId: {}", articleId);
         Long userId = securityUtils.getCurrentUserId();
-        articleService.triggerAiSummary(userId, articleId);
+        articleService.triggerAiSummaryLong(userId, articleId);
         return Result.success("已提交AI总结任务", null);
     }
 }

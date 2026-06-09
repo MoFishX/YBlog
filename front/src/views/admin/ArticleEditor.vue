@@ -52,6 +52,10 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="AI总结">
+          <el-checkbox v-model="form.genAiSummaryLong" :true-value="1" :false-value="0">发布后生成 AI 总结</el-checkbox>
+        </el-form-item>
+
         <el-form-item label="内容">
           <div class="editor-wrapper">
             <div class="editor-toolbar">
@@ -97,7 +101,8 @@ const form = reactive({
   content: '',
   summary: '',
   status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT',
-  selectedTagIds: [] as number[]
+  selectedTagIds: [] as number[],
+  genAiSummaryLong: 0 as 0 | 1
 })
 
 const availableTags = ref<Tag[]>([])
@@ -142,7 +147,8 @@ async function handleSave() {
         content: form.content,
         summary: form.summary,
         status: form.status,
-        tagIds: form.selectedTagIds
+        tagIds: form.selectedTagIds,
+        genAiSummaryLong: form.genAiSummaryLong
       })
     } else {
       await articleService.create({
@@ -150,7 +156,8 @@ async function handleSave() {
         content: form.content,
         summary: form.summary,
         status: form.status,
-        tagIds: form.selectedTagIds
+        tagIds: form.selectedTagIds,
+        genAiSummaryLong: form.genAiSummaryLong
       })
     }
     router.push('/admin/articles')
