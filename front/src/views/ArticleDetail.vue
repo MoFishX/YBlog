@@ -176,6 +176,34 @@
         </div>
       </div>
     </template>
+
+    <Teleport to="body">
+      <div
+        v-if="deleteCommentTarget"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        @click.self="deleteCommentTarget = null"
+      >
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+          <h3 class="text-lg font-bold text-zinc-900 mb-2 font-serif">确认删除</h3>
+          <p class="text-sm text-zinc-500 mb-6">确定要删除这条评论吗？此操作不可撤销。</p>
+          <div class="flex gap-3 justify-end">
+            <button
+              @click="deleteCommentTarget = null"
+              class="px-4 py-2 text-sm font-medium text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors duration-200 cursor-pointer"
+            >
+              取消
+            </button>
+            <button
+              :disabled="deletingComment"
+              @click="confirmDeleteComment"
+              class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
+            >
+              {{ deletingComment ? '删除中...' : '确认删除' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -345,8 +373,22 @@ async function pollAiSummary(id: number) {
   aiError.value = '生成超时，请重试'
 }
 
+const deleteCommentTarget = ref<number | null>(null)
+const deletingComment = ref(false)
+
 async function handleDeleteComment(commentId: number) {
-  try { await commentService.delete(commentId); await fetchComments() } catch { /* silent */ }
+  deleteCommentTarget.value = commentId
+}
+
+async function confirmDeleteComment() {
+  if (!deleteCommentTarget.value) return
+  deletingComment.value = true
+  try {
+    await commentService.delete(deleteCommentTarget.value)
+    deleteCommentTarget.value = null
+    await fetchComments()
+  } catch { /* silent */ }
+  finally { deletingComment.value = false }
 }
 
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
