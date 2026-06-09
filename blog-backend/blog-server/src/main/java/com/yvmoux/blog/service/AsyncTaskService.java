@@ -7,13 +7,13 @@ public interface AsyncTaskService {
      * 生成文章摘要
      */
     @Async
-    void generateArticleSummary(Long articleId);
+    void generateArticleSummary(Long articleId, String title, String content);
 
     /**
      * 生成文章总结
      */
     @Async
-    void generateArticleSummaryLong(Long articleId);
+    void generateArticleSummaryLong(Long articleId, String title, String content);
 
     /**
      * 发送激活邮件

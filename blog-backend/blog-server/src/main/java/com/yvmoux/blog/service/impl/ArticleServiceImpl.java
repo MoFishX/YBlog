@@ -202,12 +202,12 @@ public class ArticleServiceImpl implements ArticleService {
         // 如果发布状态，异步生成 AI 摘要/总结
         if (request.getGenAiSummary() == 1) {
             if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-                asyncTaskService.generateArticleSummary(article.getId());
+                asyncTaskService.generateArticleSummary(article.getId(), article.getTitle(), content);
             }
         }
         if (request.getGenAiSummaryLong() == 1) {
             if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-                asyncTaskService.generateArticleSummaryLong(article.getId());
+                asyncTaskService.generateArticleSummaryLong(article.getId(), article.getTitle(), content);
             }
         }
 
@@ -267,14 +267,19 @@ public class ArticleServiceImpl implements ArticleService {
         int commentCount = commentMapper.countByArticleId(articleId);
 
         // 如果发布状态，异步生成 AI 摘要/总结
+        String articleContent = request.getContent();
+        if (articleContent == null) {
+            ArticleContent ac = articleContentMapper.selectById(articleId);
+            articleContent = ac != null ? ac.getContent() : null;
+        }
         if (request.getGenAiSummary() == 1) {
             if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-                asyncTaskService.generateArticleSummary(article.getId());
+                asyncTaskService.generateArticleSummary(article.getId(), article.getTitle(), articleContent);
             }
         }
         if (request.getGenAiSummaryLong() == 1) {
             if (ArticleStatusEnum.PUBLISHED.name().equals(article.getStatus())) {
-                asyncTaskService.generateArticleSummaryLong(article.getId());
+                asyncTaskService.generateArticleSummaryLong(article.getId(), article.getTitle(), articleContent);
             }
         }
 
@@ -442,7 +447,9 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        asyncTaskService.generateArticleSummaryLong(articleId);
+        ArticleContent content = articleContentMapper.selectById(articleId);
+        String articleContent = content != null ? content.getContent() : null;
+        asyncTaskService.generateArticleSummaryLong(articleId, article.getTitle(), articleContent);
     }
 
     @Override
