@@ -158,7 +158,7 @@
           <textarea
             v-model="commentText" rows="3"
             class="w-full border border-zinc-200 rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all duration-200 bg-white"
-            placeholder="写下你的评论..." maxlength="1000"
+            placeholder="写下你的评论...（支持 Markdown）" maxlength="1000"
           ></textarea>
           <div class="flex justify-between items-center mt-3">
             <span class="text-xs text-zinc-400">{{ commentText.length }}/1000</span>
