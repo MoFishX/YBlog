@@ -7,18 +7,6 @@ import lombok.Getter;
 import java.util.List;
 
 @Getter
-public class ArticleCreateRequest {
-    @NotBlank
-    @Size(min = 1, max = 50)
-    private String title;
+public class ArticleCreateRequest extends ArticleCommonCU {
 
-    private String content;
-
-    private String summary;
-    private String coverImage;
-    private List<Long> tagIds;
-    private String status;
-
-    private Integer genAiSummary;
-    private Integer genAiSummaryLong;
 }

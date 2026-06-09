@@ -2,6 +2,7 @@ package com.yvmoux.blog.controller.pub;
 
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.Result;
+import com.yvmoux.blog.dto.response.AiSummaryLongVO;
 import com.yvmoux.blog.dto.response.AiSummaryVO;
 import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.enums.ArticleStatusEnum;
@@ -75,9 +76,9 @@ public class ArticleController {
 
     @Operation(summary = "获取文章ai总结")
     @GetMapping("/getAiSummaryLong")
-    public Result<AiSummaryVO> getAiSummary(@RequestParam Long articleId) {
+    public Result<AiSummaryLongVO> getAiSummaryLong(@RequestParam Long articleId) {
         log.info("获取文章ai总结, {}}", articleId);
-        Result<AiSummaryVO> result = Result.success(articleService.getAiSummary(articleId));
+        Result<AiSummaryLongVO> result = Result.success(articleService.getAiSummaryLong(articleId));
         log.info("获取文章ai总结成功, articleId: {}", articleId);
         return result;
     }

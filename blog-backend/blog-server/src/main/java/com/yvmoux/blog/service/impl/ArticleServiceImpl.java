@@ -8,6 +8,7 @@ import com.yvmoux.blog.converter.TagConverter;
 import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.request.ArticleCreateRequest;
 import com.yvmoux.blog.dto.request.ArticleUpdateRequest;
+import com.yvmoux.blog.dto.response.AiSummaryLongVO;
 import com.yvmoux.blog.dto.response.AiSummaryVO;
 import com.yvmoux.blog.dto.response.ArticleVO;
 import com.yvmoux.blog.dto.response.TagVO;
@@ -455,19 +456,19 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public AiSummaryVO getAiSummary(Long articleId) {
+    public AiSummaryLongVO getAiSummaryLong(Long articleId) {
         Article article = articleMapper.selectById(articleId);
 
-        String aiSummary = article.getAiSummary();
+        String aiSummaryLong = article.getAiSummaryLong();
         int status = 1;
 
-        if (aiSummary == null || aiSummary.isBlank()) {
+        if (aiSummaryLong == null || aiSummaryLong.isBlank()) {
             status = 0;
         }
 
-        return AiSummaryVO.builder()
+        return AiSummaryLongVO.builder()
                 .status(status)
-                .summary(aiSummary)
+                .summaryLong(aiSummaryLong)
                 .build();
     }
 

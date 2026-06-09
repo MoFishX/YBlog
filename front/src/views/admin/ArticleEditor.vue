@@ -15,7 +15,7 @@
 
       <el-form label-width="60px" class="max-w-4xl">
         <el-form-item label="标题">
-          <el-input v-model="form.title" placeholder="输入文章标题" maxlength="200" show-word-limit size="large" />
+          <el-input v-model="form.title" placeholder="输入文章标题" maxlength="50" show-word-limit size="large" />
         </el-form-item>
 
         <el-row :gutter="16">
@@ -60,10 +60,11 @@
           <div class="editor-wrapper">
             <div class="editor-toolbar">
               <span class="text-xs text-gray-400">Markdown</span>
-              <span class="text-xs text-gray-300">{{ form.content.length }} 字</span>
+              <span class="text-xs text-gray-300">{{ form.content.length }}/10000</span>
             </div>
             <textarea
               v-model="form.content"
+              maxlength="10000"
               class="editor-textarea"
               placeholder="# 标题&#10;&#10;开始写作..."
             ></textarea>
@@ -136,6 +137,18 @@ async function loadArticle() {
 async function handleSave() {
   if (!form.title.trim() || !form.content.trim()) {
     error.value = '标题和内容不能为空'
+    return
+  }
+  if (form.title.length > 50) {
+    error.value = '标题不能超过50字'
+    return
+  }
+  if (form.content.length > 10000) {
+    error.value = '正文不能超过10000字'
+    return
+  }
+  if (form.status === 'PUBLISHED' && form.selectedTagIds.length === 0) {
+    error.value = '请至少选择一个标签'
     return
   }
   submitting.value = true

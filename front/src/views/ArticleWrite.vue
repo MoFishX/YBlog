@@ -17,11 +17,11 @@
           v-model="form.title"
           type="text"
           required
-          maxlength="200"
-          class="w-full border-none text-3xl font-bold text-zinc-900 placeholder:text-zinc-300 focus:outline-none bg-transparent"
-          placeholder="文章标题"
-        />
-        <div class="text-xs text-zinc-400 mt-1">{{ form.title.length }}/200</div>
+           maxlength="50"
+           class="w-full border-none text-3xl font-bold text-zinc-900 placeholder:text-zinc-300 focus:outline-none bg-transparent"
+           placeholder="文章标题"
+         />
+         <div class="text-xs text-zinc-400 mt-1">{{ form.title.length }}/50</div>
       </div>
 
       <div>
@@ -78,13 +78,13 @@
             {{ tag.name }}
           </button>
         </div>
-        <div v-if="form.selectedTagIds.length" class="text-xs text-zinc-400 mt-1">已选 {{ form.selectedTagIds.length }} 个</div>
+        <div v-if="form.selectedTagIds.length" class="text-xs text-zinc-400 mt-1">已选 {{ form.selectedTagIds.length }}/10 个</div>
       </div>
 
       <div>
         <div class="flex items-center justify-between mb-2">
           <label class="text-sm font-medium text-zinc-700">正文 <span class="text-zinc-400 font-normal">(Markdown)</span></label>
-          <span class="text-xs text-zinc-400">{{ form.content.length }} 字</span>
+          <span class="text-xs text-zinc-400">{{ form.content.length }}/10000</span>
         </div>
         <div class="border border-zinc-200 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-accent/20 focus-within:border-accent transition-all duration-200">
           <div class="bg-zinc-50 border-b border-zinc-100 px-4 py-2.5 flex items-center justify-between">
@@ -94,6 +94,7 @@
           <textarea
             v-model="form.content"
             required
+            maxlength="10000"
             rows="20"
             class="w-full border-none px-4 py-4 text-sm font-mono leading-relaxed text-zinc-700 placeholder:text-zinc-300 resize-y focus:outline-none bg-white"
             placeholder="# 开始写作..."
@@ -201,8 +202,24 @@ async function doSave(status: 'PUBLISHED' | 'DRAFT') {
     error.value = '请填写标题'
     return
   }
+  if (form.title.length > 50) {
+    error.value = '标题不能超过50字'
+    return
+  }
+  if (form.content.length > 10000) {
+    error.value = '正文不能超过10000字'
+    return
+  }
   if (status === 'PUBLISHED' && !form.content.trim()) {
     error.value = '请填写正文内容'
+    return
+  }
+  if (status === 'PUBLISHED' && form.selectedTagIds.length === 0) {
+    error.value = '请至少选择一个标签'
+    return
+  }
+  if (form.selectedTagIds.length > 10) {
+    error.value = '标签不能超过10个'
     return
   }
   form.status = status
