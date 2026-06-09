@@ -26,7 +26,7 @@ public class CommentController {
     private final SecurityUtils securityUtils;
 
     @Operation(summary = "发表评论")
-    @PostMapping("/articles/{articleId}/comments")
+    @PostMapping
     public Result<CommentVO> create(@Valid @RequestBody CommentCreateRequest request) {
         Long userId = securityUtils.getCurrentUserId();
         log.info("发表评论: {}", request);
