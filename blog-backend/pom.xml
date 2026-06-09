@@ -59,6 +59,20 @@
                 <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
+
+            <!-- 七牛云Oss -->
+            <dependency>
+                <groupId>com.qiniu</groupId>
+                <artifactId>qiniu-java-sdk</artifactId>
+                <version>${qiniu.skd.oss}</version>
+            </dependency>
+
+            <!-- resend -->
+            <dependency>
+                <groupId>com.resend</groupId>
+                <artifactId>resend-java</artifactId>
+                <version>4.13.0</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
