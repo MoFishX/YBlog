@@ -41,6 +41,11 @@ const router = createRouter({
       meta: { guest: true }
     },
     {
+      path: '/verify-email',
+      name: 'VerifyEmail',
+      component: () => import('@/views/VerifyEmailView.vue')
+    },
+    {
       path: '/user/:id',
       name: 'UserCenter',
       component: () => import('@/views/UserCenter.vue')

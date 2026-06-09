@@ -36,6 +36,7 @@ public class UserServiceImpl implements UserService {
         return UserVO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .email(user.getEmail())
                 .avatar(user.getAvatar())
                 .role(user.getRole())
                 .articleCount(userMapper.countArticlesByUserId(userId))

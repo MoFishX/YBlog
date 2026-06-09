@@ -14,16 +14,40 @@
           <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
-          <div>
+          <div class="flex-1">
             <p class="text-sm font-semibold text-amber-800 mb-1">账号未激活</p>
-            <p class="text-sm text-amber-600 mb-3">激活后即可使用完整功能，包括发布文章和评论。</p>
-            <button
-              :disabled="activating"
-              @click="handleActivate"
-              class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
-            >
-              {{ activating ? '激活中...' : '立即激活' }}
-            </button>
+            <p class="text-sm text-amber-600 mb-3">激活后可发布文章</p>
+
+            <template v-if="user.email">
+              <p class="text-xs text-amber-500 mb-3">激活邮件已发送至 <span class="font-medium">{{ user.email }}</span>，完成验证可使用全部功能。如未收到，请检查垃圾邮箱。</p>
+              <button
+                :disabled="activating"
+                @click="handleResendActivation"
+                class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors duration-200 cursor-pointer"
+              >
+                {{ activating ? '发送中...' : '重发激活邮件' }}
+              </button>
+            </template>
+
+            <template v-else>
+              <p class="text-xs text-amber-500 mb-3">请先填写邮箱，我们将发送激活邮件。注意查收垃圾邮箱。</p>
+              <div class="flex gap-2 mb-2">
+                <input
+                  v-model="activationEmail"
+                  type="email"
+                  placeholder="输入邮箱地址"
+                  class="flex-1 border border-amber-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all duration-200 bg-white"
+                />
+                <button
+                  :disabled="activating || !activationEmail.trim()"
+                  @click="handleResendActivation"
+                  class="px-4 py-2 bg-amber-600 text-white text-sm font-medium rounded-lg hover:bg-amber-700 disabled:opacity-50 transition-colors duration-200 cursor-pointer whitespace-nowrap"
+                >
+                  {{ activating ? '发送中...' : '发送激活邮件' }}
+                </button>
+              </div>
+            </template>
+
             <p v-if="activateMsg" class="text-sm mt-2" :class="activateError ? 'text-red-500' : 'text-emerald-600'">{{ activateMsg }}</p>
           </div>
         </div>
@@ -125,26 +149,41 @@ const pwdSuccess = ref('')
 const activating = ref(false)
 const activateMsg = ref('')
 const activateError = ref(false)
+const activationEmail = ref('')
 
-onMounted(() => {
+onMounted(async () => {
   if (userStore.user) {
     user.value = { ...userStore.user }
     profileForm.email = userStore.user.email || ''
+    activationEmail.value = userStore.user.email || ''
   }
+  try {
+    const info = await userService.getInfo()
+    if (user.value) {
+      user.value.email = info.email
+      user.value.status = info.status
+    }
+    if (userStore.user) {
+      userStore.user.email = info.email
+      userStore.user.status = info.status
+    }
+    profileForm.email = info.email || ''
+    activationEmail.value = info.email || ''
+  } catch { /* ignore */ }
 })
 
-async function handleActivate() {
+async function handleResendActivation() {
+  const email = (user.value?.email || activationEmail.value).trim()
+  if (!email) return
   activating.value = true
   activateMsg.value = ''
   activateError.value = false
   try {
-    await authService.activate()
-    activateMsg.value = '激活成功！'
-    if (user.value) user.value.status = 'ACTIVE'
-    if (userStore.user) userStore.user.status = 'ACTIVE'
+    await authService.resendActivation(email)
+    activateMsg.value = '激活邮件已发送，请检查邮箱（含垃圾箱）'
   } catch (e: any) {
     activateError.value = true
-    activateMsg.value = e?.response?.data?.message || '激活失败'
+    activateMsg.value = e?.response?.data?.message || '发送失败'
   } finally {
     activating.value = false
   }

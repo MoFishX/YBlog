@@ -67,7 +67,10 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
         userMapper.insert(user);
-        asyncTaskService.sendWelcomeEmail(user.getEmail());
+
+        if (request.getEmail() != null) {
+            asyncTaskService.sendActivationEmail(user.getId(), request.getEmail());
+        }
     }
 
     @Override

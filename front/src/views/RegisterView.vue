@@ -10,7 +10,9 @@
         <p class="text-sm text-red-600">{{ error }}</p>
       </div>
       <div v-if="success" class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6 text-center">
-        <p class="text-sm text-green-600 font-semibold mb-3">注册成功！</p>
+        <p class="text-sm text-green-600 font-semibold mb-1">注册成功！</p>
+        <p v-if="form.email" class="text-xs text-green-500 mb-4">激活邮件已发送至 {{ form.email }}，请点击邮件中的链接完成验证。如未收到，请检查垃圾邮箱。</p>
+        <p v-else class="text-xs text-green-500 mb-4">现在可以登录使用了。</p>
         <RouterLink to="/login" class="inline-block px-5 py-2.5 bg-zinc-900 text-white text-sm font-medium rounded-lg hover:bg-zinc-800 transition-colors duration-200">前往登录</RouterLink>
       </div>
 

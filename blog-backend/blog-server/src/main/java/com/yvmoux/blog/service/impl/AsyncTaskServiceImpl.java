@@ -33,13 +33,6 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
 
     @Async
     @Override
-    public void sendWelcomeEmail(String email) {
-        // TODO  发送邮件
-        log.info("收到邮件任务: {}", email);
-    }
-
-    @Async
-    @Override
     public void generateArticleSummary(Long articleId) {
         generateArticleAi(articleId, ArticleAiType.SUMMARY);
     }
@@ -107,7 +100,7 @@ public class AsyncTaskServiceImpl implements AsyncTaskService {
         redisUtils.set("email:verify:" + token, userId, 24, TimeUnit.HOURS);
 
         String verifyUrl = frontendUrl + "/verify-email?token=" + token;
-        mailUtil.sendHtml("Blog <noreply@yvmoux.com>", email, "激活你的博客账号",
+        mailUtil.sendHtml("Blog <noreply@mail.yvmoux.com>", email, "激活你的博客账号",
                 "<p>点击以下链接激活你的博客账号：</p>" +
                 "<p><a href=\"" + verifyUrl + "\">" + verifyUrl + "</a></p>" +
                 "<p>链接 24 小时内有效。</p>");

@@ -15,7 +15,11 @@ export const authService = {
     await authApi.logout()
   },
 
-  async activate(): Promise<void> {
-    await authApi.activate()
+  async verifyEmail(token: string): Promise<void> {
+    await authApi.verifyEmail(token)
+  },
+
+  async resendActivation(email: string): Promise<void> {
+    await authApi.resendActivation(email)
   }
 }

@@ -42,7 +42,11 @@ export const authApi = {
     return request.post('/auth/logout')
   },
 
-  activate(): Promise<ApiResponse<null>> {
-    return request.post('/auth/activate')
+  verifyEmail(token: string): Promise<ApiResponse<null>> {
+    return request.get('/auth/verify-email', { params: { token } })
+  },
+
+  resendActivation(email: string): Promise<ApiResponse<null>> {
+    return request.post('/auth/resend-activation', null, { params: { email } })
   }
 }
