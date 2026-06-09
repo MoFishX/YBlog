@@ -44,6 +44,7 @@ public class ArticleController {
 
     @Operation(summary = "发布文章")
     @PostMapping
+    @PreAuthorize("isAuthenticated() and @authChecker.isActive()")
     public Result<ArticleVO> create(@Valid @RequestBody ArticleCreateRequest request) {
         Long userId = securityUtils.getCurrentUserId();
         log.info("发布文章, userId: {}, title: {}", userId, request.getTitle());
@@ -54,6 +55,7 @@ public class ArticleController {
 
     @Operation(summary = "更新文章")
     @PutMapping("/{articleId}")
+    @PreAuthorize("isAuthenticated() and @authChecker.isActive()")
     public Result<ArticleVO> update(@PathVariable Long articleId,
                                     @Valid @RequestBody ArticleUpdateRequest request) {
         Long userId = securityUtils.getCurrentUserId();
@@ -65,6 +67,7 @@ public class ArticleController {
 
     @Operation(summary = "删除文章")
     @DeleteMapping("/{articleId}")
+    @PreAuthorize("isAuthenticated() and @authChecker.isActive()")
     public Result<Void> delete(@PathVariable Long articleId) {
         Long userId = securityUtils.getCurrentUserId();
         log.info("删除文章, userId: {}, articleId: {}", userId, articleId);

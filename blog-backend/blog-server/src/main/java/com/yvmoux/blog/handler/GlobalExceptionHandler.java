@@ -1,13 +1,17 @@
 package com.yvmoux.blog.handler;
 
 import com.yvmoux.blog.dto.Result;
+import com.yvmoux.blog.enums.UserStatus;
 import com.yvmoux.blog.exception.BusinessException;
+import com.yvmoux.blog.security.AppUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -40,8 +44,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(Result.error(401, "用户名或密码错误"));
     }
 
+    // 权限拒绝异常
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<Result<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof AppUserDetails userDetails
+                && UserStatus.INACTIVE.name().equals(userDetails.getStatus())) {
+            return ResponseEntity.status(403).body(Result.error(403, "请先激活邮箱"));
+        }
         return ResponseEntity.status(403).body(Result.error(403, "无权限"));
     }
 

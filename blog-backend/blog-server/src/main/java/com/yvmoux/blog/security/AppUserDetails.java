@@ -19,6 +19,7 @@ public class AppUserDetails implements UserDetails {
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
     private final boolean enabled;
+    private final String status; // 用户状态
 
     public AppUserDetails(User user) {
         this.userId = user.getId();
@@ -26,5 +27,6 @@ public class AppUserDetails implements UserDetails {
         this.password = user.getPassword();
         this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
         this.enabled = !"BANNED".equals(user.getStatus());
+        this.status = user.getStatus();
     }
 }

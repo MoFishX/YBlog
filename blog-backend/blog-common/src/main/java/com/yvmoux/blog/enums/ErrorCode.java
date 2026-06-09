@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     FORBIDDEN(403, "无权限执行此操作"),
     USER_BANNED(403, "用户已被封禁"),
+    USER_NOT_ACTIVATED(403, "请先激活邮箱"),
 
     ARTICLE_NOT_FOUND(404, "文章不存在"),
     COMMENT_NOT_FOUND(404, "评论不存在"),

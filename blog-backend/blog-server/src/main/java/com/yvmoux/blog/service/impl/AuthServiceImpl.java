@@ -61,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(request.getEmail())
                 .avatar(null)
                 .role(RoleEnum.USER.name())
-                .status(UserStatus.ACTIVE.name())
+                .status(UserStatus.INACTIVE.name())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -106,6 +106,7 @@ public class AuthServiceImpl implements AuthService {
                 .email("")
                 .avatar(null)
                 .role(Objects.requireNonNull(userDetails.getAuthorities().iterator().next().getAuthority()).replace("ROLE_", ""))
+                .status(userDetails.getStatus())
                 .build();
 
         // 6. 打包返回
@@ -150,6 +151,7 @@ public class AuthServiceImpl implements AuthService {
                 .email(user.getEmail())
                 .avatar(user.getAvatar())
                 .role(user.getRole())
+                .status(user.getStatus())
                 .build();
 
         return RefreshResult.builder()

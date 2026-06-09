@@ -15,4 +15,5 @@ public class LoginVO {
     private String email;
     private String avatar;
     private String role;
+    private String status; // 用户状态
 }
