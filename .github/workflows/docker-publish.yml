@@ -2,6 +2,7 @@ name: Build and Push Docker Images
 
 on:
   push:
+    branches: [master]
     tags: ['v*']
 
 env:
@@ -49,6 +50,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha,prefix=
+            type=raw,value=latest
 
       - name: Build and push backend
         uses: docker/build-push-action@v6
@@ -88,6 +90,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=sha,prefix=
+            type=raw,value=latest
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
