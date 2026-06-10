@@ -1,38 +1,6 @@
 version: "3.8"
 
 services:
-  mysql:
-    image: mysql:8
-    container_name: blog-mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-      MYSQL_DATABASE: blog
-      TZ: Asia/Shanghai
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./blog-backend/CreateTable.sql:/docker-entrypoint-initdb.d/01-schema.sql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: blog-redis
-    restart: always
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       context: ./blog-backend
@@ -60,6 +28,37 @@ services:
       - EMAIL_RESEND_API_KEY=${RESEND_API_KEY:-}
     ports:
       - "8080:8080"
+  # mysql:
+  #   image: mysql:8
+  #   container_name: blog-mysql
+  #   restart: always
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+  #     MYSQL_DATABASE: blog
+  #     TZ: Asia/Shanghai
+  #   ports:
+  #     - "3306:3306"
+  #   volumes:
+  #     - mysql_data:/var/lib/mysql
+  #     - ./blog-backend/CreateTable.sql:/docker-entrypoint-initdb.d/01-schema.sql
+  #   healthcheck:
+  #     test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: blog-redis
+  #   restart: always
+  #   command: redis-server --appendonly yes
+  #   volumes:
+  #     - redis_data:/data
+  #   healthcheck:
+  #     test: ["CMD", "redis-cli", "ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
 
   frontend:
     build:

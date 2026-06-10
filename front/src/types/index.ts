@@ -4,8 +4,6 @@ export type {
   Article,
   ArticleListItem,
   HotArticle,
-  SearchArticle,
-  SearchResult,
   ArticleQuery,
   ArticleFormData,
   Tag
