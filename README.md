@@ -71,8 +71,6 @@ docker compose -f docker-compose.prod.yml up -d
 
 访问 `http://服务器IP` 即可。
 
-> 如果镜像拉取报 401，说明 ghcr.io 包还是私有状态，去 [GitHub Packages 设置](https://github.com/MoFishX/YBlog/packages) 改为 Public。
-
 ## 本地开发
 
 ```bash
