@@ -11,12 +11,6 @@
         @click="goDetail(item.id)"
       >
         <div class="flex items-center gap-3">
-          <span
-            class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0"
-            :class="item.rank === 1 ? 'bg-accent' : item.rank <= 3 ? 'bg-zinc-800' : 'bg-zinc-300'"
-          >
-            {{ item.rank }}
-          </span>
           <div class="min-w-0 flex-1">
             <p class="text-sm font-medium text-zinc-800 truncate group-hover:text-accent transition-colors duration-200">
               {{ item.title }}
