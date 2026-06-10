@@ -9,9 +9,9 @@
           在这里发现关于前端、后端、架构与设计的前沿思考与实践
         </p>
         <div class="flex items-center justify-center gap-4">
-          <RouterLink to="/search" class="px-6 py-3 text-sm font-semibold text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors duration-200 cursor-pointer">
+          <button @click="scrollToArticles" class="px-6 py-3 text-sm font-semibold text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 transition-colors duration-200 cursor-pointer">
             探索文章
-          </RouterLink>
+          </button>
           <RouterLink v-if="!userStore.isLoggedIn" to="/register" class="px-6 py-3 text-sm font-semibold text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 hover:border-zinc-300 transition-all duration-200 cursor-pointer">
             加入我们
           </RouterLink>
@@ -19,7 +19,7 @@
       </div>
     </section>
 
-    <div class="container mx-auto px-4 py-10">
+    <div ref="articlesSectionRef" class="container mx-auto px-4 py-10">
       <div class="lg:grid lg:grid-cols-[1fr_320px] lg:gap-10">
         <div>
           <div class="flex items-center justify-between mb-8">
@@ -114,6 +114,12 @@ async function fetchHot() {
   } finally {
     hotLoading.value = false
   }
+}
+
+const articlesSectionRef = ref<HTMLElement | null>(null)
+
+function scrollToArticles() {
+  articlesSectionRef.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
 function handlePageChange(p: number) {
