@@ -34,42 +34,32 @@ blog/
 
 ## 快速部署
 
-### 1. 准备文件
-
-将以下文件放到服务器同一目录：
-
-```
-docker-compose.prod.yml
-.env
-blog-backend/sql/
-```
-
-### 2. 配置环境变量
-
-编辑 `.env`，填入真实密钥：
+### 方式一：一键脚本
 
 ```bash
-MYSQL_ROOT_PASSWORD=你的数据库密码
-
-# DeepSeek AI（必填）
-AI_API_KEY=sk-xxxxxxxx
-
-# 七牛云 OSS（图片上传需要）
-OSS_QINIU_ACCESS_KEY_ID=xxx
-OSS_QINIU_ACCESS_KEY_SECRET=xxx
-OSS_QINIU_BUCKET_NAME=xxx
-
-# Resend 邮件（注册验证需要）
-EMAIL_RESEND_API_KEY=re_xxxxxxxx
+curl -fsSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
 ```
 
-### 3. 启动
+脚本会自动下载 `docker-compose.prod.yml`、`.env.example` 和 SQL 建表文件。然后：
+
+```bash
+vim .env    # 填入你的密钥
+docker compose -f docker-compose.prod.yml up -d
+```
+
+### 方式二：手动准备
+
+将以下文件放到服务器同一目录：`docker-compose.prod.yml`、`.env`、`blog-backend/sql/`。
+
+创建 `.env` 并填入密钥后启动：
 
 ```bash
 docker compose -f docker-compose.prod.yml up -d
 ```
 
 访问 `http://服务器IP` 即可。
+
+> 如果镜像拉取报 401，去 [GitHub Packages 设置](https://github.com/MoFishX/YBlog/packages) 把包改为 Public。
 
 ## 本地开发
 
