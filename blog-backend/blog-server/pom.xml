@@ -98,7 +98,7 @@
         <!-- Flyway -->
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-mysql</artifactId>
+            <artifactId>flyway-database-mysql</artifactId>
         </dependency>
 
         <!-- Test -->
