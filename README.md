@@ -80,15 +80,10 @@ MYSQL_ROOT_PASSWORD=你的密码
 ## 本地开发
 
 ```bash
-# 1. 编译后端
-cd blog-backend
-mvn clean package -DskipTests
-
-# 2. 启动所有服务（本地构建镜像）
-cd ..
+# 1. 启动所有服务（自动编译前后端）
 docker compose up -d --build
 
-# 3. 前端热更新
+# 2. 前端热更新
 cd front
 npm run dev
 ```
