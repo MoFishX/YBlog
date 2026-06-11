@@ -31,11 +31,6 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
-jwt:
-  secret: YTk3MjNhNDY5ZjEwMmI1ZDNkOGY3ZTU2YzRhOTFiOGQ2OTNjNWU4ZjA3ZjI0M2Q4YTkzYjVmN2UwNjFiOGMyYQ==
-  access-token-expiration: 300 # 5 min
-  refresh-token-expiration: 86400 # 1 day
-
 springdoc:
   api-docs:
     enabled: true
