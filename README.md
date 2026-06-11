@@ -25,8 +25,7 @@ blog/
 │   ├── blog-common/        # 通用模块
 │   ├── blog-pojo/          # 实体模块
 │   └── Dockerfile          # 后端镜像构建
-├── docker-compose.yml      # 本地开发编排（编译 + 运行）
-├── docker-compose.prod.yml # 生产部署编排（只拉镜像）
+├── docker-compose.yml      # Docker 编排（支持本地构建与生产镜像）
 ├── .env                    # 环境变量配置
 └── .github/workflows/      # CI/CD 自动构建推送到 ghcr.io
 ```
@@ -39,21 +38,23 @@ blog/
 curl -fsSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
 ```
 
-脚本会自动下载 `docker-compose.prod.yml` 和 `.env.example`。然后：
+脚本会自动下载 `docker-compose.yml` 和 `.env.example`。然后：
 
 ```bash
 vim .env    # 填入你的密钥
-docker compose -f docker-compose.prod.yml up -d
+docker compose pull
+docker compose up -d
 ```
 
 ### 方式二：手动准备
 
-将 `docker-compose.prod.yml` 和 `.env` 放到服务器同一目录。
+将 `docker-compose.yml` 和 `.env` 放到服务器同一目录。
 
 创建 `.env` 并填入密钥后启动：
 
 ```bash
-docker compose -f docker-compose.prod.yml up -d
+docker compose pull
+docker compose up -d
 ```
 
 访问 `http://服务器IP` 即可。
@@ -65,9 +66,9 @@ docker compose -f docker-compose.prod.yml up -d
 cd blog-backend
 mvn clean package -DskipTests
 
-# 2. 启动所有服务
+# 2. 启动所有服务（本地构建镜像）
 cd ..
-docker compose up -d
+docker compose up -d --build
 
 # 3. 前端热更新
 cd front
