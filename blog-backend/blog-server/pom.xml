@@ -98,8 +98,7 @@
         <!-- Flyway -->
         <dependency>
             <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-mysql</artifactId>
-            <version>10.22.0</version>
+            <artifactId>flyway-core</artifactId>
         </dependency>
 
         <!-- Test -->

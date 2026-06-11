@@ -6,7 +6,7 @@ COPY pom.xml .
 COPY blog-server/pom.xml blog-server/
 COPY blog-common/pom.xml blog-common/
 COPY blog-pojo/pom.xml blog-pojo/
-RUN mvn dependency:go-offline -B
+RUN mvn dependency:go-offline -B -U
 
 COPY . .
 RUN mvn package -DskipTests -B
