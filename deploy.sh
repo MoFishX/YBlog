@@ -10,9 +10,7 @@ echo "==> 下载部署文件..."
 
 curl -fsSL "$BASE/docker-compose.prod.yml" -o docker-compose.prod.yml
 curl -fsSL "$BASE/.env.example" -o .env
-mkdir -p blog-backend/sql
-curl -fsSL "$BASE/blog-backend/sql/CreateTable.sql" -o blog-backend/sql/CreateTable.sql
-curl -fsSL "$BASE/blog-backend/sql/deepseek_sql_20260607_756156.sql" -o blog-backend/sql/deepseek_sql_20260607_756156.sql
+
 
 echo "==> 请编辑 .env 填入你的密钥:"
 echo "    AI_API_KEY=sk-xxx"

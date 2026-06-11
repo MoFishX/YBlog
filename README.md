@@ -7,7 +7,7 @@
 | 模块 | 技术 |
 |------|------|
 | 前端 | Vue 3 + TypeScript + Vite + Element Plus + Tailwind CSS |
-| 后端 | Spring Boot 3 + MyBatis Plus + MySQL + Redis |
+| 后端 | Spring Boot 3 + MyBatis Plus + Flyway + MySQL + Redis |
 | AI | DeepSeek API |
 | 存储 | 七牛云 OSS |
 | 邮件 | Resend |
@@ -21,10 +21,9 @@ blog/
 │   ├── Dockerfile          # 前端镜像构建
 │   └── nginx.conf          # Nginx 配置（含 /api 代理到后端）
 ├── blog-backend/           # 后端项目
-│   ├── blog-server/        # 主模块
+│   ├── blog-server/        # 主模块（含 Flyway 迁移脚本）
 │   ├── blog-common/        # 通用模块
 │   ├── blog-pojo/          # 实体模块
-│   ├── sql/                # 数据库建表脚本
 │   └── Dockerfile          # 后端镜像构建
 ├── docker-compose.yml      # 本地开发编排（编译 + 运行）
 ├── docker-compose.prod.yml # 生产部署编排（只拉镜像）
@@ -40,7 +39,7 @@ blog/
 curl -fsSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
 ```
 
-脚本会自动下载 `docker-compose.prod.yml`、`.env.example` 和 SQL 建表文件。然后：
+脚本会自动下载 `docker-compose.prod.yml` 和 `.env.example`。然后：
 
 ```bash
 vim .env    # 填入你的密钥
@@ -49,7 +48,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 ### 方式二：手动准备
 
-将以下文件放到服务器同一目录：`docker-compose.prod.yml`、`.env`、`blog-backend/sql/`。
+将 `docker-compose.prod.yml` 和 `.env` 放到服务器同一目录。
 
 创建 `.env` 并填入密钥后启动：
 
@@ -58,8 +57,6 @@ docker compose -f docker-compose.prod.yml up -d
 ```
 
 访问 `http://服务器IP` 即可。
-
-> 如果镜像拉取报 401，去 [GitHub Packages 设置](https://github.com/MoFishX/YBlog/packages) 把包改为 Public。
 
 ## 本地开发
 
@@ -76,6 +73,8 @@ docker compose up -d
 cd front
 npm run dev
 ```
+
+数据库表由 Flyway 在 Spring Boot 启动时自动创建，首次启动会自动执行 `db/migration/` 下的迁移脚本。
 
 ## 端口说明
 

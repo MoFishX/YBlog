@@ -43,6 +43,9 @@ springdoc:
     enabled: true
     path: /swagger-ui.html
 
+  flyway:
+    baseline-on-migrate: true
+
 server:
   port: 8080
 
