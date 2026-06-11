@@ -32,32 +32,50 @@ blog/
 
 ## 快速部署
 
-### 方式一：一键脚本
+### 方式一：手动部署
+
+> Writing
+
+### 方式二：Docker Compose
+
+使用 Docker Compose 部署，包含 MySQL 和 Reids 容器。
+
+#### 前置条件
+
+- Docker 20.10+
+- Docker Compose v2+
+
+#### 快速开始（一键部署）
+
+使用自动化脚本快速搭建：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
-```
+# 创建部署目录
+mkdir -p yblog-deploy && cd yblog-deploy
 
-脚本会自动下载 `docker-compose.yml` 和 `.env.example`。然后：
+# 下载并运行部署准备脚本
+curl -sSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
 
-```bash
-vim .env    # 填入你的密钥
-docker compose pull
+# 启动服务
 docker compose up -d
+
+# 查看日志
+docker compose logs -f yblog
 ```
 
-### 方式二：手动准备
+#### 脚本功能
 
-将 `docker-compose.yml` 和 `.env` 放到服务器同一目录。
+- 下载`docker-compose.yml` 和 `.env.example`
 
-创建 `.env` 并填入密钥后启动：
+- 自动生成安全凭证（JWT_SECRET）
+- 创建 `.env` 文件并填充自动生成的密钥
 
-```bash
-docker compose pull
-docker compose up -d
+#### `.env`必须配置项
+
+``` bash
+# MySQL 密码
+MYSQL_ROOT_PASSWORD=你的密码
 ```
-
-访问 `http://服务器IP` 即可。
 
 ## 本地开发
 

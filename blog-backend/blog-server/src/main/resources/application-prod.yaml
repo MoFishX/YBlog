@@ -10,12 +10,6 @@ spring:
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
-
 logging:
   level:
     com.yvmoux.blog: info
@@ -37,3 +31,13 @@ email:
   resend:
     api-key:
 
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+jwt:
+  secret: ${JWT_SECRET:yblog}
+  access-token-expiration: 300 # 5 min
+  refresh-token-expiration: 86400 # 1 day
