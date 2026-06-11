@@ -19,6 +19,9 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
 
+  flyway:
+    baseline-on-migrate: true
+
 mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
   global-config:
@@ -37,9 +40,6 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
-
-  flyway:
-    baseline-on-migrate: true
 
 server:
   port: 8080
