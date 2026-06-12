@@ -21,9 +21,7 @@ public class MyBatisConfig {
 
         GlobalConfig globalConfig = new GlobalConfig();
         GlobalConfig.DbConfig dbConfig = new GlobalConfig.DbConfig();
-        dbConfig.setLogicDeleteField("deletedAt");
-        dbConfig.setLogicDeleteValue("now()");
-        dbConfig.setLogicNotDeleteValue("null");
+        
         globalConfig.setDbConfig(dbConfig);
         factory.setGlobalConfig(globalConfig);
 

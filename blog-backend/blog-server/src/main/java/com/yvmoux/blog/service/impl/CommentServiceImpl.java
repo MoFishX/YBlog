@@ -199,7 +199,6 @@ public class CommentServiceImpl implements CommentService {
                 .isRead(reply.getIsRead() != null && reply.getIsRead() == 1)
                 .status(reply.getStatus())
                 .createdAt(reply.getCreatedAt())
-                .deletedAt(reply.getDeletedAt())
                 .build()).collect(Collectors.toList());
 
         return new PageResult<>(vos, replyPage.getTotal());
