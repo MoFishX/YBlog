@@ -7,7 +7,7 @@
 | 模块 | 技术 |
 |------|------|
 | 前端 | Vue 3 + TypeScript + Vite + Element Plus + Tailwind CSS |
-| 后端 | Spring Boot 3 + MyBatis Plus + Flyway + MySQL + Redis |
+| 后端 | Spring Boot 3 + MyBatis Plus + SQL Schema + MySQL + Redis |
 | AI | DeepSeek API |
 | 存储 | 七牛云 OSS |
 | 邮件 | Resend |
@@ -63,29 +63,24 @@ docker compose up -d
 
 #### 脚本功能
 
-- 下载`docker-compose.yml` 和 `.env.example`
+- 下载 `docker-compose.yml` 和 `.env.example`（保存为 `.env`）
+- 自动生成随机密钥（JWT_SECRET、MYSQL_ROOT_PASSWORD、ADMIN_PASSWORD）
+- 检测服务器公网 IP，自动填入 APP_DOMAIN / APP_URL
+- 将生成的密钥和 IP 写入 `.env` 文件
 
-- 自动生成安全凭证（JWT_SECRET）
-- 创建 `.env` 文件并填充自动生成的密钥
+#### `.env` 必须手动配置项
 
-#### `.env`必须配置项
+脚本已自动填入 MySQL/管理员/JWT 密码和服务 IP，以下需自行填写：
 
 ``` bash
-# MySQL 密码
-MYSQL_ROOT_PASSWORD=你的密码
-
-# 服务器IP
-APP_DOMAIN=blog.example.com
-
-# 注册邮件发送给用户的验证地址
-APP_URL=http://blog.example.com
-
 # 注册邮件（否则新用户无法注册）
 EMAIL_RESEND_API_KEY=re_你的resend密钥
 
-# JWT 密钥（如果是使用的自动化脚本部署会自动生成随机的密钥，则不需要设置）
-# 如果需要手动设置，可打开任意在线 Base64 随机密钥生成工具。要求：随机字节数填 32，输出 Base64
-JWT_SECRET=
+# 如需使用七牛云 OSS 存储上传文件
+STORAGE_TYPE=oss
+OSS_QINIU_ACCESS_KEY_ID=你的七牛云AK
+OSS_QINIU_ACCESS_KEY_SECRET=你的七牛云SK
+OSS_QINIU_BUCKET_NAME=你的bucket名称
 ```
 
 ## 本地开发
