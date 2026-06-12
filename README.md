@@ -21,7 +21,7 @@ blog/
 │   ├── Dockerfile          # 前端镜像构建
 │   └── nginx.conf          # Nginx 配置（含 /api 代理到后端）
 ├── blog-backend/           # 后端项目
-│   ├── blog-server/        # 主模块（含 Flyway 迁移脚本）
+│   ├── blog-server/        # 主模块
 │   ├── blog-common/        # 通用模块
 │   ├── blog-pojo/          # 实体模块
 │   └── Dockerfile          # 后端镜像构建
