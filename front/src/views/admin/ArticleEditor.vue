@@ -35,22 +35,33 @@
         </el-row>
 
         <el-form-item label="标签">
-          <el-select
-            v-model="form.selectedTagIds"
-            multiple
-            filterable
-            placeholder="选择标签"
-            class="w-full"
-            :loading="tagsLoading"
-          >
-            <el-option
-              v-for="tag in availableTags"
-              :key="tag.id"
-              :label="tag.name"
-              :value="tag.id"
-            />
-          </el-select>
+          <div class="flex gap-2 w-full">
+            <el-select
+              v-model="form.selectedTagIds"
+              multiple
+              filterable
+              placeholder="选择标签"
+              class="flex-1"
+              :loading="tagsLoading"
+            >
+              <el-option
+                v-for="tag in availableTags"
+                :key="tag.id"
+                :label="tag.name"
+                :value="tag.id"
+              />
+            </el-select>
+            <el-button :icon="Plus" @click="showTagDialog = true" :loading="tagsLoading">新增</el-button>
+          </div>
         </el-form-item>
+
+        <el-dialog v-model="showTagDialog" title="新增标签" width="360px" :close-on-click-modal="false">
+          <el-input v-model="newTagName" placeholder="输入标签名称" maxlength="20" show-word-limit />
+          <template #footer>
+            <el-button @click="showTagDialog = false">取消</el-button>
+            <el-button type="primary" :loading="tagCreating" @click="handleCreateTag">确定</el-button>
+          </template>
+        </el-dialog>
 
         <el-form-item label="AI总结">
           <el-checkbox v-model="form.genAiSummaryLong" :true-value="1" :false-value="0">发布后生成 AI 总结</el-checkbox>
@@ -87,7 +98,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ArrowLeft } from '@element-plus/icons-vue'
+import { ArrowLeft, Plus } from '@element-plus/icons-vue'
 import { articleService } from '@/services/admin/articleService'
 import { tagService } from '@/services/admin/tagService'
 import type { Tag } from '@/types/article'
@@ -110,6 +121,27 @@ const availableTags = ref<Tag[]>([])
 const tagsLoading = ref(false)
 const submitting = ref(false)
 const error = ref('')
+
+const showTagDialog = ref(false)
+const newTagName = ref('')
+const tagCreating = ref(false)
+
+async function handleCreateTag() {
+  const name = newTagName.value.trim()
+  if (!name) return
+  tagCreating.value = true
+  try {
+    const tag = await tagService.create(name)
+    availableTags.value.push(tag)
+    form.selectedTagIds.push(tag.id)
+    newTagName.value = ''
+    showTagDialog.value = false
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || '创建标签失败'
+  } finally {
+    tagCreating.value = false
+  }
+}
 
 async function loadTags() {
   tagsLoading.value = true
