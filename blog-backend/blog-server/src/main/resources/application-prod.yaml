@@ -13,8 +13,6 @@ spring:
 logging:
   level:
     com.yvmoux.blog: info
-    org.flywaydb: debug
-
 ai:
   base-url: https://api.deepseek.com
   api-key:
