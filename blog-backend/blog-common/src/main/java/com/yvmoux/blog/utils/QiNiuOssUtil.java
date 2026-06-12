@@ -22,7 +22,7 @@ public class QiNiuOssUtil {
         // 创建 文件路径 和 文件名
         String pathPrefix = storageConfig.getOss().getPathPrefix()
                 .replaceAll("/+$", "");
-        objectName = storageConfig.getOss().getPathPrefix() + "/" + objectName;
+        objectName = pathPrefix + "/" + objectName;
 
         // 创建OSSClient实例。
         Auth auth = Auth.create(storageConfig.getOss().getAccessKeyId(), storageConfig.getOss().getAccessKeySecret());
