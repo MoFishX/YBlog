@@ -2,12 +2,6 @@ spring:
   profiles:
     active: dev
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/blog?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 666
-    driver-class-name: com.mysql.cj.jdbc.Driver
-
   data:
     redis:
       host: localhost
@@ -41,9 +35,6 @@ springdoc:
   swagger-ui:
     enabled: true
     path: /swagger-ui.html
-
-server:
-  port: 8080
 
 app:
   frontend-url: http://localhost:5173

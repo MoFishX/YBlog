@@ -1,14 +1,18 @@
+server:
+  port: 1145
+
 spring:
   datasource:
-    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/blog?useSSL=true&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:root}
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:yblog}?useSSL=true&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:yblog}
+    password: ${MYSQL_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   data:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD}
 
 logging:
   level:
@@ -37,6 +41,6 @@ springdoc:
     enabled: false
 
 jwt:
-  secret: ${JWT_SECRET:yblog}
-  access-token-expiration: 300 # 5 min
-  refresh-token-expiration: 86400 # 1 day
+  secret: ${JWT_SECRET}
+  access-token-expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:300}
+  refresh-token-expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:2592000}

@@ -4,8 +4,9 @@ services:
     container_name: blog-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-666}
-      MYSQL_DATABASE: blog
+      MYSQL_USER: ${MYSQL_USER:-yblog}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-yblog}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
       TZ: Asia/Shanghai
     ports:
       - "${MYSQL_PORT:-3306}:3306"
@@ -50,24 +51,23 @@ services:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: prod
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/blog?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-666}
-      SPRING_DATA_REDIS_HOST: redis
-      SERVER_PORT: "8080"
+      # AI Model
       AI_BASE_URL: ${AI_BASE_URL:-https://api.deepseek.com}
       AI_API_KEY: ${AI_API_KEY:-}
       AI_MODEL: ${AI_MODEL:-deepseek-chat}
       AI_MAX_TOKENS: ${AI_MAX_TOKENS:-1024}
       AI_TEMPERATURE: ${AI_TEMPERATURE:-0.3}
       AI_ENABLED: ${AI_ENABLED:-true}
+      # OSS
       OSS_QINIU_ACCESS_KEY_ID: ${OSS_QINIU_ACCESS_KEY_ID:-}
       OSS_QINIU_ACCESS_KEY_SECRET: ${OSS_QINIU_ACCESS_KEY_SECRET:-}
       OSS_QINIU_BUCKET_NAME: ${OSS_QINIU_BUCKET_NAME:-}
+      # Email
       EMAIL_RESEND_API_KEY: ${EMAIL_RESEND_API_KEY:-}
+      # JWT
       JWT_SECRET: ${JWT_SECRET:-}
-    ports:
-      - "${BACKEND_PORT:-8085}:8080"
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-300}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-2592000}
     networks:
       - blog-net
 
@@ -81,7 +81,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${FRONTEND_PORT:-80}:80"
+      - "${PORT:-8085}:80"
     networks:
       - blog-net
 
