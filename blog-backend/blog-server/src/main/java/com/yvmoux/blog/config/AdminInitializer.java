@@ -6,6 +6,7 @@ import com.yvmoux.blog.entity.User;
 import com.yvmoux.blog.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
@@ -22,12 +23,12 @@ public class AdminInitializer implements CommandLineRunner, EnvironmentAware {
     private Environment environment;
 
     @Override
-    public void setEnvironment(Environment environment) {
+    public void setEnvironment(@NonNull Environment environment) {
         this.environment = environment;
     }
 
     @Override
-    public void run(String... args) {
+    public void run(String @NonNull ... args) {
         String username = environment.getProperty("ADMIN_USERNAME");
         String password = environment.getProperty("ADMIN_PASSWORD");
         String email = environment.getProperty("ADMIN_EMAIL");
