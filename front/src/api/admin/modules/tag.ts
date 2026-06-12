@@ -1,9 +1,11 @@
 import request from '@/api/request'
-import type { ApiResponse } from '@/types/api'
-import { tagApi as publicTagApi } from '@/api/modules/tag'
+import type { ApiResponse, PageResult } from '@/types/api'
+import type { Tag } from '@/types/article'
 
 export const tagApi = {
-  getList: publicTagApi.getList,
+  getList(params: { page: number; pageSize: number }): Promise<ApiResponse<PageResult<Tag>>> {
+    return request.get('/admin/tags', { params })
+  },
 
   create(data: { name: string }): Promise<ApiResponse<{ id: number; name: string }>> {
     return request.post('/admin/tags', data)

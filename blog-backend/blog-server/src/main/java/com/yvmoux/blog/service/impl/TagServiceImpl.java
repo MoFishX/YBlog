@@ -1,6 +1,7 @@
 package com.yvmoux.blog.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.response.TagVO;
 import com.yvmoux.blog.entity.Tag;
 import com.yvmoux.blog.enums.ErrorCode;
@@ -38,6 +39,31 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    public PageResult<TagVO> getAllTags(Integer page, Integer pageSize, boolean includeCreatedBy) {
+        List<Tag> allTags = tagMapper.selectAllWithArticleCount();
+
+        int total = allTags.size();
+        int fromIndex = (page - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, total);
+        List<Tag> paged = fromIndex < total ? allTags.subList(fromIndex, toIndex) : List.of();
+
+        List<TagVO> records = paged.stream()
+                .map(tag -> {
+                    TagVO.TagVOBuilder builder = TagVO.builder()
+                            .id(tag.getId())
+                            .name(tag.getName())
+                            .articleCount(tag.getArticleCount());
+                    if (includeCreatedBy) {
+                        builder.createdBy(tag.getCreatedBy());
+                    }
+                    return builder.build();
+                })
+                .collect(Collectors.toList());
+
+        return new PageResult<>(records, total);
+    }
+
+    @Override
     public TagVO createTag(String name, Long createdBy) {
         // 检查标签名是否存在
         if (tagMapper.selectCount(new QueryWrapper<Tag>().eq("name", name)) > 0) {
@@ -53,6 +79,7 @@ public class TagServiceImpl implements TagService {
                 .id(tag.getId())
                 .name(tag.getName())
                 .articleCount(0)
+                .createdBy(tag.getCreatedBy())
                 .build();
     }
 
@@ -99,6 +126,7 @@ public class TagServiceImpl implements TagService {
                 .id(tag.getId())
                 .name(tag.getName())
                 .articleCount(tag.getArticleCount())
+                .createdBy(tag.getCreatedBy())
                 .build();
     }
 

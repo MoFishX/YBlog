@@ -14,6 +14,11 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="name" label="名称" min-width="200" />
         <el-table-column prop="articleCount" label="文章数" width="100" />
+        <el-table-column label="创建者" width="120">
+          <template #default="{ row }">
+            {{ row.createdBy === -1 ? '系统' : row.createdBy ?? '-' }}
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button size="small" @click="openEdit(row)">编辑</el-button>
@@ -21,6 +26,16 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <div class="flex justify-end mt-4">
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="pageSize"
+          :total="total"
+          layout="total, prev, pager, next"
+          @current-change="fetchList"
+        />
+      </div>
     </el-card>
 
     <el-dialog v-model="showCreate" title="新建标签" width="400px">
@@ -47,6 +62,9 @@ import { tagService } from '@/services/admin/tagService'
 import type { Tag } from '@/types/article'
 
 const list = ref<Tag[]>([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = 20
 const loading = ref(false)
 const error = ref('')
 const submitting = ref(false)
@@ -62,7 +80,9 @@ async function fetchList() {
   loading.value = true
   error.value = ''
   try {
-    list.value = await tagService.getList()
+    const result = await tagService.getList(currentPage.value, pageSize)
+    list.value = result.records
+    total.value = result.total
   } catch (e: any) {
     error.value = e?.response?.data?.message || '加载失败'
   } finally {

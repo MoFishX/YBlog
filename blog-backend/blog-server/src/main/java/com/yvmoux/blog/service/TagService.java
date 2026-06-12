@@ -1,5 +1,6 @@
 package com.yvmoux.blog.service;
 
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.response.TagVO;
 import java.util.List;
 
@@ -11,6 +12,8 @@ public interface TagService {
      * @return 所有标签信息
      */
     List<TagVO> getAllTags();
+
+    PageResult<TagVO> getAllTags(Integer page, Integer pageSize, boolean includeCreatedBy);
 
     /**
      * 创建标签

@@ -13,4 +13,5 @@ public class TagVO {
     private Long id;
     private String name;
     private Integer articleCount;
+    private Long createdBy;
 }

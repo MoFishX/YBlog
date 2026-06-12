@@ -100,7 +100,8 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ArrowLeft, Plus } from '@element-plus/icons-vue'
 import { articleService } from '@/services/admin/articleService'
-import { tagService } from '@/services/admin/tagService'
+import { tagService as adminTagService } from '@/services/admin/tagService'
+import { tagApi } from '@/api/modules/tag'
 import type { Tag } from '@/types/article'
 
 const route = useRoute()
@@ -131,7 +132,7 @@ async function handleCreateTag() {
   if (!name) return
   tagCreating.value = true
   try {
-    const tag = await tagService.create(name)
+    const tag = await adminTagService.create(name)
     availableTags.value.push(tag)
     form.selectedTagIds.push(tag.id)
     newTagName.value = ''
@@ -146,7 +147,8 @@ async function handleCreateTag() {
 async function loadTags() {
   tagsLoading.value = true
   try {
-    availableTags.value = await tagService.getList()
+    const res = await tagApi.getList()
+    availableTags.value = res.data
   } catch { /* ignore */ }
   finally { tagsLoading.value = false }
 }

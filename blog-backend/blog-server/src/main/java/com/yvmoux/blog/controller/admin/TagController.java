@@ -1,5 +1,6 @@
 package com.yvmoux.blog.controller.admin;
 
+import com.yvmoux.blog.dto.PageResult;
 import com.yvmoux.blog.dto.Result;
 import com.yvmoux.blog.dto.TagRequest;
 import com.yvmoux.blog.dto.response.TagVO;
@@ -12,7 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "管理-用户")
+import java.util.List;
+
+@Tag(name = "管理-标签")
 @RestController("adminTagController")
 @RequestMapping("/admin/tags")
 @RequiredArgsConstructor
@@ -21,6 +24,14 @@ import org.springframework.web.bind.annotation.*;
 public class TagController {
 
     private final TagService tagService;
+
+    @Operation(summary = "标签列表")
+    @GetMapping
+    public Result<PageResult<TagVO>> list(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "20") Integer pageSize) {
+        return Result.success(tagService.getAllTags(page, pageSize, true));
+    }
 
     @Operation(summary = "创建标签")
     @PostMapping
