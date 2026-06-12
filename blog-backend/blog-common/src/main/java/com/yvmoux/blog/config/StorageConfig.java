@@ -37,5 +37,6 @@ public class StorageConfig {
         private String accessKeyId;
         private String accessKeySecret;
         private String bucketName;
+        private String pathPrefix = "yblog/uploads";
     }
 }

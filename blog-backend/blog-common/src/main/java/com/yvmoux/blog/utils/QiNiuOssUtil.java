@@ -5,7 +5,6 @@ import com.qiniu.storage.Configuration;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.Auth;
 import com.yvmoux.blog.config.StorageConfig;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,9 @@ public class QiNiuOssUtil {
 
     public String upload(byte[] bytes, String objectName) {
         // 创建 文件路径 和 文件名
-        objectName = "_yvmou/blog/" + objectName;
+        String pathPrefix = storageConfig.getOss().getPathPrefix()
+                .replaceAll("/+$", "");
+        objectName = storageConfig.getOss().getPathPrefix() + "/" + objectName;
 
         // 创建OSSClient实例。
         Auth auth = Auth.create(storageConfig.getOss().getAccessKeyId(), storageConfig.getOss().getAccessKeySecret());

@@ -35,10 +35,11 @@ storage:
 
   # 七牛云储存（仅在七牛云储存时生效）
   oss:
-    endpoint: https://cdn.yvmou.cn
-    access-key-id: BmDQIcudJIP_FCKyoC0KmgeELAv_E9UGjHXHZ8Qi
-    access-key-secret: imrt2rI3j6mZAAxWQ59VoAv12zKx03kGWBM0R__y
-    bucket-name: yvmoublog
+    endpoint: ${OSS_QINIU_ENDPOINT:https://upload.example.com}
+    access-key-id: ${OSS_QINIU_ACCESS_KEY_ID:}
+    access-key-secret: ${OSS_QINIU_ACCESS_KEY_SECRET:}
+    bucket-name: ${OSS_QINIU_BUCKET_NAME:}
+    path-prefix: ${OSS_QINIU_PATH_PREFIX:yblog/uploads}
 
 email:
   resend:
