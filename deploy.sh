@@ -48,13 +48,10 @@ else
   fi
 fi
 
-echo "==> 请编辑 .env 文件:"
-echo "    参考链接: https://github.com/MoFishX/YBlog#env%E5%BF%85%E9%A1%AE%E9%85%8D%E7%BD%AE%E9%A1%B9"
+echo "==> 填充密钥..."
 echo "    MySQL/管理员/JWT 密码均已随机生成，可打开 .env 查看"
-echo "    AI_API_KEY=sk-xxx"
-echo "    OSS_QINIU_ACCESS_KEY_ID=xxx"
 echo "    ..."
 echo ""
-echo "==> 编辑完成后运行以下命令！！！"
+echo "==> 编辑 .env 后运行以下命令！！！"
 echo "    docker compose pull"
 echo "    docker compose up -d"
