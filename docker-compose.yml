@@ -78,6 +78,10 @@ services:
       # Domain
       APP_DOMAIN: ${APP_DOMAIN:-}
       APP_URL: ${APP_URL:-}
+      # Admin
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
     networks:
       - blog-net
 

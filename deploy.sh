@@ -40,12 +40,21 @@ else
   fi
 fi
 
+ADMIN_PASSWORD=$(openssl rand -base64 12 2>/dev/null || date +%s | sha256sum | base64 | head -c 16)
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  sed -i '' "s|^ADMIN_PASSWORD=.*|ADMIN_PASSWORD=${ADMIN_PASSWORD}|" .env
+else
+  sed -i "s|^ADMIN_PASSWORD=.*|ADMIN_PASSWORD=${ADMIN_PASSWORD}|" .env
+fi
+
 echo "==> 请编辑 .env 文件:"
-echo "    参考链接: https://github.com/MoFishX/YBlog#env%E5%BF%85%E9%A1%BB%E9%85%8D%E7%BD%AE%E9%A1%B9"
+echo "    参考链接: https://github.com/MoFishX/YBlog#env%E5%BF%85%E9%A1%AE%E9%85%8D%E7%BD%AE%E9%A1%B9"
+echo "    管理员账号: admin，密码已随机生成在 .env 的 ADMIN_PASSWORD"
 echo "    AI_API_KEY=sk-xxx"
 echo "    OSS_QINIU_ACCESS_KEY_ID=xxx"
 echo "    ..."
 echo ""
-echo "==> 编辑完成后运行！！！"
+echo "==> 编辑完成后运行以下命令！！！"
 echo "    docker compose pull"
 echo "    docker compose up -d"
