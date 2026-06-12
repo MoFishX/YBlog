@@ -72,6 +72,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
       # Redis
       REDIS_HOST: ${REDIS_HOST:-blog-redis}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
     networks:
       - blog-net
 
