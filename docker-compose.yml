@@ -48,6 +48,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    ports:
+      - "${BACKEND_PORT:-1145}:1145"
     environment:
       SPRING_PROFILES_ACTIVE: prod
       # AI Model
@@ -89,7 +91,7 @@ services:
     depends_on:
       - backend
     ports:
-      - "${PORT:-80}:80"
+      - "${SERVER_PORT:-80}:80"
     networks:
       - blog-net
 

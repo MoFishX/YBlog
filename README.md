@@ -57,6 +57,7 @@ mkdir -p yblog-deploy && cd yblog-deploy
 curl -sSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bash
 
 # 启动服务
+docker compose pull
 docker compose up -d
 
 # 查看日志
@@ -75,6 +76,13 @@ docker compose logs -f yblog
 ``` bash
 # MySQL 密码
 MYSQL_ROOT_PASSWORD=你的密码
+
+# 注册邮件（否则新用户无法注册）
+EMAIL_RESEND_API_KEY=re_你的resend密钥
+
+# JWT 密钥（如果是使用的自动化脚本部署会自动生成随机的密钥，则不需要设置）
+# 如果需要手动设置，可打开任意在线 Base64 随机密钥生成工具。要求：随机字节数填 32，输出 Base64
+JWT_SECRET=
 ```
 
 ## 本地开发
@@ -88,13 +96,11 @@ cd front
 npm run dev
 ```
 
-数据库表由 Flyway 在 Spring Boot 启动时自动创建，首次启动会自动执行 `db/migration/` 下的迁移脚本。
-
 ## 端口说明
 
 | 服务 | 容器内端口 | 对外端口 |
 |------|-----------|---------|
-| Nginx（前端） | 80 | 80（可配 `FRONTEND_PORT`） |
-| Spring Boot（后端） | 8080 | 8085（可配 `BACKEND_PORT`） |
-| MySQL | 3306 | 3306（可配 `MYSQL_PORT`） |
-| Redis | 6379 | 6379（可配 `REDIS_PORT`） |
+| Nginx（前端） | 80 | 80（可配置） |
+| Spring Boot（后端） | 1145 | 1145（可配置） |
+| MySQL | 3306 | 3306（可配置） |
+| Redis | 6379 | 6379（可配置） |
