@@ -77,6 +77,12 @@ docker compose logs -f yblog
 # MySQL 密码
 MYSQL_ROOT_PASSWORD=你的密码
 
+# 服务器IP
+APP_DOMAIN=blog.example.com
+
+# 注册邮件发送给用户的验证地址
+APP_URL=http://blog.example.com
+
 # 注册邮件（否则新用户无法注册）
 EMAIL_RESEND_API_KEY=re_你的resend密钥
 

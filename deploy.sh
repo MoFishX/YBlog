@@ -19,10 +19,25 @@ else
   JWT_SECRET=$(date +%s | sha256sum | base64 | head -c 44)
 fi
 
+echo "==> 检测服务器公网IP..."
+
+SERVER_IP=$(curl -fsSL --connect-timeout 5 ifconfig.me 2>/dev/null \
+  || curl -fsSL --connect-timeout 5 ip.sb 2>/dev/null \
+  || curl -fsSL --connect-timeout 5 icanhazip.com 2>/dev/null \
+  || echo "")
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
   sed -i '' "s|^JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" .env
+  if [ -n "$SERVER_IP" ]; then
+    sed -i '' "s|^APP_DOMAIN=.*|APP_DOMAIN=${SERVER_IP}|" .env
+    sed -i '' "s|^APP_URL=.*|APP_URL=http://${SERVER_IP}|" .env
+  fi
 else
   sed -i "s|^JWT_SECRET=.*|JWT_SECRET=${JWT_SECRET}|" .env
+  if [ -n "$SERVER_IP" ]; then
+    sed -i "s|^APP_DOMAIN=.*|APP_DOMAIN=${SERVER_IP}|" .env
+    sed -i "s|^APP_URL=.*|APP_URL=http://${SERVER_IP}|" .env
+  fi
 fi
 
 echo "==> 请编辑 .env 填入你的密钥:"
