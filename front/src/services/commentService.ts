@@ -8,7 +8,7 @@ export const commentService = {
     return res.data
   },
 
-  async create(data: CommentFormData): Promise<{ id: number; content: string; createdAt: string }> {
+  async create(data: CommentFormData): Promise<UserComment> {
     const res = await commentApi.create(data)
     return res.data
   },

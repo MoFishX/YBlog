@@ -16,6 +16,7 @@ public class CommentVO {
     private AuthorVO user;
     private AuthorVO replyTo;
     private Long articleId;
+    private Long parentId;
     private String articleTitle;
     private Boolean isRead;
     private String status;

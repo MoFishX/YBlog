@@ -7,7 +7,7 @@ export const commentApi = {
     return request.get('/comments', { params })
   },
 
-  create(data: CommentFormData): Promise<ApiResponse<{ id: number; content: string; createdAt: string }>> {
+  create(data: CommentFormData): Promise<ApiResponse<UserComment>> {
     return request.post('/comments', data)
   },
 

@@ -59,6 +59,7 @@ public class CommentServiceImpl implements CommentService {
                 .user(buildAuthorVO(comment.getUserId()))
                 .replyTo(comment.getParentId() != null ? buildReplyToVO(comment.getParentId(), userId) : null)
                 .articleId(comment.getArticleId())
+                .parentId(comment.getParentId())
                 .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
                 .status(comment.getStatus())
                 .createdAt(comment.getCreatedAt())
@@ -99,6 +100,12 @@ public class CommentServiceImpl implements CommentService {
         return CommentVO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
+                .user(buildAuthorVO(comment.getUserId()))
+                .replyTo(comment.getParentId() != null ? buildReplyToVO(comment.getParentId(), userId) : null)
+                .articleId(comment.getArticleId())
+                .parentId(comment.getParentId())
+                .isRead(false)
+                .status(comment.getStatus())
                 .createdAt(comment.getCreatedAt())
                 .build();
     }

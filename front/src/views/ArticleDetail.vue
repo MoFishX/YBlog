@@ -217,7 +217,7 @@ import { articleService } from '@/services/articleService'
 import { commentService } from '@/services/commentService'
 import CommentList from '@/components/comment/CommentList.vue'
 import type { Article } from '@/types/article'
-import type { Comment } from '@/types/comment'
+import type { Comment, UserComment } from '@/types/comment'
 
 const route = useRoute()
 const router = useRouter()
@@ -322,9 +322,10 @@ async function submitComment() {
   if (!id || !commentText.value.trim()) return
   submitting.value = true
   try {
-    await commentService.create({ articleId: id, content: commentText.value, parentId: replyParentId.value })
+    const newComment = await commentService.create({ articleId: id, content: commentText.value, parentId: replyParentId.value })
     commentText.value = ''; replyTarget.value = null; replyParentId.value = null
-    commentPage.value = 1; await fetchComments()
+    comments.value.push(newComment)
+    commentTotal.value++
   } catch { /* keep text */ }
   finally { submitting.value = false }
 }

@@ -12,6 +12,7 @@ export interface Comment {
     id: number
     username: string
   } | null
+  parentId?: number | null
   createdAt: string
 }
 
