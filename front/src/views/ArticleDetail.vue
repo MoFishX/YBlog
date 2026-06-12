@@ -148,7 +148,7 @@
           @reply="handleReply" @delete="handleDeleteComment" @page-change="handleCommentPageChange"
         />
 
-        <div v-if="userStore.isLoggedIn" class="mt-6 bg-zinc-50 rounded-xl p-5">
+        <div v-if="userStore.isLoggedIn" class="mt-6 bg-zinc-50 rounded-xl p-5 comment-form-area">
           <div v-if="replyTarget" class="flex items-center justify-between text-sm text-zinc-500 mb-3">
             <span>回复 <span class="text-zinc-900 font-semibold">@{{ replyTarget }}</span></span>
             <button @click="cancelReply" class="text-zinc-400 hover:text-zinc-600 transition-colors duration-200 cursor-pointer">
@@ -240,6 +240,7 @@ const commentText = ref('')
 const submitting = ref(false)
 const replyTarget = ref<string | null>(null)
 const replyParentId = ref<number | null>(null)
+const scrollToTargetId = ref<number | null>(null)
 
 const aiError = ref('')
 const aiGenerating = ref(false)
@@ -320,18 +321,40 @@ async function handleLike() {
 async function submitComment() {
   const id = Number(route.params.id)
   if (!id || !commentText.value.trim()) return
+  const replyTo = replyParentId.value
   submitting.value = true
   try {
     const newComment = await commentService.create({ articleId: id, content: commentText.value, parentId: replyParentId.value })
     commentText.value = ''; replyTarget.value = null; replyParentId.value = null
     comments.value.push(newComment)
     commentTotal.value++
+    if (replyTo) {
+      scrollToTargetId.value = replyTo
+      nextTick(() => {
+        const el = document.getElementById(`comment-${replyTo}`)
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          el.classList.add('ring-2', 'ring-accent/40', 'rounded-lg')
+          setTimeout(() => el.classList.remove('ring-2', 'ring-accent/40', 'rounded-lg'), 3000)
+        }
+        scrollToTargetId.value = null
+      })
+    } else {
+      nextTick(() => {
+        const el = document.getElementById(`comment-${newComment.id}`)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      })
+    }
   } catch { /* keep text */ }
   finally { submitting.value = false }
 }
 
 function handleReply(commentId: number, username: string) {
   replyTarget.value = username; replyParentId.value = commentId; commentText.value = ''
+  nextTick(() => {
+    const el = document.querySelector('.comment-form-area')
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  })
 }
 
 function cancelReply() { replyTarget.value = null; replyParentId.value = null; commentText.value = '' }
@@ -395,16 +418,38 @@ async function confirmDeleteComment() {
 
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
 
-function scrollToComment() {
+async function scrollToComment() {
   const hash = window.location.hash
   if (!hash.startsWith('#comment-')) return
-  const el = document.getElementById(hash.slice(1))
-  if (el) {
-    nextTick(() => {
+  const targetId = hash.slice(1)
+
+  const tryScroll = () => {
+    const el = document.getElementById(targetId)
+    if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       el.classList.add('ring-2', 'ring-accent/40', 'rounded-lg')
       setTimeout(() => el.classList.remove('ring-2', 'ring-accent/40', 'rounded-lg'), 3000)
+      return true
+    }
+    return false
+  }
+
+  if (tryScroll()) return
+
+  for (let i = 0; i < 10; i++) {
+    document.querySelectorAll('[class*="text-left"]:has(> :empty)').forEach(btn => {
+      if (btn.textContent?.includes('展开') && btn.textContent?.includes('条回复')) {
+        (btn as HTMLElement).click()
+      }
     })
+    const allExpandBtns = Array.from(document.querySelectorAll('button'))
+      .filter(btn => btn.textContent?.includes('展开') && btn.textContent?.includes('条回复'))
+    for (const btn of allExpandBtns) {
+      ;(btn as HTMLElement).click()
+    }
+    await nextTick()
+    await new Promise(r => setTimeout(r, 50))
+    if (tryScroll()) return
   }
 }
 
