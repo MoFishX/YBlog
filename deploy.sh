@@ -40,11 +40,12 @@ else
   fi
 fi
 
-echo "==> 请编辑 .env 填入你的密钥:"
+echo "==> 请编辑 .env 文件:"
+echo "    参考链接: https://github.com/MoFishX/YBlog#env%E5%BF%85%E9%A1%BB%E9%85%8D%E7%BD%AE%E9%A1%B9"
 echo "    AI_API_KEY=sk-xxx"
 echo "    OSS_QINIU_ACCESS_KEY_ID=xxx"
 echo "    ..."
 echo ""
-echo "==> 编辑完成后运行:"
+echo "==> 编辑完成后运行！！！"
 echo "    docker compose pull"
 echo "    docker compose up -d"
