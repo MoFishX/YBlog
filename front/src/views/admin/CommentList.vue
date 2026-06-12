@@ -28,7 +28,7 @@
         <el-table-column prop="user.username" label="用户" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'info'">{{ row.status }}</el-tag>
+            <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'danger'">{{ row.status === 'ACTIVE' ? '正常' : '已删除' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="时间" width="180">

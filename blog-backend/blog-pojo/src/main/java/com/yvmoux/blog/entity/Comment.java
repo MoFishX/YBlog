@@ -33,4 +33,6 @@ public class Comment {
     private Integer isRead;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime deletedAt;
 }

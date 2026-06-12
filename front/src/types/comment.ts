@@ -26,6 +26,7 @@ export interface AdminComment {
   }
   status: string
   createdAt: string
+  deletedAt: string | null
 }
 
 export interface ReplyNotification {

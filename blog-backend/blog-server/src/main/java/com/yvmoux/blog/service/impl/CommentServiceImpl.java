@@ -7,6 +7,7 @@ import com.yvmoux.blog.dto.request.CommentCreateRequest;
 import com.yvmoux.blog.dto.response.CommentVO;
 import com.yvmoux.blog.entity.Article;
 import com.yvmoux.blog.entity.Comment;
+import com.yvmoux.blog.enums.CommentStatusEnum;
 import com.yvmoux.blog.enums.ErrorCode;
 import com.yvmoux.blog.exception.BusinessException;
 import com.yvmoux.blog.mapper.ArticleMapper;
@@ -41,6 +42,7 @@ public class CommentServiceImpl implements CommentService {
         // 条件查询
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId);
+        wrapper.eq("status", CommentStatusEnum.ACTIVE.name());
         wrapper.orderByAsc("created_at");
 
         // 分页查询
@@ -51,7 +53,7 @@ public class CommentServiceImpl implements CommentService {
                 .id(comment.getId())
                 .content(comment.getContent())
                 .user(buildAuthorVO(comment.getUserId()))
-                .replyTo(comment.getParentId() != null ? buildAuthorVO(commentMapper.selectById(comment.getParentId()).getUserId()) : null)
+                .replyTo(comment.getParentId() != null ? buildReplyToVO(comment.getParentId()) : null)
                 .articleId(comment.getArticleId())
                 .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
                 .status(comment.getStatus())
@@ -69,9 +71,12 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        // 校验父评论存在
-        if (request.getParentId() != null && commentMapper.selectById(request.getParentId()) == null) {
-            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
+        // 校验父评论存在且未删除
+        if (request.getParentId() != null) {
+            Comment parent = commentMapper.selectById(request.getParentId());
+            if (parent == null || CommentStatusEnum.DELETED.name().equals(parent.getStatus())) {
+                throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
+            }
         }
 
         // 插入评论
@@ -80,7 +85,7 @@ public class CommentServiceImpl implements CommentService {
                 .userId(userId)
                 .content(request.getContent())
                 .parentId(request.getParentId())
-                .status("APPROVED")
+                .status(CommentStatusEnum.ACTIVE.name())
                 .isRead(0)
                 .createdAt(LocalDateTime.now())
                 .build();
@@ -102,6 +107,10 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
         }
 
+        if (CommentStatusEnum.DELETED.name().equals(comment.getStatus())) {
+            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+
         boolean isOwner = comment.getUserId().equals(userId);
         boolean isArticleAuthor = false;
         if (!isOwner) {
@@ -115,23 +124,25 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 删除评论
-        commentMapper.deleteById(commentId);
+        comment.setStatus(CommentStatusEnum.DELETED.name());
+        comment.setDeletedAt(LocalDateTime.now());
+        commentMapper.updateById(comment);
     }
 
     @Override
     public PageResult<CommentVO> getReplies(Long userId, Integer page, Integer pageSize, boolean unreadOnly) {
-        // 获取用户所有评论 ID
         QueryWrapper<Comment> userCommentsWrapper = new QueryWrapper<>();
         userCommentsWrapper.eq("user_id", userId);
+        userCommentsWrapper.eq("status", CommentStatusEnum.ACTIVE.name());
         List<Comment> userComments = commentMapper.selectList(userCommentsWrapper);
         if (userComments.isEmpty()) {
             return new PageResult<>(new ArrayList<>(), 0);
         }
 
-        // 查询回复这些评论的内容
         List<Long> userCommentIds = userComments.stream().map(Comment::getId).collect(Collectors.toList());
         QueryWrapper<Comment> replyWrapper = new QueryWrapper<>();
         replyWrapper.in("parent_id", userCommentIds);
+        replyWrapper.eq("status", CommentStatusEnum.ACTIVE.name());
         if (unreadOnly) replyWrapper.eq("is_read", 0);
         replyWrapper.orderByDesc("created_at");
 
@@ -175,6 +186,7 @@ public class CommentServiceImpl implements CommentService {
                 .isRead(reply.getIsRead() != null && reply.getIsRead() == 1)
                 .status(reply.getStatus())
                 .createdAt(reply.getCreatedAt())
+                .deletedAt(reply.getDeletedAt())
                 .build()).collect(Collectors.toList());
 
         return new PageResult<>(vos, replyPage.getTotal());
@@ -190,5 +202,11 @@ public class CommentServiceImpl implements CommentService {
                 .avatar(user.getAvatar())
                 .email(user.getEmail())
                 .build();
+    }
+
+    private com.yvmoux.blog.dto.response.AuthorVO buildReplyToVO(Long parentId) {
+        Comment parent = commentMapper.selectById(parentId);
+        if (parent == null || CommentStatusEnum.DELETED.name().equals(parent.getStatus())) return null;
+        return buildAuthorVO(parent.getUserId());
     }
 }

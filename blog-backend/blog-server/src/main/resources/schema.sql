@@ -51,6 +51,7 @@ create table if not exists comment (
     status     varchar(20) not null default 'ACTIVE'         comment '状态：ACTIVE正常 / DELETED已删除',
     is_read    tinyint     not null default 0                comment '是否已读：0未读 / 1已读',
     created_at datetime    not null          comment '创建时间',
+    deleted_at datetime    default null        comment '删除时间',
     primary key (id),
     index idx_article (article_id)
 ) engine=InnoDB;
