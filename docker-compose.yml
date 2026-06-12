@@ -67,6 +67,11 @@ services:
       JWT_SECRET: ${JWT_SECRET:-}
       JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-300}
       JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-2592000}
+      # MySQL
+      MYSQL_HOST: ${MYSQL_HOST:-blog-mysql}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
+      # Redis
+      REDIS_HOST: ${REDIS_HOST:-blog-redis}
     networks:
       - blog-net
 
