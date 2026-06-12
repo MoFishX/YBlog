@@ -59,6 +59,10 @@ curl -sSL https://raw.githubusercontent.com/MoFishX/YBlog/master/deploy.sh | bas
 # 启动服务
 docker compose pull
 docker compose up -d
+
+# 查看日志
+docker logs -f blog-backend
+docker logs -f blog-frontend
 ```
 
 #### 脚本功能
