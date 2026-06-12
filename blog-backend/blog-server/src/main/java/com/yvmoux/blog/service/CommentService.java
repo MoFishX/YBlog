@@ -10,6 +10,7 @@ public interface CommentService {
     void deleteComment(Long commentId, Long userId, boolean isAdmin);
     void hideComment(Long commentId);
     PageResult<CommentVO> getReplies(Long userId, Integer page, Integer pageSize, boolean unreadOnly);
+    PageResult<CommentVO> getMyComments(Long userId, Integer page, Integer pageSize);
     PageResult<CommentVO> getAllComments(Integer page, Integer pageSize, String keyword, Long articleId);
     void forceDeleteComment(Long commentId);
 }

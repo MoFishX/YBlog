@@ -163,6 +163,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    public PageResult<CommentVO> getMyComments(Long userId, Integer page, Integer pageSize) {
+        QueryWrapper<Comment> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", userId);
+        wrapper.orderByDesc("created_at");
+        return pageResult(page, pageSize, wrapper);
+    }
+
+    @Override
     public PageResult<CommentVO> getAllComments(Integer page, Integer pageSize, String keyword, Long articleId) {
         // 条件查询
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();

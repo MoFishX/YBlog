@@ -15,6 +15,25 @@ export interface Comment {
   createdAt: string
 }
 
+export interface UserComment {
+  id: number
+  content: string
+  user: {
+    id: number
+    username: string
+    avatar?: string | null
+  }
+  replyTo?: {
+    id: number
+    username: string
+  } | null
+  articleId: number
+  articleTitle: string
+  status: string
+  isRead: boolean
+  createdAt: string
+}
+
 export interface AdminComment {
   id: number
   content: string

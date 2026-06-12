@@ -1,5 +1,5 @@
 <template>
-  <div class="py-4 first:pt-0 last:pb-0">
+  <div :id="`comment-${comment.id}`" class="py-4 first:pt-0 last:pb-0">
     <div class="flex items-start gap-3">
       <div class="w-7 h-7 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-500 text-xs font-semibold flex-shrink-0 overflow-hidden">
         <img v-if="comment.user.avatar" :src="comment.user.avatar" class="w-full h-full object-cover" />

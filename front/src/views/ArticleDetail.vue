@@ -209,7 +209,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { useRoute, RouterLink } from 'vue-router'
+import { useRoute, RouterLink, useRouter } from 'vue-router'
 import { marked } from 'marked'
 import { formatDateTime, formatNumber } from '@/utils/format'
 import { useUserStore } from '@/stores/user'
@@ -220,6 +220,7 @@ import type { Article } from '@/types/article'
 import type { Comment } from '@/types/comment'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 const article = ref<Article | null>(null)
@@ -392,6 +393,27 @@ async function confirmDeleteComment() {
 }
 
 function handleCommentPageChange(p: number) { commentPage.value = p; fetchComments() }
+
+function scrollToComment() {
+  const hash = window.location.hash
+  if (!hash.startsWith('#comment-')) return
+  const el = document.getElementById(hash.slice(1))
+  if (el) {
+    nextTick(() => {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      el.classList.add('ring-2', 'ring-accent/40', 'rounded-lg')
+      setTimeout(() => el.classList.remove('ring-2', 'ring-accent/40', 'rounded-lg'), 3000)
+    })
+  }
+}
+
+watch(() => comments.value.length, () => {
+  nextTick(scrollToComment)
+})
+
+watch(() => route.hash, () => {
+  nextTick(scrollToComment)
+})
 
 onMounted(() => { fetchDetail(); fetchComments() })
 onBeforeUnmount(() => { aiPollActive = false; stopTyping() })

@@ -58,4 +58,13 @@ public class CommentController {
         log.info("获取评论回复成功, total: {}", result.getData().getTotal());
         return result;
     }
+
+    @Operation(summary = "我发表的评论")
+    @GetMapping("/mine")
+    public Result<PageResult<CommentVO>> myComments(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "20") Integer pageSize) {
+        Long userId = securityUtils.getCurrentUserId();
+        return Result.success(commentService.getMyComments(userId, page, pageSize));
+    }
 }

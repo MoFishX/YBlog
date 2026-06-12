@@ -1,5 +1,5 @@
 import { commentApi } from '@/api/modules/comment'
-import type { Comment, ReplyNotification, CommentFormData } from '@/types/comment'
+import type { Comment, UserComment, CommentFormData } from '@/types/comment'
 import type { PageResult } from '@/types/api'
 
 export const commentService = {
@@ -17,7 +17,12 @@ export const commentService = {
     await commentApi.delete(commentId)
   },
 
-  async getReplies(params?: { page?: number; pageSize?: number; unreadOnly?: number }): Promise<PageResult<ReplyNotification>> {
+  async getMyComments(params?: { page?: number; pageSize?: number }): Promise<PageResult<UserComment>> {
+    const res = await commentApi.getMyComments(params)
+    return res.data
+  },
+
+  async getReplies(params?: { page?: number; pageSize?: number; unreadOnly?: number }): Promise<PageResult<UserComment>> {
     const res = await commentApi.getReplies(params)
     return res.data
   }

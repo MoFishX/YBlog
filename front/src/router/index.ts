@@ -75,6 +75,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/my-comments',
+      name: 'MyComments',
+      component: () => import('@/views/MyComments.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/admin',
       component: () => import('@/components/admin/layout/AdminLayout.vue'),
       meta: { requiresAuth: true, requiresAdmin: true, blank: true },
