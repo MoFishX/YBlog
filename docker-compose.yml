@@ -4,9 +4,10 @@ services:
     container_name: blog-mysql
     restart: unless-stopped
     environment:
+      MYSQL_HOST: ${MYSQL_HOST:-blog-mysql}
       MYSQL_USER: ${MYSQL_USER:-yblog}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-yblog}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-}
       TZ: Asia/Shanghai
     ports:
       - "${MYSQL_PORT:-3306}:3306"
@@ -25,6 +26,8 @@ services:
     image: redis:7-alpine
     container_name: blog-redis
     restart: unless-stopped
+    environment:
+      REDIS_HOST: ${REDIS_HOST:-blog-redis}
     ports:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
