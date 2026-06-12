@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,21 +59,7 @@ public class UploadController {
                                               @RequestParam("type") String type) throws IOException {
         log.info("上传文件, type: {}, originalFilename: {}, size: {}", type, file.getOriginalFilename(), file.getSize());
 
-        if (file.isEmpty()) {
-            throw new BusinessException(ErrorCode.BAD_REQUEST);
-        }
-        if (file.getSize() > MAX_FILE_SIZE) {
-            throw new BusinessException(ErrorCode.FILE_TOO_LARGE);
-        }
-
-        String originalFilename = file.getOriginalFilename();
-        String extension = "";
-        if (originalFilename != null && originalFilename.contains(".")) {
-            extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
-        }
-        if (!ALLOWED_EXTENSIONS.contains(extension)) {
-            throw new BusinessException(ErrorCode.FILE_TYPE_INVALID);
-        }
+        String extension = fileExt(file, type);
 
         String dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
         String newFilename = UUID.randomUUID().toString().replace("-", "") + "." + extension;
@@ -96,5 +83,29 @@ public class UploadController {
                 "filename", newFilename,
                 "size", file.getSize()
         ));
+    }
+
+    private @NonNull String fileExt(MultipartFile file, String type) {
+        // 仅接收avatar和article
+        if (!type.equalsIgnoreCase("avatar") && !type.equalsIgnoreCase("article")) {
+            throw new BusinessException(ErrorCode.FILE_TYPE_INVALID);
+        }
+
+        if (file.isEmpty()) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST);
+        }
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new BusinessException(ErrorCode.FILE_TOO_LARGE);
+        }
+
+        String originalFilename = file.getOriginalFilename();
+        String extension = "";
+        if (originalFilename != null && originalFilename.contains(".")) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+        }
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new BusinessException(ErrorCode.FILE_TYPE_INVALID);
+        }
+        return extension;
     }
 }
