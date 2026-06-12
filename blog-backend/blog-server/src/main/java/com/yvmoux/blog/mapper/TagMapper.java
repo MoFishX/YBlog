@@ -14,10 +14,11 @@ public interface TagMapper extends BaseMapper<Tag> {
     @Select("select " +
             "t.id as id," +
             "t.name as name," +
+            "t.created_by as createdBy," +
             "count(distinct at.article_id) as article_count " +
                 "from tag as t " +
                     "left join article_tag as at on t.id = at.tag_id " +
-                        "group by t.id, t.name " +
+                        "group by t.id, t.name, t.created_by " +
                         "order by t.id;")
     List<Tag> selectAllWithArticleCount();
 

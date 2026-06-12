@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,26 +26,26 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<TagVO> getAllTags() {
-        // 查询所有标签及对应的文章数文章数
         List<Tag> tags = tagMapper.selectAllWithArticleCount();
 
-        // 构建返回值
-        return tags.stream().map(tag -> TagVO.builder()
-                .id(tag.getId())
-                .name(tag.getName())
-                .articleCount(tag.getArticleCount())
-                .build()).collect(Collectors.toList());
+        return tags.stream()
+                .map(tag -> TagVO.builder()
+                        .id(tag.getId())
+                        .name(tag.getName())
+                        .articleCount(tag.getArticleCount())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @Override
-    public TagVO createTag(String name) {
+    public TagVO createTag(String name, Long createdBy) {
         // 检查标签名是否存在
         if (tagMapper.selectCount(new QueryWrapper<Tag>().eq("name", name)) > 0) {
             throw new BusinessException(ErrorCode.TAG_NAME_EXISTS);
         }
 
         // 插入标签
-        Tag tag = Tag.builder().name(name).build();
+        Tag tag = Tag.builder().name(name).createdBy(createdBy).build();
         tagMapper.insert(tag);
 
         // 构建返回值
@@ -53,6 +54,27 @@ public class TagServiceImpl implements TagService {
                 .name(tag.getName())
                 .articleCount(0)
                 .build();
+    }
+
+    @Override
+    public List<Long> resolveTagIds(List<String> tagNames, Long userId) {
+        if (tagNames == null || tagNames.isEmpty()) return new ArrayList<>();
+
+        List<Long> ids = new ArrayList<>();
+        for (String name : tagNames) {
+            String trimmed = name.trim();
+            if (trimmed.isEmpty()) continue;
+
+            Tag existing = tagMapper.selectOne(new QueryWrapper<Tag>().eq("name", trimmed));
+            if (existing != null) {
+                ids.add(existing.getId());
+            } else {
+                Tag tag = Tag.builder().name(trimmed).createdBy(userId).build();
+                tagMapper.insert(tag);
+                ids.add(tag.getId());
+            }
+        }
+        return ids;
     }
 
     @Override

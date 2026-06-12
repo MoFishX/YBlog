@@ -23,4 +23,6 @@ public class Tag {
 
     @TableField(exist = false)
     private Integer articleCount;
+
+    private Long createdBy;
 }

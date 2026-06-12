@@ -69,16 +69,31 @@
             type="button"
             v-for="tag in availableTags"
             :key="tag.id"
-            @click="toggleTag(tag.id)"
+            @click="toggleTag(tag)"
             class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-all duration-200 cursor-pointer"
-            :class="isTagSelected(tag.id)
+            :class="isTagSelected(tag)
               ? 'bg-accent/10 border-accent/30 text-accent'
               : 'border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-700'"
           >
             {{ tag.name }}
           </button>
+          <div class="flex items-center gap-1">
+            <input
+              v-model="newTagInput"
+              @keydown.enter.prevent="handleAddTag"
+              placeholder="新标签"
+              maxlength="20"
+              class="w-20 px-2 py-1.5 text-xs border border-dashed border-zinc-300 rounded-lg focus:outline-none focus:border-accent transition-colors"
+            />
+            <button
+              type="button"
+              @click="handleAddTag"
+              :disabled="!newTagInput.trim() || selectedTags.length >= 10"
+              class="px-2 py-1.5 text-xs font-medium text-zinc-400 hover:text-accent disabled:opacity-40 transition-colors cursor-pointer"
+            >+</button>
+          </div>
         </div>
-        <div v-if="form.selectedTagIds.length" class="text-xs text-zinc-400 mt-1">已选 {{ form.selectedTagIds.length }}/10 个</div>
+        <div v-if="selectedTags.length" class="text-xs text-zinc-400 mt-1">已选 {{ selectedTags.length }}/10 个</div>
       </div>
 
       <div>
@@ -147,28 +162,47 @@ const form = reactive({
   content: '',
   summary: '',
   status: 'PUBLISHED' as 'PUBLISHED' | 'DRAFT',
-  selectedTagIds: [] as number[],
   genAiSummary: 0 as 0 | 1,
   genAiSummaryLong: 0 as 0 | 1
 })
 
 const availableTags = ref<Tag[]>([])
+const selectedTags = ref<Tag[]>([])
 const tagsLoading = ref(false)
 const submitting = ref(false)
 const error = ref('')
 const loadError = ref('')
+const newTagInput = ref('')
 
-function isTagSelected(id: number) {
-  return form.selectedTagIds.includes(id)
+function isTagSelected(tag: Tag) {
+  return selectedTags.value.some(t => t.id === tag.id)
 }
 
-function toggleTag(id: number) {
-  const idx = form.selectedTagIds.indexOf(id)
+function toggleTag(tag: Tag) {
+  const idx = selectedTags.value.findIndex(t => t.id === tag.id)
   if (idx > -1) {
-    form.selectedTagIds.splice(idx, 1)
-  } else {
-    form.selectedTagIds.push(id)
+    selectedTags.value.splice(idx, 1)
+  } else if (selectedTags.value.length < 10) {
+    selectedTags.value.push(tag)
   }
+}
+
+async function handleAddTag() {
+  const name = newTagInput.value.trim()
+  if (!name) return
+  if (selectedTags.value.length >= 10) {
+    error.value = '标签不能超过10个'
+    return
+  }
+  const existing = availableTags.value.find(t => t.name === name)
+  if (!existing) {
+    const tempTag = { id: -(Date.now()), name, articleCount: 0 } as Tag
+    availableTags.value.push(tempTag)
+    selectedTags.value.push(tempTag)
+  } else if (!isTagSelected(existing)) {
+    selectedTags.value.push(existing)
+  }
+  newTagInput.value = ''
 }
 
 async function loadTags() {
@@ -191,7 +225,7 @@ async function loadArticle() {
     form.content = article.content
     form.summary = article.summary || ''
     form.status = article.status === 'DRAFT' ? 'DRAFT' : 'PUBLISHED'
-    form.selectedTagIds = article.tags?.map(t => t.id) || []
+    selectedTags.value = article.tags || []
   } catch (e: any) {
     loadError.value = e?.response?.data?.message || '加载文章失败'
   }
@@ -214,11 +248,11 @@ async function doSave(status: 'PUBLISHED' | 'DRAFT') {
     error.value = '请填写正文内容'
     return
   }
-  if (status === 'PUBLISHED' && form.selectedTagIds.length === 0) {
+  if (status === 'PUBLISHED' && selectedTags.value.length === 0) {
     error.value = '请至少选择一个标签'
     return
   }
-  if (form.selectedTagIds.length > 10) {
+  if (selectedTags.value.length > 10) {
     error.value = '标签不能超过10个'
     return
   }
@@ -231,7 +265,7 @@ async function doSave(status: 'PUBLISHED' | 'DRAFT') {
       content: form.content,
       summary: form.summary.trim() || undefined,
       status: status,
-      tagIds: form.selectedTagIds,
+      tagNames: selectedTags.value.map(t => t.name),
       genAiSummary: status === 'PUBLISHED' ? form.genAiSummary : 0,
       genAiSummaryLong: status === 'PUBLISHED' ? form.genAiSummaryLong : 0
     }

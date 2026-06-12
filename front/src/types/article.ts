@@ -4,6 +4,7 @@ export interface Tag {
   id: number
   name: string
   articleCount?: number
+  createdBy?: number
 }
 
 export interface ArticleListItem {
@@ -84,6 +85,7 @@ export interface ArticleFormData {
   summary?: string
   coverImage?: string
   tagIds?: number[]
+  tagNames?: string[]
   status?: 'PUBLISHED' | 'DRAFT'
   genAiSummary?: 0 | 1
   genAiSummaryLong?: 0 | 1

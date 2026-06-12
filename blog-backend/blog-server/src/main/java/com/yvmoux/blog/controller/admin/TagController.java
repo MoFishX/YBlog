@@ -26,7 +26,7 @@ public class TagController {
     @PostMapping
     public Result<TagVO> create(@Valid @RequestBody TagRequest request) {
         log.info("创建标签, name: {}", request.getName());
-        TagVO tag = tagService.createTag(request.getName());
+        TagVO tag = tagService.createTag(request.getName(), -1L);
         log.info("创建标签成功, tagId: {}", tag.getId());
         return Result.success("创建成功", tag);
     }

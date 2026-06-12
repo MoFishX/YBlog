@@ -23,6 +23,9 @@ public class ArticleCommonCU {
     @Size(min = 1, max = 10)
     private List<Long> tagIds;
 
+    @Size(max = 10)
+    private List<String> tagNames;
+
     private String status;
 
     private Integer genAiSummary;

@@ -21,6 +21,7 @@ import com.yvmoux.blog.mapper.*;
 import com.yvmoux.blog.security.SecurityUtils;
 import com.yvmoux.blog.service.ArticleService;
 import com.yvmoux.blog.service.AsyncTaskService;
+import com.yvmoux.blog.service.TagService;
 import com.yvmoux.blog.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,6 +52,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleConverter articleConverter;
     private final TagConverter tagConverter;
     private final AsyncTaskService asyncTaskService;
+    private final TagService tagService;
 
     @Override
     public PageResult<ArticleVO> getArticleList(Integer page, Integer pageSize, String tagName, String orderBy, String status, Long authorId) {
@@ -184,8 +186,9 @@ public class ArticleServiceImpl implements ArticleService {
         articleContentMapper.insert(articleContent);
 
         // 插入文章标签
-        if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
-            List<ArticleTag> tags = request.getTagIds().stream()
+        List<Long> tagIds = resolveTagIds(request.getTagIds(), request.getTagNames(), userId);
+        if (!tagIds.isEmpty()) {
+            List<ArticleTag> tags = tagIds.stream()
                     .map(tagId -> ArticleTag.builder()
                             .articleId(article.getId())
                             .tagId(tagId)
@@ -249,9 +252,10 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         // 更新文章标签
-        if (request.getTagIds() != null && !request.getTagIds().isEmpty()) {
+        List<Long> tagIds = resolveTagIds(request.getTagIds(), request.getTagNames(), userId);
+        if (!tagIds.isEmpty()) {
             articleTagMapper.deleteByArticleId(articleId);
-            List<ArticleTag> tags = request.getTagIds().stream()
+            List<ArticleTag> tags = tagIds.stream()
                     .map(tagId -> ArticleTag.builder()
                             .articleId(articleId)
                             .tagId(tagId)
@@ -518,5 +522,27 @@ public class ArticleServiceImpl implements ArticleService {
                 .trim();
 
         return text.length() > 200 ? text.substring(0, 200) : text;
+    }
+
+    /**
+     * 解析文章标签ID列表
+     * 优先处理标签名称（自动创建或查找），其次使用直接传入的标签ID
+     *
+     * @param tagIds 直接指定的标签ID列表
+     * @param tagNames 标签名称列表，若存在则优先处理
+     * @param userId 当前用户ID，用于创建新标签时关联作者
+     * @return 解析后的标签ID列表
+     */
+    private List<Long> resolveTagIds(List<Long> tagIds, List<String> tagNames, Long userId) {
+        // 如果提供了标签名称，委托给 TagService 处理（可能涉及新建标签）
+        if (tagNames != null && !tagNames.isEmpty()) {
+            return tagService.resolveTagIds(tagNames, userId);
+        }
+        // 如果提供了标签ID，直接返回
+        if (tagIds != null && !tagIds.isEmpty()) {
+            return tagIds;
+        }
+        // 默认返回空列表
+        return List.of();
     }
 }

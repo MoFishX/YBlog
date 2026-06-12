@@ -59,6 +59,7 @@ create table if not exists comment (
 create table if not exists tag (
     id   bigint      not null auto_increment comment '标签ID',
     name varchar(50) not null                comment '标签名称',
+    created_by bigint      not null                comment '创建者ID',
     primary key (id),
     unique key uk_name (name)
 ) engine=InnoDB;
