@@ -33,7 +33,7 @@ public class CommentServiceImpl implements CommentService {
     private final UserMapper userMapper;
 
     @Override
-    public PageResult<CommentVO> getCommentsByArticle(Long articleId, Integer page, Integer pageSize) {
+    public PageResult<CommentVO> getCommentsByArticle(Long articleId, Long userId, Integer page, Integer pageSize) {
         // 校验文章存在
         if (articleMapper.selectById(articleId) == null) {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
@@ -42,18 +42,22 @@ public class CommentServiceImpl implements CommentService {
         // 条件查询
         QueryWrapper<Comment> wrapper = new QueryWrapper<>();
         wrapper.eq("article_id", articleId);
-        wrapper.eq("status", CommentStatusEnum.ACTIVE.name());
+
+        if (userId != null) {
+            wrapper.and(w -> w.eq("status", CommentStatusEnum.ACTIVE.name())
+                    .or(w2 -> w2.eq("status", CommentStatusEnum.HIDDEN.name()).eq("user_id", userId)));
+        } else {
+            wrapper.eq("status", CommentStatusEnum.ACTIVE.name());
+        }
         wrapper.orderByAsc("created_at");
 
-        // 分页查询
         Page<Comment> commentPage = commentMapper.selectPage(new Page<>(page, pageSize), wrapper);
 
-        // 构建返回值
         List<CommentVO> vos = commentPage.getRecords().stream().map(comment -> CommentVO.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
                 .user(buildAuthorVO(comment.getUserId()))
-                .replyTo(comment.getParentId() != null ? buildReplyToVO(comment.getParentId()) : null)
+                .replyTo(comment.getParentId() != null ? buildReplyToVO(comment.getParentId(), userId) : null)
                 .articleId(comment.getArticleId())
                 .isRead(comment.getIsRead() != null && comment.getIsRead() == 1)
                 .status(comment.getStatus())
@@ -71,10 +75,10 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ErrorCode.ARTICLE_NOT_FOUND);
         }
 
-        // 校验父评论存在且未删除
+        // 校验父评论存在且未隐藏
         if (request.getParentId() != null) {
             Comment parent = commentMapper.selectById(request.getParentId());
-            if (parent == null || CommentStatusEnum.DELETED.name().equals(parent.getStatus())) {
+            if (parent == null || CommentStatusEnum.HIDDEN.name().equals(parent.getStatus())) {
                 throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
             }
         }
@@ -107,10 +111,6 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
         }
 
-        if (CommentStatusEnum.DELETED.name().equals(comment.getStatus())) {
-            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
-        }
-
         boolean isOwner = comment.getUserId().equals(userId);
         boolean isArticleAuthor = false;
         if (!isOwner) {
@@ -124,8 +124,21 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 删除评论
-        comment.setStatus(CommentStatusEnum.DELETED.name());
-        comment.setDeletedAt(LocalDateTime.now());
+        commentMapper.deleteById(commentId);
+    }
+
+    @Override
+    public void hideComment(Long commentId) {
+        Comment comment = commentMapper.selectById(commentId);
+        if (comment == null) {
+            throw new BusinessException(ErrorCode.COMMENT_NOT_FOUND);
+        }
+
+        if (CommentStatusEnum.HIDDEN.name().equals(comment.getStatus())) {
+            comment.setStatus(CommentStatusEnum.ACTIVE.name());
+        } else {
+            comment.setStatus(CommentStatusEnum.HIDDEN.name());
+        }
         commentMapper.updateById(comment);
     }
 
@@ -204,9 +217,14 @@ public class CommentServiceImpl implements CommentService {
                 .build();
     }
 
-    private com.yvmoux.blog.dto.response.AuthorVO buildReplyToVO(Long parentId) {
+    private com.yvmoux.blog.dto.response.AuthorVO buildReplyToVO(Long parentId, Long currentUserId) {
         Comment parent = commentMapper.selectById(parentId);
-        if (parent == null || CommentStatusEnum.DELETED.name().equals(parent.getStatus())) return null;
+        if (parent == null || CommentStatusEnum.HIDDEN.name().equals(parent.getStatus())) {
+            if (parent != null && currentUserId != null && parent.getUserId().equals(currentUserId)) {
+                return buildAuthorVO(parent.getUserId());
+            }
+            return null;
+        }
         return buildAuthorVO(parent.getUserId());
     }
 }

@@ -7,6 +7,10 @@ export const commentApi = {
     return request.get('/admin/comments', { params })
   },
 
+  hide(commentId: number): Promise<ApiResponse<null>> {
+    return request.patch(`/admin/comments/${commentId}/hide`)
+  },
+
   delete(commentId: number): Promise<ApiResponse<null>> {
     return request.delete(`/admin/comments/${commentId}`)
   }

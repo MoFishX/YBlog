@@ -2,7 +2,7 @@ package com.yvmoux.blog.enums;
 
 public enum CommentStatusEnum {
     ACTIVE,
-    DELETED;
+    HIDDEN;
 
     public static boolean contains(String value) {
         for (CommentStatusEnum status : values()) {

@@ -28,14 +28,17 @@
         <el-table-column prop="user.username" label="用户" width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'danger'">{{ row.status === 'ACTIVE' ? '正常' : '已删除' }}</el-tag>
+            <el-tag :type="row.status === 'ACTIVE' ? 'success' : 'warning'">{{ row.status === 'ACTIVE' ? '正常' : '已隐藏' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="时间" width="180">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
+            <el-button size="small" :type="row.status === 'ACTIVE' ? 'warning' : 'success'" @click="handleHide(row.id)">
+              {{ row.status === 'ACTIVE' ? '隐藏' : '显示' }}
+            </el-button>
             <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
@@ -88,6 +91,15 @@ async function fetchList() {
     error.value = e?.response?.data?.message || '加载失败'
   } finally {
     loading.value = false
+  }
+}
+
+async function handleHide(id: number) {
+  try {
+    await commentService.hide(id)
+    await fetchList()
+  } catch {
+    // failed
   }
 }
 

@@ -20,5 +20,4 @@ public class CommentVO {
     private Boolean isRead;
     private String status;
     private LocalDateTime createdAt;
-    private LocalDateTime deletedAt;
 }

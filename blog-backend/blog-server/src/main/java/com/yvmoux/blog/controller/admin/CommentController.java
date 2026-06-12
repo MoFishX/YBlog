@@ -34,6 +34,14 @@ public class CommentController {
         return result;
     }
 
+    @Operation(summary = "隐藏/显示评论")
+    @PatchMapping("/{commentId}/hide")
+    public Result<Void> hideComment(@PathVariable Long commentId) {
+        log.info("切换评论隐藏状态, commentId: {}", commentId);
+        commentService.hideComment(commentId);
+        return Result.success("操作成功", null);
+    }
+
     @Operation(summary = "强制删除评论")
     @DeleteMapping("/{commentId}")
     public Result<Void> forceDeleteComment(@PathVariable Long commentId) {
