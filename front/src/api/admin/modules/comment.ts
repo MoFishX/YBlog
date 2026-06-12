@@ -8,7 +8,7 @@ export const commentApi = {
   },
 
   hide(commentId: number): Promise<ApiResponse<null>> {
-    return request.patch(`/admin/comments/${commentId}/hide`)
+    return request.put(`/admin/comments/${commentId}/hide`)
   },
 
   delete(commentId: number): Promise<ApiResponse<null>> {

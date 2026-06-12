@@ -35,7 +35,7 @@ public class CommentController {
     }
 
     @Operation(summary = "隐藏/显示评论")
-    @PatchMapping("/{commentId}/hide")
+    @PutMapping("/{commentId}/hide")
     public Result<Void> hideComment(@PathVariable Long commentId) {
         log.info("切换评论隐藏状态, commentId: {}", commentId);
         commentService.hideComment(commentId);
