@@ -73,6 +73,8 @@ services:
       # Redis
       REDIS_HOST: ${REDIS_HOST:-blog-redis}
       REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      # Domain
+      APP_DOMAIN: ${APP_DOMAIN:-}
     networks:
       - blog-net
 
