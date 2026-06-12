@@ -54,6 +54,28 @@
       </div>
 
       <div class="bg-white rounded-xl border border-zinc-100 p-6">
+        <h2 class="text-base font-bold text-zinc-900 mb-5 font-serif">头像</h2>
+        <div class="flex items-center gap-5">
+          <label class="relative group cursor-pointer block">
+            <span class="block w-20 h-20 rounded-full overflow-hidden bg-zinc-100 flex items-center justify-center text-zinc-400 text-2xl font-bold">
+              <img v-if="user.avatar" :src="user.avatar" class="w-full h-full object-cover" />
+              <template v-else>{{ user.username.charAt(0).toUpperCase() }}</template>
+            </span>
+            <span class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <svg v-if="!uploadingAvatar" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <svg v-else class="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            </span>
+            <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden" @change="handleAvatarChange" :disabled="uploadingAvatar" />
+          </label>
+          <div class="flex-1">
+            <p class="text-sm text-zinc-500">点击头像更换</p>
+            <p class="text-xs text-zinc-400 mt-1">支持 JPG、PNG、GIF、WebP，不超过 2MB</p>
+            <p v-if="avatarError" class="text-sm text-red-500 mt-1">{{ avatarError }}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-zinc-100 p-6">
         <h2 class="text-base font-bold text-zinc-900 mb-5 font-serif">个人信息</h2>
         <form @submit.prevent="handleSaveProfile" class="space-y-4">
           <div>
@@ -131,6 +153,7 @@ import { RouterLink } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { userService } from '@/services/userService'
 import { authService } from '@/services/authService'
+import { uploadApi } from '@/api/modules/upload'
 import type { User } from '@/types/user'
 
 const userStore = useUserStore()
@@ -140,6 +163,9 @@ const profileForm = reactive({ email: '' })
 const savingProfile = ref(false)
 const profileError = ref('')
 const profileSuccess = ref('')
+
+const uploadingAvatar = ref(false)
+const avatarError = ref('')
 
 const pwdForm = reactive({ oldPassword: '', newPassword: '' })
 const changingPwd = ref(false)
@@ -186,6 +212,39 @@ async function handleResendActivation() {
     activateMsg.value = e?.response?.data?.message || '发送失败'
   } finally {
     activating.value = false
+  }
+}
+
+async function handleAvatarChange(e: Event) {
+  const input = e.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  if (!allowedTypes.includes(file.type)) {
+    avatarError.value = '仅支持 JPG、PNG、GIF、WebP 格式'
+    input.value = ''
+    return
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    avatarError.value = '头像文件不能超过 2MB'
+    input.value = ''
+    return
+  }
+
+  uploadingAvatar.value = true
+  avatarError.value = ''
+  try {
+    const res = await uploadApi.upload(file, 'avatar')
+    const avatarUrl = res.data.url + '?' + Date.now()
+    const updated = await userService.updateProfile({ avatar: res.data.url })
+    if (user.value) user.value.avatar = avatarUrl
+    if (userStore.user) userStore.user.avatar = avatarUrl
+  } catch (e: any) {
+    avatarError.value = e?.response?.data?.message || '头像上传失败'
+  } finally {
+    uploadingAvatar.value = false
+    input.value = ''
   }
 }
 

@@ -25,14 +25,24 @@ ai:
   temperature: 0.3
   enabled: true
 
-oss:
-  qiniu:
-    access-key-id:
-    access-key-secret:
-    bucket-name:
+storage:
+  # 储存类型 local oss
+  type: ${STORAGE_TYPE:local}
+
+  # 本地储存路径（仅在本地储存时生效）
+  local:
+    path: ${LOCAL_STORAGE_PATH:/uploads}
+
+  # 七牛云储存（仅在七牛云储存时生效）
+  oss:
+    endpoint: https://cdn.yvmou.cn
+    access-key-id: BmDQIcudJIP_FCKyoC0KmgeELAv_E9UGjHXHZ8Qi
+    access-key-secret: imrt2rI3j6mZAAxWQ59VoAv12zKx03kGWBM0R__y
+    bucket-name: yvmoublog
+
 email:
   resend:
-    api-key:
+    api-key: ${EMAIL_RESEND_API_KEY}
 
 springdoc:
   api-docs:

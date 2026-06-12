@@ -59,7 +59,12 @@ services:
       AI_MAX_TOKENS: ${AI_MAX_TOKENS:-1024}
       AI_TEMPERATURE: ${AI_TEMPERATURE:-0.3}
       AI_ENABLED: ${AI_ENABLED:-true}
-      # OSS
+      # STORAGE
+      STORAGE_TYPE: ${UPLOAD_STORAGE:-local}
+      # Local Storage Config
+      LOCAL_STORAGE_PATH: ${UPLOAD_PATH:-/uploads}
+      # OSS Config
+      OSS_QINIU_ENDPOINT: ${OSS_QINIU_ENDPOINT:-https://upload.example.com}
       OSS_QINIU_ACCESS_KEY_ID: ${OSS_QINIU_ACCESS_KEY_ID:-}
       OSS_QINIU_ACCESS_KEY_SECRET: ${OSS_QINIU_ACCESS_KEY_SECRET:-}
       OSS_QINIU_BUCKET_NAME: ${OSS_QINIU_BUCKET_NAME:-}
@@ -82,6 +87,8 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+    volumes:
+      - upload_data:${LOCAL_STORAGE_PATH:-/uploads}
     networks:
       - blog-net
 
@@ -102,6 +109,7 @@ services:
 volumes:
   mysql_data:
   redis_data:
+  upload_data:
 
 networks:
   blog-net:
