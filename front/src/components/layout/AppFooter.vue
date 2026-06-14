@@ -15,8 +15,10 @@
           </div>
         </div>
         <div>
-          <h4 class="text-sm font-semibold text-zinc-700 mb-3 uppercase tracking-wider">技术栈</h4>
-          <p class="text-sm text-zinc-400 leading-relaxed">Vue 3 + TypeScript + Tailwind CSS + Pinia + Vue Router</p>
+          <h4 class="text-sm font-semibold text-zinc-700 mb-3 uppercase tracking-wider">友情链接</h4>
+          <div class="space-y-2">
+            <a href="https://github.com/MoFishX" target="_blank" rel="noopener" class="block text-sm text-zinc-500 hover:text-accent transition-colors duration-200">MoFishX</a>
+          </div>
         </div>
       </div>
       <div class="border-t border-zinc-100 pt-6 text-center text-sm text-zinc-400">

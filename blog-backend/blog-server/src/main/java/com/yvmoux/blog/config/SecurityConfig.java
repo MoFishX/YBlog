@@ -93,10 +93,14 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         List<String> origins = new ArrayList<>();
+        origins.add("http://localhost");
         origins.add("http://localhost:*");
+        origins.add("http://127.0.0.1");
         origins.add("http://127.0.0.1:*");
         if (appDomain != null && !appDomain.isBlank()) {
+            origins.add("http://" + appDomain);
             origins.add("http://" + appDomain + ":*");
+            origins.add("https://" + appDomain);
             origins.add("https://" + appDomain + ":*");
         }
 
