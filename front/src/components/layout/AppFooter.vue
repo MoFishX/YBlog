@@ -21,8 +21,11 @@
           </div>
         </div>
       </div>
-      <div class="border-t border-zinc-100 pt-6 text-center text-sm text-zinc-400">
-        &copy; {{ year }} yvmouX Blog. All rights reserved.
+      <div class="border-t border-zinc-100 pt-6 text-center text-sm text-zinc-400 space-y-2">
+        <p>&copy; {{ year }} yvmouX Blog. All rights reserved.</p>
+        <p>
+          <a href="https://icp.gov.moe/?keyword=20244188" target="_blank" rel="noopener" class="hover:text-accent transition-colors duration-200">萌ICP备20244188号</a>
+        </p>
       </div>
     </div>
   </footer>
