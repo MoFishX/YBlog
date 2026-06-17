@@ -7,7 +7,7 @@
 | 模块 | 技术 |
 |------|------|
 | 前端 | Vue 3 + TypeScript + Vite + Element Plus + Tailwind CSS |
-| 后端 | Spring Boot 3 + MyBatis Plus + SQL Schema + MySQL + Redis |
+| 后端 | Go + Gin + GORM + MySQL + Redis |
 | AI | DeepSeek API |
 | 存储 | 七牛云 OSS |
 | 邮件 | Resend |
@@ -20,10 +20,9 @@ blog/
 │   ├── src/                # 源码
 │   ├── Dockerfile          # 前端镜像构建
 │   └── nginx.conf          # Nginx 配置（含 /api 代理到后端）
-├── blog-backend/           # 后端项目
-│   ├── blog-server/        # 主模块
-│   ├── blog-common/        # 通用模块
-│   ├── blog-pojo/          # 实体模块
+├── blog-backend-go/        # Go 后端项目
+│   ├── cmd/server/         # 入口
+│   ├── internal/           # 内部模块
 │   └── Dockerfile          # 后端镜像构建
 ├── docker-compose.yml      # Docker 编排（支持本地构建与生产镜像）
 ├── .env                    # 环境变量配置
